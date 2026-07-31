@@ -196,7 +196,6 @@ export const sugerirCenarios = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => z.object({ projectId: z.string().uuid() }).parse(i))
   .handler(async ({ data }) => {
     const supabase = await db();
-    const supabase = await db();
     const ctx = await loadContext(supabase, data.projectId);
     return gerarJson<{ cenarios: Array<Record<string, string>> }>({
       system: "Você sugere cenários de gravação coerentes para vídeos de venda no TikTok Shop.",
@@ -215,7 +214,6 @@ export const gerarAlternativas = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data }) => {
-    const supabase = await db();
     const supabase = await db();
     const ctx = await loadContext(supabase, data.projectId);
     const { data: roteiro } = await supabase
