@@ -1,67 +1,62 @@
-import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/AppShell";
-import { TextField } from "@/components/Field";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { contar } from "@/lib/queries";
 
 export const Route = createFileRoute("/configuracoes")({
   head: () => ({
     meta: [
       { title: "Configurações | StudioIA" },
-      { name: "description", content: "Ajuste seus dados de perfil no StudioIA." },
+      { name: "description", content: "Informações do espaço de trabalho interno do StudioIA." },
       { property: "og:title", content: "Configurações | StudioIA" },
-      { property: "og:description", content: "Ajuste seus dados de perfil no StudioIA." },
+      { property: "og:description", content: "Informações do espaço de trabalho interno do StudioIA." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Configuracoes,
 });
 
 function Configuracoes() {
-  const [nome, setNome] = useState("");
-  const [salvando, setSalvando] = useState(false);
-
-  const perfil = useQuery({
-    queryKey: ["profile"],
-    queryFn: async () => {
-      const { data: auth } = await supabase.auth.getUser();
-      if (!auth.user) throw new Error("Sessão expirada.");
-      const { data } = await supabase.from("profiles").select("*").eq("id", auth.user.id).maybeSingle();
-      return { ...data, email: data?.email ?? auth.user.email ?? "", id: auth.user.id };
-    },
+  const resumo = useQuery({
+    queryKey: ["resumo-workspace"],
+    queryFn: async () => ({
+      produtos: await contar("products"),
+      personagens: await contar("characters"),
+      cenarios: await contar("scenarios"),
+      projetos: await contar("projects"),
+      templates: await contar("templates"),
+    }),
   });
 
-  useEffect(() => {
-    if (perfil.data?.nome) setNome(perfil.data.nome);
-  }, [perfil.data]);
+  if (resumo.isLoading) return <Skeleton className="h-64 rounded-2xl" />;
 
-  async function salvar() {
-    if (!perfil.data?.id) return;
-    setSalvando(true);
-    const { error } = await supabase.from("profiles").update({ nome }).eq("id", perfil.data.id);
-    setSalvando(false);
-    if (error) return toast.error(error.message);
-    toast.success("Perfil atualizado.");
-  }
-
-  if (perfil.isLoading) return <Skeleton className="h-64 rounded-2xl" />;
+  const itens = [
+    { rotulo: "Produtos", valor: resumo.data?.produtos ?? 0 },
+    { rotulo: "Personagens", valor: resumo.data?.personagens ?? 0 },
+    { rotulo: "Cenários", valor: resumo.data?.cenarios ?? 0 },
+    { rotulo: "Projetos", valor: resumo.data?.projetos ?? 0 },
+    { rotulo: "Templates", valor: resumo.data?.templates ?? 0 },
+  ];
 
   return (
     <>
-      <PageHeader titulo="Configurações" descricao="Seus dados de conta no StudioIA." />
-      <div className="max-w-lg space-y-4 rounded-2xl border border-border bg-card p-5">
-        <TextField label="Nome" value={nome} onChange={setNome} />
-        <TextField label="E-mail" value={perfil.data?.email ?? ""} onChange={() => {}} />
-        <p className="text-xs text-muted-foreground">Plano atual: {perfil.data?.plano ?? "free"}</p>
-        <Button onClick={salvar} disabled={salvando}>
-          Salvar alterações
-        </Button>
+      <PageHeader
+        titulo="Configurações"
+        descricao="Ferramenta interna e privada, sem login e com um único espaço de trabalho compartilhado."
+      />
+      <div className="grid max-w-2xl gap-3 sm:grid-cols-2">
+        {itens.map((i) => (
+          <div key={i.rotulo} className="rounded-2xl border border-border bg-card p-5">
+            <p className="text-sm text-muted-foreground">{i.rotulo}</p>
+            <p className="mt-1 text-2xl font-bold">{i.valor}</p>
+          </div>
+        ))}
       </div>
+      <p className="mt-5 max-w-2xl text-xs text-muted-foreground">
+        Todo o acesso ao banco acontece no servidor. O navegador não conversa direto com o banco de dados.
+      </p>
     </>
   );
 }
