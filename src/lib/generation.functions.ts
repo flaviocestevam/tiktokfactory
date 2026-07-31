@@ -1,8 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   contextoCompleto,
+  db,
   extrairPagina,
   gerarJson,
   gerarTexto,
@@ -15,15 +15,13 @@ import {
 } from "./generation.server";
 
 export const extrairProduto = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ url: z.string().url("Informe um link válido.") }).parse(i))
   .handler(async ({ data }) => extrairPagina(data.url));
 
 export const gerarEstrategia = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ projectId: z.string().uuid() }).parse(i))
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
+  .handler(async ({ data }) => {
+    const supabase = await db();
     const ctx = await loadContext(supabase, data.projectId);
     const out = await gerarJson<Record<string, unknown>>(promptEstrategia(ctx));
 
@@ -34,7 +32,6 @@ export const gerarEstrategia = createServerFn({ method: "POST" })
       .maybeSingle();
 
     const payload = {
-      user_id: userId,
       project_id: data.projectId,
       analise: out as never,
       publico: (out.publico as string) ?? null,
@@ -51,12 +48,11 @@ export const gerarEstrategia = createServerFn({ method: "POST" })
 
     const { data: saved, error } = await query;
     if (error) throw new Error(error.message);
-    await registrarHistorico(supabase, userId, data.projectId, "estrategia", anterior, saved);
+    await registrarHistorico(supabase, data.projectId, "estrategia", anterior, saved);
     return saved;
   });
 
 export const gerarRoteiro = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
     z
       .object({
@@ -66,8 +62,8 @@ export const gerarRoteiro = createServerFn({ method: "POST" })
       })
       .parse(i),
   )
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
+  .handler(async ({ data }) => {
+    const supabase = await db();
     const ctx = await loadContext(supabase, data.projectId);
     const { data: estrategia } = await supabase
       .from("strategies")
@@ -88,7 +84,6 @@ export const gerarRoteiro = createServerFn({ method: "POST" })
     const { data: saved, error } = await supabase
       .from("scripts")
       .insert({
-        user_id: userId,
         project_id: data.projectId,
         versao: (count ?? 0) + 1,
         rotulo: data.rotulo ?? out.titulo_interno ?? `Versão ${(count ?? 0) + 1}`,
@@ -112,15 +107,14 @@ export const gerarRoteiro = createServerFn({ method: "POST" })
       .single();
 
     if (error) throw new Error(error.message);
-    await registrarHistorico(supabase, userId, data.projectId, "roteiro", null, saved);
+    await registrarHistorico(supabase, data.projectId, "roteiro", null, saved);
     return saved;
   });
 
 export const gerarPromptImagem = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ projectId: z.string().uuid(), scriptId: z.string().uuid().optional() }).parse(i))
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
+  .handler(async ({ data }) => {
+    const supabase = await db();
     const ctx = await loadContext(supabase, data.projectId);
     const { data: roteiro } = await supabase
       .from("scripts")
@@ -139,7 +133,6 @@ export const gerarPromptImagem = createServerFn({ method: "POST" })
     const { data: saved, error } = await supabase
       .from("image_prompts")
       .insert({
-        user_id: userId,
         project_id: data.projectId,
         versao: (count ?? 0) + 1,
         prompt: out.prompt ?? null,
@@ -154,15 +147,14 @@ export const gerarPromptImagem = createServerFn({ method: "POST" })
       .select()
       .single();
     if (error) throw new Error(error.message);
-    await registrarHistorico(supabase, userId, data.projectId, "prompt_imagem", null, saved);
+    await registrarHistorico(supabase, data.projectId, "prompt_imagem", null, saved);
     return saved;
   });
 
 export const gerarPromptVideo = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ projectId: z.string().uuid() }).parse(i))
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
+  .handler(async ({ data }) => {
+    const supabase = await db();
     const ctx = await loadContext(supabase, data.projectId);
     const { data: roteiro } = await supabase
       .from("scripts")
@@ -181,7 +173,6 @@ export const gerarPromptVideo = createServerFn({ method: "POST" })
     const { data: saved, error } = await supabase
       .from("video_prompts")
       .insert({
-        user_id: userId,
         project_id: data.projectId,
         versao: (count ?? 0) + 1,
         prompt_flow: out.prompt_flow ?? null,
@@ -197,15 +188,15 @@ export const gerarPromptVideo = createServerFn({ method: "POST" })
       .select()
       .single();
     if (error) throw new Error(error.message);
-    await registrarHistorico(supabase, userId, data.projectId, "prompt_video", null, saved);
+    await registrarHistorico(supabase, data.projectId, "prompt_video", null, saved);
     return saved;
   });
 
 export const sugerirCenarios = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({ projectId: z.string().uuid() }).parse(i))
-  .handler(async ({ data, context }) => {
-    const ctx = await loadContext(context.supabase, data.projectId);
+  .handler(async ({ data }) => {
+    const supabase = await db();
+    const ctx = await loadContext(supabase, data.projectId);
     return gerarJson<{ cenarios: Array<Record<string, string>> }>({
       system: "Você sugere cenários de gravação coerentes para vídeos de venda no TikTok Shop.",
       prompt: `${contextoCompleto(ctx)}\n\nSugira 5 cenários adequados para este produto.`,
@@ -214,7 +205,6 @@ export const sugerirCenarios = createServerFn({ method: "POST" })
   });
 
 export const gerarAlternativas = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
     z
       .object({
@@ -223,9 +213,10 @@ export const gerarAlternativas = createServerFn({ method: "POST" })
       })
       .parse(i),
   )
-  .handler(async ({ data, context }) => {
-    const ctx = await loadContext(context.supabase, data.projectId);
-    const { data: roteiro } = await context.supabase
+  .handler(async ({ data }) => {
+    const supabase = await db();
+    const ctx = await loadContext(supabase, data.projectId);
+    const { data: roteiro } = await supabase
       .from("scripts")
       .select("*")
       .eq("project_id", data.projectId)
@@ -241,7 +232,6 @@ export const gerarAlternativas = createServerFn({ method: "POST" })
   });
 
 export const regenerarParte = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
     z
       .object({
@@ -252,8 +242,8 @@ export const regenerarParte = createServerFn({ method: "POST" })
       })
       .parse(i),
   )
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
+  .handler(async ({ data }) => {
+    const supabase = await db();
     const ctx = await loadContext(supabase, data.projectId);
     const { data: roteiro } = await supabase.from("scripts").select("*").eq("id", data.scriptId).single();
 
@@ -271,6 +261,6 @@ export const regenerarParte = createServerFn({ method: "POST" })
       .select()
       .single();
     if (error) throw new Error(error.message);
-    await registrarHistorico(supabase, userId, data.projectId, `roteiro:${data.campo}`, roteiro, saved);
+    await registrarHistorico(supabase, data.projectId, `roteiro:${data.campo}`, roteiro, saved);
     return saved;
   });

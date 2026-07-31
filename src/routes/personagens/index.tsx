@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { listar } from "@/lib/queries";
 
-export const Route = createFileRoute("/_authenticated/personagens/")({
+export const Route = createFileRoute("/personagens/")({
   head: () => ({
     meta: [
       { title: "Personagens | StudioIA" },

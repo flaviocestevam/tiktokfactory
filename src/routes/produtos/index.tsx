@@ -3,16 +3,15 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Package, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/AppShell";
 import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatarData, listar } from "@/lib/queries";
+import { excluir as excluirRegistro, formatarData, listar } from "@/lib/queries";
 
-export const Route = createFileRoute("/_authenticated/produtos/")({
+export const Route = createFileRoute("/produtos/")({
   head: () => ({
     meta: [
       { title: "Produtos | StudioIA" },
@@ -36,10 +35,13 @@ function Produtos() {
   );
 
   async function excluir(id: string) {
-    const { error } = await supabase.from("products").delete().eq("id", id);
-    if (error) return toast.error(error.message);
-    toast.success("Produto excluído.");
-    qc.invalidateQueries({ queryKey: ["products"] });
+    try {
+      await excluirRegistro("products", id);
+      toast.success("Produto excluído.");
+      qc.invalidateQueries({ queryKey: ["products"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha ao excluir.");
+    }
   }
 
   return (

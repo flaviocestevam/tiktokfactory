@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
+import { AppShell } from "@/components/AppShell";
 
 function NotFoundComponent() {
   return (
@@ -78,23 +79,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "StudioIA — Vídeos de venda para TikTok Shop com IA" },
-      {
-        name: "description",
-        content:
-          "Cadastre o produto, escolha personagem e cenário e gere roteiro, prompt de foto e prompt de vídeo para TikTok Shop.",
-      },
-      { property: "og:title", content: "StudioIA — Vídeos de venda para TikTok Shop com IA" },
-      {
-        property: "og:description",
-        content: "Cadastre o produto, escolha personagem e cenário e gere roteiro, prompt de foto e prompt de vídeo para TikTok Shop.",
-      },
+      { name: "robots", content: "noindex, nofollow" },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "StudioIA — Vídeos de venda para TikTok Shop com IA" },
-      { name: "twitter:description", content: "Cadastre o produto, escolha personagem e cenário e gere roteiro, prompt de foto e prompt de vídeo para TikTok Shop." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c7428960-0d92-43f6-ba33-46207766efa4/id-preview-75bb48d8--ebb821a3-43ea-4852-994f-a202351aebcc.lovable.app-1785476210720.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c7428960-0d92-43f6-ba33-46207766efa4/id-preview-75bb48d8--ebb821a3-43ea-4852-994f-a202351aebcc.lovable.app-1785476210720.png" },
+      { name: "twitter:card", content: "summary" },
     ],
     links: [
       {
@@ -118,7 +105,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <head>
         <HeadContent />
       </head>
@@ -135,8 +122,10 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <AppShell>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+      </AppShell>
       <Toaster position="top-right" richColors />
     </QueryClientProvider>
   );

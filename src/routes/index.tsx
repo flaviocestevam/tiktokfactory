@@ -1,79 +1,195 @@
+import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Film, Image as ImageIcon, ScrollText, Sparkles, Users } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { FolderKanban, Package, Plus, ScrollText, Search, Sparkles, Users } from "lucide-react";
+import { PageHeader } from "@/components/AppShell";
+import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { contar, formatarData, listar } from "@/lib/queries";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "StudioIA — Vídeos de venda para TikTok Shop com IA" },
-      {
-        name: "description",
-        content:
-          "Cadastre o produto, escolha personagem e cenário e gere roteiro, prompt de foto e prompt de vídeo para TikTok Shop.",
-      },
-      { property: "og:title", content: "StudioIA — Vídeos de venda para TikTok Shop com IA" },
-      {
-        property: "og:description",
-        content: "Cadastre o produto, escolha personagem e cenário e gere roteiro, prompt de foto e prompt de vídeo para TikTok Shop.",
-      },
+      { title: "Dashboard | StudioIA" },
+      { name: "description", content: "Acompanhe seus projetos, produtos, personagens e cenários." },
+      { property: "og:title", content: "Dashboard | StudioIA" },
+      { property: "og:description", content: "Acompanhe seus projetos, produtos, personagens e cenários." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Index,
+  component: Dashboard,
 });
 
-const RECURSOS = [
-  { icon: Sparkles, titulo: "Estratégia", texto: "Análise honesta do produto e ao menos cinco ângulos de venda." },
-  { icon: ScrollText, titulo: "Roteiro por tempo", texto: "Fala, ação, expressão, câmera e texto na tela, segundo a segundo." },
-  { icon: ImageIcon, titulo: "Prompt de foto", texto: "Prompt técnico com regras de identidade e reprodução fiel do produto." },
-  { icon: Film, titulo: "Prompt do Google Flow", texto: "Cena, ação, câmera, diálogo, continuidade e restrições negativas." },
-  { icon: Users, titulo: "Biblioteca de personagens", texto: "Ficha completa de identidade, linguagem e aparência canônica." },
-];
+function Dashboard() {
+  const [busca, setBusca] = useState("");
+  const [status, setStatus] = useState("todos");
 
-function Index() {
+  const projetos = useQuery({ queryKey: ["projects"], queryFn: () => listar("projects") });
+  const produtos = useQuery({ queryKey: ["products"], queryFn: () => listar("products") });
+  const personagens = useQuery({ queryKey: ["characters"], queryFn: () => listar("characters") });
+  const cenarios = useQuery({ queryKey: ["scenarios"], queryFn: () => listar("scenarios") });
+  const roteiros = useQuery({
+    queryKey: ["scripts-count"],
+    queryFn: () => contar("scripts"),
+  });
+
+  const lista = useMemo(() => {
+    const todos = projetos.data ?? [];
+    return todos.filter((p) => {
+      const okBusca = p.nome.toLowerCase().includes(busca.toLowerCase());
+      const okStatus = status === "todos" || p.status === status;
+      return okBusca && okStatus;
+    });
+  }, [projetos.data, busca, status]);
+
+  const emAndamento = (projetos.data ?? []).filter((p) => p.status !== "finalizado" && p.status !== "arquivado").length;
+  const finalizados = (projetos.data ?? []).filter((p) => p.status === "finalizado").length;
+
   return (
-    <div className="min-h-screen bg-background">
-      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-6">
-        <span className="font-display text-lg font-bold">
-          Studio<span className="text-primary">IA</span>
-        </span>
-        <Button asChild variant="outline" size="sm">
-          <Link to="/auth">Entrar</Link>
-        </Button>
-      </header>
-
-      <section className="mx-auto w-full max-w-6xl px-5 pb-16 pt-10 lg:pt-20">
-        <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs text-accent">
-          <Sparkles className="size-3.5" /> Produção de vídeos comerciais com IA
-        </p>
-        <h1 className="max-w-3xl text-4xl font-bold leading-[1.1] sm:text-5xl lg:text-6xl">
-          Campanhas de vídeo para TikTok Shop com influenciadoras de inteligência artificial.
-        </h1>
-        <p className="mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg">
-          Cadastre o produto ou cole o link da página de vendas, escolha cenário e formato, e receba estratégia,
-          roteiro por tempo, prompt de foto e prompt de vídeo — tudo editável e pronto para copiar.
-        </p>
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Button asChild size="lg" className="gap-2">
-            <Link to="/auth">
-              Começar agora <ArrowRight className="size-4" />
+    <>
+      <PageHeader
+        titulo="Dashboard"
+        descricao="Sua central de produção de vídeos para TikTok Shop."
+        acoes={
+          <Button asChild className="gap-2">
+            <Link to="/projetos/novo">
+              <Plus className="size-4" /> Criar novo vídeo
             </Link>
           </Button>
+        }
+      />
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <Metrica titulo="Projetos" valor={projetos.data?.length} icon={FolderKanban} to="/projetos" />
+        <Metrica titulo="Produtos" valor={produtos.data?.length} icon={Package} to="/produtos" />
+        <Metrica titulo="Personagens" valor={personagens.data?.length} icon={Users} to="/personagens" />
+        <Metrica titulo="Cenários" valor={cenarios.data?.length} icon={Sparkles} to="/cenarios" />
+        <Metrica titulo="Roteiros gerados" valor={roteiros.data} icon={ScrollText} />
+        <Metrica titulo="Em andamento" valor={emAndamento} sub={`${finalizados} finalizados`} icon={FolderKanban} />
+      </div>
+
+      <section className="mt-10">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="text-lg font-semibold">Projetos recentes</h2>
+          <div className="flex gap-2">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                placeholder="Buscar projeto"
+                className="w-full pl-9 sm:w-56"
+              />
+            </div>
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos os status</SelectItem>
+                <SelectItem value="rascunho">Rascunho</SelectItem>
+                <SelectItem value="em_andamento">Em andamento</SelectItem>
+                <SelectItem value="finalizado">Finalizado</SelectItem>
+                <SelectItem value="arquivado">Arquivado</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {RECURSOS.map((r) => (
-            <article key={r.titulo} className="rounded-2xl border border-border bg-card p-5">
-              <span className="flex size-9 items-center justify-center rounded-lg bg-secondary text-accent">
-                <r.icon className="size-4.5" />
-              </span>
-              <h2 className="mt-4 text-base font-semibold">{r.titulo}</h2>
-              <p className="mt-1.5 text-sm text-muted-foreground">{r.texto}</p>
-            </article>
-          ))}
-        </div>
+        {projetos.isLoading ? (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} className="h-28 rounded-2xl" />
+            ))}
+          </div>
+        ) : lista.length === 0 ? (
+          <EmptyState
+            icon={FolderKanban}
+            titulo={projetos.data?.length ? "Nenhum projeto com esses filtros" : "Nenhum projeto ainda"}
+            descricao={
+              projetos.data?.length
+                ? "Ajuste a busca ou o filtro de status para ver seus projetos."
+                : "Crie seu primeiro projeto para gerar estratégia, roteiro e prompts de imagem e vídeo."
+            }
+            acao={
+              <Button asChild>
+                <Link to="/projetos/novo">Criar novo vídeo</Link>
+              </Button>
+            }
+          />
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {lista.slice(0, 9).map((p) => (
+              <Link
+                key={p.id}
+                to="/projetos/$id"
+                params={{ id: p.id }}
+                className="rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary/50"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="font-semibold">{p.nome}</h3>
+                  <Badge variant="secondary" className="shrink-0 capitalize">
+                    {String(p.status).replace("_", " ")}
+                  </Badge>
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {p.duracao}s · {p.formato} · {p.objetivo || "sem objetivo definido"}
+                </p>
+                <p className="mt-3 text-xs text-muted-foreground">Atualizado em {formatarData(p.updated_at)}</p>
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
+
+      {personagens.data?.length === 0 ? (
+        <div className="mt-8 rounded-2xl border border-border bg-card/60 p-5 text-sm text-muted-foreground">
+          Nenhuma personagem cadastrada. As personagens serão adicionadas na próxima etapa de configuração.
+        </div>
+      ) : null}
+    </>
+  );
+}
+
+function Metrica({
+  titulo,
+  valor,
+  sub,
+  icon: Icon,
+  to,
+}: {
+  titulo: string;
+  valor?: number;
+  sub?: string;
+  icon: typeof FolderKanban;
+  to?: "/projetos" | "/produtos" | "/personagens" | "/cenarios";
+}) {
+  const conteudo = (
+    <div className="rounded-2xl border border-border bg-card p-4">
+      <div className="flex items-center justify-between">
+        <span className="text-xs uppercase tracking-wide text-muted-foreground">{titulo}</span>
+        <Icon className="size-4 text-accent" />
+      </div>
+      <p className="mt-3 font-display text-2xl font-bold">{valor ?? "—"}</p>
+      {sub ? <p className="mt-1 text-xs text-muted-foreground">{sub}</p> : null}
     </div>
+  );
+  return to ? (
+    <Link to={to} className="transition-transform hover:-translate-y-0.5">
+      {conteudo}
+    </Link>
+  ) : (
+    conteudo
   );
 }

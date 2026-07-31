@@ -23,9 +23,9 @@ import {
   OBJETIVOS,
   TONS_LINGUAGEM,
 } from "@/lib/variables";
-import { listar, obterUsuarioId } from "@/lib/queries";
+import { criar, listar } from "@/lib/queries";
 
-export const Route = createFileRoute("/_authenticated/projetos/novo")({
+export const Route = createFileRoute("/projetos/novo")({
   head: () => ({
     meta: [
       { title: "Criar novo vídeo | StudioIA" },
@@ -69,11 +69,7 @@ function NovoProjeto() {
     if (!form.product_id) return toast.error("Selecione um produto.");
     setSalvando(true);
     try {
-      const user_id = await obterUsuarioId();
-      const { data, error } = await supabase
-        .from("projects")
-        .insert({
-          user_id,
+      const data = await criar("projects", {
           nome: form.nome.trim(),
           product_id: form.product_id,
           character_id: form.character_id || null,
@@ -89,10 +85,7 @@ function NovoProjeto() {
           velocidade_fala: form.velocidade_fala,
           observacoes: form.observacoes || null,
           status: "em_andamento",
-        })
-        .select()
-        .single();
-      if (error) throw new Error(error.message);
+      });
       qc.invalidateQueries({ queryKey: ["projects"] });
       toast.success("Projeto criado.");
       navigate({ to: "/projetos/$id", params: { id: data.id } });

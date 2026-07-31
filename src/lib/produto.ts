@@ -29,8 +29,8 @@ const CAMPOS_TEXTO = [
   "link",
 ] as const;
 
-export function montarPayloadProduto(valores: ProductDraft, user_id: string): TablesInsert<"products"> {
-  const payload: Record<string, unknown> = { user_id };
+export function montarPayloadProduto(valores: ProductDraft): TablesInsert<"products"> {
+  const payload: Record<string, unknown> = {};
   for (const campo of CAMPOS_TEXTO) {
     const v = valores[campo];
     payload[campo] = typeof v === "string" && v.trim() ? v.trim() : campo === "nome" ? "Produto sem nome" : null;

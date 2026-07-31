@@ -2,14 +2,13 @@ import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/AppShell";
 import { ProductForm, type ProductDraft } from "@/components/ProductForm";
 import { Skeleton } from "@/components/ui/skeleton";
 import { montarPayloadProduto, produtoParaDraft } from "@/lib/produto";
-import { obterUsuarioId } from "@/lib/queries";
+import { atualizar, obter } from "@/lib/queries";
 
-export const Route = createFileRoute("/_authenticated/produtos/$id")({
+export const Route = createFileRoute("/produtos/$id")({
   head: () => ({
     meta: [
       { title: "Editar produto | StudioIA" },
@@ -32,11 +31,7 @@ function EditarProduto() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["product", id],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("products").select("*").eq("id", id).single();
-      if (error) throw new Error(error.message);
-      return data;
-    },
+    queryFn: () => obter("products", id),
   });
 
   useEffect(() => {
@@ -47,9 +42,7 @@ function EditarProduto() {
     if (!valores) return;
     setSalvando(true);
     try {
-      const user_id = await obterUsuarioId();
-      const { error } = await supabase.from("products").update(montarPayloadProduto(valores, user_id)).eq("id", id);
-      if (error) throw new Error(error.message);
+      await atualizar("products", id, montarPayloadProduto(valores));
       qc.invalidateQueries({ queryKey: ["products"] });
       qc.invalidateQueries({ queryKey: ["product", id] });
       toast.success("Produto atualizado.");

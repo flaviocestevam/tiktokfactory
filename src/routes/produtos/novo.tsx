@@ -2,13 +2,12 @@ import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/AppShell";
 import { ProductForm, type ProductDraft } from "@/components/ProductForm";
 import { montarPayloadProduto } from "@/lib/produto";
-import { obterUsuarioId } from "@/lib/queries";
+import { criar } from "@/lib/queries";
 
-export const Route = createFileRoute("/_authenticated/produtos/novo")({
+export const Route = createFileRoute("/produtos/novo")({
   head: () => ({
     meta: [
       { title: "Novo produto | StudioIA" },
@@ -33,9 +32,7 @@ function NovoProduto() {
     if (!nome) return toast.error("Informe ao menos o nome do produto.");
     setSalvando(true);
     try {
-      const user_id = await obterUsuarioId();
-      const { error } = await supabase.from("products").insert(montarPayloadProduto(valores, user_id));
-      if (error) throw new Error(error.message);
+      await criar("products", montarPayloadProduto(valores));
       qc.invalidateQueries({ queryKey: ["products"] });
       toast.success("Produto cadastrado.");
       navigate({ to: "/produtos" });

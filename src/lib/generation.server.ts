@@ -162,9 +162,13 @@ export function contextoCompleto(ctx: ProjectContext): string {
   ].join("\n\n");
 }
 
+export async function db(): Promise<Client> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  return supabaseAdmin as unknown as Client;
+}
+
 export async function registrarHistorico(
   supabase: Client,
-  userId: string,
   projectId: string,
   tipo: string,
   anterior: unknown,
@@ -177,7 +181,6 @@ export async function registrarHistorico(
     .eq("tipo_conteudo", tipo);
 
   await supabase.from("version_history").insert({
-    user_id: userId,
     project_id: projectId,
     tipo_conteudo: tipo,
     versao: (count ?? 0) + 1,
