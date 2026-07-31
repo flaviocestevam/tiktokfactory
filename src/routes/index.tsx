@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { FolderKanban, Package, Plus, ScrollText, Search, Sparkles, Users } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/AppShell";
 import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { formatarData, listar } from "@/lib/queries";
+import { contar, formatarData, listar } from "@/lib/queries";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -42,11 +41,7 @@ function Dashboard() {
   const cenarios = useQuery({ queryKey: ["scenarios"], queryFn: () => listar("scenarios") });
   const roteiros = useQuery({
     queryKey: ["scripts-count"],
-    queryFn: async () => {
-      const { count, error } = await supabase.from("scripts").select("id", { count: "exact", head: true });
-      if (error) throw new Error(error.message);
-      return count ?? 0;
-    },
+    queryFn: () => contar("scripts"),
   });
 
   const lista = useMemo(() => {
