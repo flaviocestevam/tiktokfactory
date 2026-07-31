@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-export type ProductDraft = Record<string, string> & { imagens?: string[] };
+export type ProductDraft = { imagens?: string[]; [key: string]: string | string[] | undefined };
 
 export const CAMPOS_PRODUTO: Array<{ chave: string; label: string; area?: boolean; rows?: number }> = [
   { chave: "nome", label: "Nome do produto" },
@@ -57,16 +57,21 @@ export function ProductForm({
   const [enviando, setEnviando] = useState(false);
 
   const set = (chave: string, valor: string) => onChange({ ...valores, [chave]: valor });
+  const txt = (chave: string) => {
+    const v = valores[chave];
+    return typeof v === "string" ? v : "";
+  };
 
   async function lerLink() {
-    if (!valores.link?.trim()) return toast.error("Cole o link da página de vendas.");
+    if (!txt("link").trim()) return toast.error("Cole o link da página de vendas.");
     setExtraindo(true);
     setAviso(null);
     try {
-      const res = await extrair({ data: { url: valores.link.trim() } });
+      const res = await extrair({ data: { url: txt("link").trim() } });
       const novos: ProductDraft = { ...valores };
       Object.entries(res.dados ?? {}).forEach(([k, v]) => {
-        if (String(v ?? "").trim() && !String(novos[k] ?? "").trim()) novos[k] = String(v);
+        const atual = typeof novos[k] === "string" ? (novos[k] as string) : "";
+        if (String(v ?? "").trim() && !atual.trim()) novos[k] = String(v);
       });
       if (res.imagens?.length) {
         novos.imagens = [...new Set([...(valores.imagens ?? []), ...res.imagens])].slice(0, 12);
@@ -116,7 +121,7 @@ export function ProductForm({
         </p>
         <div className="mt-4 flex flex-col gap-2 sm:flex-row">
           <Input
-            value={valores.link ?? ""}
+            value={txt("link")}
             onChange={(e) => set("link", e.target.value)}
             placeholder="https://..."
           />
@@ -139,7 +144,7 @@ export function ProductForm({
             <TextField
               key={c.chave}
               label={c.label}
-              value={valores[c.chave] ?? ""}
+              value={txt(c.chave)}
               onChange={(v) => set(c.chave, v)}
             />
           ))}
@@ -150,7 +155,7 @@ export function ProductForm({
               key={c.chave}
               label={c.label}
               rows={3}
-              value={valores[c.chave] ?? ""}
+              value={txt(c.chave)}
               onChange={(v) => set(c.chave, v)}
             />
           ))}
@@ -158,7 +163,7 @@ export function ProductForm({
             label="Informações adicionais sobre o produto"
             rows={8}
             hint="Cole aqui a descrição completa da página de vendas."
-            value={valores.dados_adicionais ?? ""}
+            value={txt("dados_adicionais")}
             onChange={(v) => set("dados_adicionais", v)}
           />
         </div>
