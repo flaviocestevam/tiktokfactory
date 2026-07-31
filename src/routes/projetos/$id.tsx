@@ -4,7 +4,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Download, Loader2, Sparkles, Wand2 } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/AppShell";
 import { CopyButton } from "@/components/CopyButton";
 import { EmptyState } from "@/components/EmptyState";
@@ -21,7 +20,7 @@ import {
   gerarRoteiro,
 } from "@/lib/generation.functions";
 import { AVISO_SEM_PERSONAGEM } from "@/lib/variables";
-import { baixarTexto } from "@/lib/queries";
+import { baixarTexto, listar, obter } from "@/lib/queries";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export const Route = createFileRoute("/projetos/$id")({
@@ -53,55 +52,27 @@ function Projeto() {
 
   const projeto = useQuery({
     queryKey: ["project", id],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("projects").select("*").eq("id", id).single();
-      if (error) throw new Error(error.message);
-      return data;
-    },
+    queryFn: () => obter("projects", id),
   });
 
   const estrategia = useQuery({
     queryKey: ["strategy", id],
-    queryFn: async () => {
-      const { data } = await supabase.from("strategies").select("*").eq("project_id", id).maybeSingle();
-      return data;
-    },
+    queryFn: async () => (await listar("strategies", { project_id: id }))[0] ?? null,
   });
 
   const roteiros = useQuery({
     queryKey: ["scripts", id],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("scripts")
-        .select("*")
-        .eq("project_id", id)
-        .order("versao", { ascending: false });
-      return data ?? [];
-    },
+    queryFn: () => listar("scripts", { project_id: id }, { coluna: "versao", asc: false }),
   });
 
   const promptsImagem = useQuery({
     queryKey: ["image_prompts", id],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("image_prompts")
-        .select("*")
-        .eq("project_id", id)
-        .order("versao", { ascending: false });
-      return data ?? [];
-    },
+    queryFn: () => listar("image_prompts", { project_id: id }, { coluna: "versao", asc: false }),
   });
 
   const promptsVideo = useQuery({
     queryKey: ["video_prompts", id],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("video_prompts")
-        .select("*")
-        .eq("project_id", id)
-        .order("versao", { ascending: false });
-      return data ?? [];
-    },
+    queryFn: () => listar("video_prompts", { project_id: id }, { coluna: "versao", asc: false }),
   });
 
   async function executar(chave: string, acao: () => Promise<unknown>, chaveCache: string) {
