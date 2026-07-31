@@ -44,13 +44,19 @@ export function AppShell({ children }: { children: ReactNode }) {
             to={item.to}
             onClick={() => setAberto(false)}
             className={cn(
-              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+              "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium interactive",
               ativo
-                ? "bg-primary/15 text-primary"
-                : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+                ? "bg-primary/12 text-primary shadow-[inset_0_1px_0_oklch(1_0_0/0.06)]"
+                : "text-muted-foreground hover:bg-secondary/70 hover:text-foreground",
             )}
           >
-            <item.icon className="size-4" />
+            <span
+              className={cn(
+                "absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-primary transition-opacity duration-300",
+                ativo ? "opacity-100" : "opacity-0",
+              )}
+            />
+            <item.icon className="size-4 transition-transform duration-300 group-hover:scale-110" />
             {item.label}
           </Link>
         );
@@ -60,9 +66,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-sidebar-border bg-sidebar px-4 py-6 lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-sidebar-border bg-sidebar/80 px-4 py-6 backdrop-blur-xl lg:flex">
         <Brand />
         <div className="mt-8 flex flex-1 flex-col">{nav}</div>
+        <p className="px-3 pt-6 text-[11px] uppercase tracking-[0.18em] text-muted-foreground/70">
+          Workspace privado
+        </p>
       </aside>
 
       {aberto ? (
@@ -85,13 +94,13 @@ export function AppShell({ children }: { children: ReactNode }) {
       ) : null}
 
       <div className="lg:pl-64">
-        <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-background/85 px-4 py-3 backdrop-blur lg:hidden">
+        <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-background/70 px-4 py-3 backdrop-blur-xl lg:hidden">
           <Button variant="ghost" size="icon" onClick={() => setAberto(true)} aria-label="Abrir menu">
             <Menu className="size-5" />
           </Button>
           <Brand compact />
         </header>
-        <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:py-10">{children}</main>
+        <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-8 lg:py-14">{children}</main>
       </div>
     </div>
   );
