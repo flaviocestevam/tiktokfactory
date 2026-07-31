@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AMBIENTES, ENQUADRAMENTOS, ESTILOS_CENARIO, HORARIOS, ILUMINACOES } from "@/lib/variables";
-import { listar, obterUsuarioId } from "@/lib/queries";
+import { criar, excluir as excluirRegistro, listar } from "@/lib/queries";
 
 export const Route = createFileRoute("/cenarios/")({
   head: () => ({
@@ -65,9 +65,7 @@ function Cenarios() {
     if (!form.nome.trim()) return toast.error("Dê um nome ao cenário.");
     setSalvando(true);
     try {
-      const user_id = await obterUsuarioId();
-      const { error } = await supabase.from("scenarios").insert({ ...form, user_id });
-      if (error) throw new Error(error.message);
+      await criar("scenarios", { ...form });
       qc.invalidateQueries({ queryKey: ["scenarios"] });
       setAberto(false);
       setForm(VAZIO);
@@ -80,10 +78,13 @@ function Cenarios() {
   }
 
   async function excluir(id: string) {
-    const { error } = await supabase.from("scenarios").delete().eq("id", id);
-    if (error) return toast.error(error.message);
-    qc.invalidateQueries({ queryKey: ["scenarios"] });
-    toast.success("Cenário excluído.");
+    try {
+      await excluirRegistro("scenarios", id);
+      qc.invalidateQueries({ queryKey: ["scenarios"] });
+      toast.success("Cenário excluído.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha ao excluir.");
+    }
   }
 
   return (
