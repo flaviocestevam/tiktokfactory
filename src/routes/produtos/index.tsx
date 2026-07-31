@@ -35,10 +35,13 @@ function Produtos() {
   );
 
   async function excluir(id: string) {
-    const { error } = await supabase.from("products").delete().eq("id", id);
-    if (error) return toast.error(error.message);
-    toast.success("Produto excluído.");
-    qc.invalidateQueries({ queryKey: ["products"] });
+    try {
+      await excluirRegistro("products", id);
+      toast.success("Produto excluído.");
+      qc.invalidateQueries({ queryKey: ["products"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha ao excluir.");
+    }
   }
 
   return (
