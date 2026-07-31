@@ -13,7 +13,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedCenariosIndexRouteImport } from './routes/_authenticated/cenarios/index'
+import { Route as AuthenticatedPersonagensIndexRouteImport } from './routes/_authenticated/personagens/index'
 import { Route as AuthenticatedProdutosIndexRouteImport } from './routes/_authenticated/produtos/index'
+import { Route as AuthenticatedProdutosIdRouteImport } from './routes/_authenticated/produtos/$id'
 import { Route as AuthenticatedProdutosNovoRouteImport } from './routes/_authenticated/produtos/novo'
 
 const IndexRoute = IndexRouteImport.update({
@@ -35,12 +38,29 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCenariosIndexRoute =
+  AuthenticatedCenariosIndexRouteImport.update({
+    id: '/cenarios/',
+    path: '/cenarios/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedPersonagensIndexRoute =
+  AuthenticatedPersonagensIndexRouteImport.update({
+    id: '/personagens/',
+    path: '/personagens/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedProdutosIndexRoute =
   AuthenticatedProdutosIndexRouteImport.update({
     id: '/produtos/',
     path: '/produtos/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedProdutosIdRoute = AuthenticatedProdutosIdRouteImport.update({
+  id: '/produtos/$id',
+  path: '/produtos/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedProdutosNovoRoute =
   AuthenticatedProdutosNovoRouteImport.update({
     id: '/produtos/novo',
@@ -52,14 +72,20 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/produtos/$id': typeof AuthenticatedProdutosIdRoute
   '/produtos/novo': typeof AuthenticatedProdutosNovoRoute
+  '/cenarios/': typeof AuthenticatedCenariosIndexRoute
+  '/personagens/': typeof AuthenticatedPersonagensIndexRoute
   '/produtos/': typeof AuthenticatedProdutosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/produtos/$id': typeof AuthenticatedProdutosIdRoute
   '/produtos/novo': typeof AuthenticatedProdutosNovoRoute
+  '/cenarios': typeof AuthenticatedCenariosIndexRoute
+  '/personagens': typeof AuthenticatedPersonagensIndexRoute
   '/produtos': typeof AuthenticatedProdutosIndexRoute
 }
 export interface FileRoutesById {
@@ -68,21 +94,43 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/produtos/$id': typeof AuthenticatedProdutosIdRoute
   '/_authenticated/produtos/novo': typeof AuthenticatedProdutosNovoRoute
+  '/_authenticated/cenarios/': typeof AuthenticatedCenariosIndexRoute
+  '/_authenticated/personagens/': typeof AuthenticatedPersonagensIndexRoute
   '/_authenticated/produtos/': typeof AuthenticatedProdutosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/dashboard' | '/produtos/novo' | '/produtos/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/produtos/$id'
+    | '/produtos/novo'
+    | '/cenarios/'
+    | '/personagens/'
+    | '/produtos/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/dashboard' | '/produtos/novo' | '/produtos'
+  to:
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/produtos/$id'
+    | '/produtos/novo'
+    | '/cenarios'
+    | '/personagens'
+    | '/produtos'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/dashboard'
+    | '/_authenticated/produtos/$id'
     | '/_authenticated/produtos/novo'
+    | '/_authenticated/cenarios/'
+    | '/_authenticated/personagens/'
     | '/_authenticated/produtos/'
   fileRoutesById: FileRoutesById
 }
@@ -122,11 +170,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/cenarios/': {
+      id: '/_authenticated/cenarios/'
+      path: '/cenarios'
+      fullPath: '/cenarios/'
+      preLoaderRoute: typeof AuthenticatedCenariosIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/personagens/': {
+      id: '/_authenticated/personagens/'
+      path: '/personagens'
+      fullPath: '/personagens/'
+      preLoaderRoute: typeof AuthenticatedPersonagensIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/produtos/': {
       id: '/_authenticated/produtos/'
       path: '/produtos'
       fullPath: '/produtos/'
       preLoaderRoute: typeof AuthenticatedProdutosIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/produtos/$id': {
+      id: '/_authenticated/produtos/$id'
+      path: '/produtos/$id'
+      fullPath: '/produtos/$id'
+      preLoaderRoute: typeof AuthenticatedProdutosIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/produtos/novo': {
@@ -141,13 +210,19 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedProdutosIdRoute: typeof AuthenticatedProdutosIdRoute
   AuthenticatedProdutosNovoRoute: typeof AuthenticatedProdutosNovoRoute
+  AuthenticatedCenariosIndexRoute: typeof AuthenticatedCenariosIndexRoute
+  AuthenticatedPersonagensIndexRoute: typeof AuthenticatedPersonagensIndexRoute
   AuthenticatedProdutosIndexRoute: typeof AuthenticatedProdutosIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedProdutosIdRoute: AuthenticatedProdutosIdRoute,
   AuthenticatedProdutosNovoRoute: AuthenticatedProdutosNovoRoute,
+  AuthenticatedCenariosIndexRoute: AuthenticatedCenariosIndexRoute,
+  AuthenticatedPersonagensIndexRoute: AuthenticatedPersonagensIndexRoute,
   AuthenticatedProdutosIndexRoute: AuthenticatedProdutosIndexRoute,
 }
 
