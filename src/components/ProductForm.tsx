@@ -2,9 +2,8 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Link2, Loader2, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { extrairProduto } from "@/lib/generation.functions";
-import { obterUsuarioId } from "@/lib/queries";
+import { enviarArquivo } from "@/lib/queries";
 import { AreaField, TextField } from "@/components/Field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -94,14 +93,10 @@ export function ProductForm({
     if (!files?.length) return;
     setEnviando(true);
     try {
-      const userId = await obterUsuarioId();
       const urls: string[] = [];
       for (const file of Array.from(files).slice(0, 8)) {
-        const caminho = `${userId}/${crypto.randomUUID()}-${file.name.replace(/[^\w.-]/g, "_")}`;
-        const { error } = await supabase.storage.from("produtos").upload(caminho, file);
-        if (error) throw new Error(error.message);
-        const { data } = await supabase.storage.from("produtos").createSignedUrl(caminho, 60 * 60 * 24 * 365);
-        if (data?.signedUrl) urls.push(data.signedUrl);
+        const url = await enviarArquivo("produtos", file);
+        if (url) urls.push(url);
       }
       onChange({ ...valores, imagens: [...(valores.imagens ?? []), ...urls] });
       toast.success("Imagens enviadas.");
