@@ -34,10 +34,13 @@ function Projetos() {
   const lista = (data ?? []).filter((p) => p.nome.toLowerCase().includes(busca.toLowerCase()));
 
   async function excluir(id: string) {
-    const { error } = await supabase.from("projects").delete().eq("id", id);
-    if (error) return toast.error(error.message);
-    qc.invalidateQueries({ queryKey: ["projects"] });
-    toast.success("Projeto excluído.");
+    try {
+      await excluirRegistro("projects", id);
+      qc.invalidateQueries({ queryKey: ["projects"] });
+      toast.success("Projeto excluído.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha ao excluir.");
+    }
   }
 
   return (
