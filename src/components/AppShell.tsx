@@ -109,10 +109,10 @@ export function AppShell({ children }: { children: ReactNode }) {
 function Brand({ compact }: { compact?: boolean }) {
   return (
     <Link to="/" className="flex items-center gap-2.5">
-      <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+      <span className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-[0_6px_18px_-8px_var(--color-primary)]">
         <Wand2 className="size-4" />
       </span>
-      <span className={cn("font-display text-base font-bold tracking-tight", compact && "text-sm")}>
+      <span className={cn("font-display text-base font-bold tracking-[-0.03em]", compact && "text-sm")}>
         Studio<span className="text-primary">IA</span>
       </span>
     </Link>
@@ -129,10 +129,12 @@ export function PageHeader({
   acoes?: ReactNode;
 }) {
   return (
-    <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-      <div>
-        <h1 className="text-2xl font-bold sm:text-3xl">{titulo}</h1>
-        {descricao ? <p className="mt-1.5 text-sm text-muted-foreground">{descricao}</p> : null}
+    <div className="mb-8 flex flex-col gap-4 stagger sm:flex-row sm:items-end sm:justify-between">
+      <div className="max-w-2xl">
+        <h1 className="text-[clamp(1.75rem,1.2rem+2vw,2.5rem)] font-bold">{titulo}</h1>
+        {descricao ? (
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{descricao}</p>
+        ) : null}
       </div>
       {acoes ? <div className="flex flex-wrap gap-2">{acoes}</div> : null}
     </div>
