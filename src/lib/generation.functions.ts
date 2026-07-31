@@ -266,7 +266,7 @@ export const regenerarParte = createServerFn({ method: "POST" })
 
     const { data: saved, error } = await supabase
       .from("scripts")
-      .update({ [data.campo]: texto.trim() })
+      .update({ [data.campo]: texto.trim() } as never)
       .eq("id", data.scriptId)
       .select()
       .single();
