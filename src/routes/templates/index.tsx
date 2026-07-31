@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { VARIAVEIS } from "@/lib/variables";
-import { listar, obterUsuarioId } from "@/lib/queries";
+import { criar, excluir as excluirRegistro, listar } from "@/lib/queries";
 
 export const Route = createFileRoute("/templates/")({
   head: () => ({
@@ -37,19 +37,24 @@ function Templates() {
 
   async function salvar() {
     if (!form.nome.trim()) return toast.error("Dê um nome ao template.");
-    const user_id = await obterUsuarioId();
-    const { error } = await supabase.from("templates").insert({ ...form, user_id });
-    if (error) return toast.error(error.message);
-    qc.invalidateQueries({ queryKey: ["templates"] });
-    setAberto(false);
-    setForm({ nome: "", tipo: "roteiro", categoria: "", conteudo: "" });
-    toast.success("Template salvo.");
+    try {
+      await criar("templates", { ...form });
+      qc.invalidateQueries({ queryKey: ["templates"] });
+      setAberto(false);
+      setForm({ nome: "", tipo: "roteiro", categoria: "", conteudo: "" });
+      toast.success("Template salvo.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha ao salvar.");
+    }
   }
 
   async function excluir(id: string) {
-    const { error } = await supabase.from("templates").delete().eq("id", id);
-    if (error) return toast.error(error.message);
-    qc.invalidateQueries({ queryKey: ["templates"] });
+    try {
+      await excluirRegistro("templates", id);
+      qc.invalidateQueries({ queryKey: ["templates"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha ao excluir.");
+    }
   }
 
   return (
