@@ -1,9 +1,15 @@
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
 
-export async function listar(tabela: "products" | "characters" | "scenarios" | "projects" | "templates") {
-  const { data, error } = await supabase.from(tabela).select("*").order("created_at", { ascending: false });
+type TabelaListavel = "products" | "characters" | "scenarios" | "projects" | "templates";
+
+export async function listar<T extends TabelaListavel>(tabela: T): Promise<Tables<T>[]> {
+  const { data, error } = await supabase
+    .from(tabela)
+    .select("*")
+    .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
-  return data ?? [];
+  return (data ?? []) as unknown as Tables<T>[];
 }
 
 export async function obterUsuarioId() {
