@@ -78,19 +78,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "StudioIA — Campanhas de vídeo para TikTok Shop" },
+      { title: "StudioIA — Vídeos de venda para TikTok Shop com IA" },
       {
         name: "description",
         content:
-          "Central de produção de vídeos de venda para TikTok Shop com influenciadoras de inteligência artificial.",
+          "Cadastre o produto, escolha personagem e cenário e gere roteiro, prompt de foto e prompt de vídeo para TikTok Shop.",
       },
-      { property: "og:title", content: "StudioIA — Campanhas de vídeo para TikTok Shop" },
+      { property: "og:title", content: "StudioIA — Vídeos de venda para TikTok Shop com IA" },
       {
         property: "og:description",
-        content: "Produza roteiros, prompts de imagem e prompts de vídeo para TikTok Shop.",
+        content: "Cadastre o produto, escolha personagem e cenário e gere roteiro, prompt de foto e prompt de vídeo para TikTok Shop.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "StudioIA — Vídeos de venda para TikTok Shop com IA" },
+      { name: "twitter:description", content: "Cadastre o produto, escolha personagem e cenário e gere roteiro, prompt de foto e prompt de vídeo para TikTok Shop." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c7428960-0d92-43f6-ba33-46207766efa4/id-preview-75bb48d8--ebb821a3-43ea-4852-994f-a202351aebcc.lovable.app-1785476210720.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c7428960-0d92-43f6-ba33-46207766efa4/id-preview-75bb48d8--ebb821a3-43ea-4852-994f-a202351aebcc.lovable.app-1785476210720.png" },
     ],
     links: [
       {

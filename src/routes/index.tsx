@@ -14,7 +14,7 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "StudioIA — Vídeos de venda para TikTok Shop com IA" },
       {
         property: "og:description",
-        content: "Central de produção de campanhas de vídeo com influenciadoras de inteligência artificial.",
+        content: "Cadastre o produto, escolha personagem e cenário e gere roteiro, prompt de foto e prompt de vídeo para TikTok Shop.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
