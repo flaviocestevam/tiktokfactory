@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { montarPayloadProduto, produtoParaDraft } from "@/lib/produto";
 import { obterUsuarioId } from "@/lib/queries";
 
-export const Route = createFileRoute("/_authenticated/produtos/$id")({
+export const Route = createFileRoute("/produtos/$id")({
   head: () => ({
     meta: [
       { title: "Editar produto | StudioIA" },

@@ -25,7 +25,7 @@ import {
 } from "@/lib/variables";
 import { listar, obterUsuarioId } from "@/lib/queries";
 
-export const Route = createFileRoute("/_authenticated/projetos/novo")({
+export const Route = createFileRoute("/projetos/novo")({
   head: () => ({
     meta: [
       { title: "Criar novo vídeo | StudioIA" },

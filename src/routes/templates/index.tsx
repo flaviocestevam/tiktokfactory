@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { VARIAVEIS } from "@/lib/variables";
 import { listar, obterUsuarioId } from "@/lib/queries";
 
-export const Route = createFileRoute("/_authenticated/templates/")({
+export const Route = createFileRoute("/templates/")({
   head: () => ({
     meta: [
       { title: "Templates | StudioIA" },

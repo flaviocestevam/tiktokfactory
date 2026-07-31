@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatarData, listar } from "@/lib/queries";
 
-export const Route = createFileRoute("/_authenticated/projetos/")({
+export const Route = createFileRoute("/projetos/")({
   head: () => ({
     meta: [
       { title: "Projetos | StudioIA" },

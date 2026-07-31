@@ -27,7 +27,7 @@ import {
 import { AMBIENTES, ENQUADRAMENTOS, ESTILOS_CENARIO, HORARIOS, ILUMINACOES } from "@/lib/variables";
 import { listar, obterUsuarioId } from "@/lib/queries";
 
-export const Route = createFileRoute("/_authenticated/cenarios/")({
+export const Route = createFileRoute("/cenarios/")({
   head: () => ({
     meta: [
       { title: "Cenários | StudioIA" },

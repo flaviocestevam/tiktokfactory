@@ -8,7 +8,7 @@ import { ProductForm, type ProductDraft } from "@/components/ProductForm";
 import { montarPayloadProduto } from "@/lib/produto";
 import { obterUsuarioId } from "@/lib/queries";
 
-export const Route = createFileRoute("/_authenticated/produtos/novo")({
+export const Route = createFileRoute("/produtos/novo")({
   head: () => ({
     meta: [
       { title: "Novo produto | StudioIA" },

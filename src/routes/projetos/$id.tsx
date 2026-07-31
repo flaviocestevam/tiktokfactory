@@ -24,7 +24,7 @@ import { AVISO_SEM_PERSONAGEM } from "@/lib/variables";
 import { baixarTexto } from "@/lib/queries";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-export const Route = createFileRoute("/_authenticated/projetos/$id")({
+export const Route = createFileRoute("/projetos/$id")({
   head: () => ({
     meta: [
       { title: "Projeto | StudioIA" },
