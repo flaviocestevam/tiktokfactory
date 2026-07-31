@@ -70,19 +70,25 @@ function Dashboard() {
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        <Metrica titulo="Projetos" valor={projetos.data?.length} icon={FolderKanban} to="/projetos" />
-        <Metrica titulo="Produtos" valor={produtos.data?.length} icon={Package} to="/produtos" />
-        <Metrica titulo="Personagens" valor={personagens.data?.length} icon={Users} to="/personagens" />
-        <Metrica titulo="Cenários" valor={cenarios.data?.length} icon={Sparkles} to="/cenarios" />
-        <Metrica titulo="Roteiros gerados" valor={roteiros.data} icon={ScrollText} />
-        <Metrica titulo="Em andamento" valor={emAndamento} sub={`${finalizados} finalizados`} icon={FolderKanban} />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <Metrica indice={0} titulo="Projetos" valor={projetos.data?.length} icon={FolderKanban} to="/projetos" />
+        <Metrica indice={1} titulo="Produtos" valor={produtos.data?.length} icon={Package} to="/produtos" />
+        <Metrica indice={2} titulo="Personagens" valor={personagens.data?.length} icon={Users} to="/personagens" />
+        <Metrica indice={3} titulo="Cenários" valor={cenarios.data?.length} icon={Sparkles} to="/cenarios" />
+        <Metrica indice={4} titulo="Roteiros gerados" valor={roteiros.data} icon={ScrollText} />
+        <Metrica
+          indice={5}
+          titulo="Em andamento"
+          valor={emAndamento}
+          sub={`${finalizados} finalizados`}
+          icon={FolderKanban}
+        />
       </div>
 
-      <section className="mt-10">
-        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="text-lg font-semibold">Projetos recentes</h2>
-          <div className="flex gap-2">
+      <section className="mt-16">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="text-xl font-semibold">Projetos recentes</h2>
+          <div className="flex gap-3">
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -108,9 +114,9 @@ function Dashboard() {
         </div>
 
         {projetos.isLoading ? (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[0, 1, 2].map((i) => (
-              <Skeleton key={i} className="h-28 rounded-2xl" />
+              <Skeleton key={i} className="h-32 rounded-2xl" />
             ))}
           </div>
         ) : lista.length === 0 ? (
@@ -129,24 +135,27 @@ function Dashboard() {
             }
           />
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {lista.slice(0, 9).map((p) => (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {lista.slice(0, 9).map((p, i) => (
               <Link
                 key={p.id}
                 to="/projetos/$id"
                 params={{ id: p.id }}
-                className="rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary/50"
+                style={{ animationDelay: `${Math.min(i, 8) * 60}ms` }}
+                className="surface stagger interactive group p-5 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lift"
               >
                 <div className="flex items-start justify-between gap-3">
-                  <h3 className="font-semibold">{p.nome}</h3>
+                  <h3 className="font-semibold transition-colors duration-300 group-hover:text-primary">{p.nome}</h3>
                   <Badge variant="secondary" className="shrink-0 capitalize">
                     {String(p.status).replace("_", " ")}
                   </Badge>
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">
+                <p className="mt-3 text-xs text-muted-foreground">
                   {p.duracao}s · {p.formato} · {p.objetivo || "sem objetivo definido"}
                 </p>
-                <p className="mt-3 text-xs text-muted-foreground">Atualizado em {formatarData(p.updated_at)}</p>
+                <p className="mt-4 text-[11px] uppercase tracking-[0.12em] text-muted-foreground/70">
+                  Atualizado em {formatarData(p.updated_at)}
+                </p>
               </Link>
             ))}
           </div>
@@ -154,7 +163,7 @@ function Dashboard() {
       </section>
 
       {personagens.data?.length === 0 ? (
-        <div className="mt-8 rounded-2xl border border-border bg-card/60 p-5 text-sm text-muted-foreground">
+        <div className="glass mt-10 rounded-2xl border border-border p-6 text-sm leading-relaxed text-muted-foreground">
           Nenhuma personagem cadastrada. As personagens serão adicionadas na próxima etapa de configuração.
         </div>
       ) : null}
@@ -168,28 +177,33 @@ function Metrica({
   sub,
   icon: Icon,
   to,
+  indice = 0,
 }: {
   titulo: string;
   valor?: number;
   sub?: string;
   icon: typeof FolderKanban;
   to?: "/projetos" | "/produtos" | "/personagens" | "/cenarios";
+  indice?: number;
 }) {
   const conteudo = (
-    <div className="rounded-2xl border border-border bg-card p-4">
+    <div className="surface interactive h-full p-5 hover:border-primary/35 hover:shadow-lift">
       <div className="flex items-center justify-between">
-        <span className="text-xs uppercase tracking-wide text-muted-foreground">{titulo}</span>
-        <Icon className="size-4 text-accent" />
+        <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{titulo}</span>
+        <Icon className="size-4 text-accent transition-transform duration-500 group-hover:scale-110" />
       </div>
-      <p className="mt-3 font-display text-2xl font-bold">{valor ?? "—"}</p>
-      {sub ? <p className="mt-1 text-xs text-muted-foreground">{sub}</p> : null}
+      <p className="mt-4 font-display text-3xl font-bold tracking-[-0.03em] tabular-nums">{valor ?? "—"}</p>
+      {sub ? <p className="mt-1.5 text-xs text-muted-foreground">{sub}</p> : null}
     </div>
   );
+  const estilo = { animationDelay: `${indice * 60}ms` };
   return to ? (
-    <Link to={to} className="transition-transform hover:-translate-y-0.5">
+    <Link to={to} style={estilo} className="stagger group block interactive hover:-translate-y-1">
       {conteudo}
     </Link>
   ) : (
-    conteudo
+    <div style={estilo} className="stagger group">
+      {conteudo}
+    </div>
   );
 }

@@ -13,13 +13,13 @@ export function EmptyState({
   acao?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/40 px-6 py-14 text-center">
-      <div className="mb-4 flex size-12 items-center justify-center rounded-xl bg-secondary text-accent">
+    <div className="stagger flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/40 px-8 py-16 text-center backdrop-blur-sm">
+      <div className="mb-6 flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-secondary to-card text-accent shadow-soft ring-1 ring-border">
         <Icon className="size-6" />
       </div>
-      <h3 className="text-base font-semibold text-foreground">{titulo}</h3>
-      <p className="mt-1.5 max-w-md text-sm text-muted-foreground">{descricao}</p>
-      {acao ? <div className="mt-5">{acao}</div> : null}
+      <h3 className="text-lg font-semibold text-foreground">{titulo}</h3>
+      <p className="mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">{descricao}</p>
+      {acao ? <div className="mt-6">{acao}</div> : null}
     </div>
   );
 }

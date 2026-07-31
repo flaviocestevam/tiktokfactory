@@ -80,9 +80,13 @@ function Projetos() {
           }
         />
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {lista.map((p) => (
-            <div key={p.id} className="rounded-2xl border border-border bg-card p-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {lista.map((p, i) => (
+            <div
+              key={p.id}
+              style={{ animationDelay: `${Math.min(i, 8) * 60}ms` }}
+              className="surface stagger interactive p-5 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lift"
+            >
               <div className="flex items-start justify-between gap-2">
                 <Link to="/projetos/$id" params={{ id: p.id }} className="font-semibold hover:text-primary">
                   {p.nome}
@@ -91,14 +95,16 @@ function Projetos() {
                   <Trash2 className="size-4 text-destructive" />
                 </button>
               </div>
-              <div className="mt-2 flex flex-wrap gap-1.5">
+              <div className="mt-3 flex flex-wrap gap-2">
                 <Badge variant="secondary" className="capitalize">
                   {String(p.status).replace("_", " ")}
                 </Badge>
                 <Badge variant="outline">{p.duracao}s</Badge>
                 <Badge variant="outline">{p.formato}</Badge>
               </div>
-              <p className="mt-3 text-xs text-muted-foreground">Atualizado em {formatarData(p.updated_at)}</p>
+              <p className="mt-4 text-[11px] uppercase tracking-[0.12em] text-muted-foreground/70">
+                Atualizado em {formatarData(p.updated_at)}
+              </p>
             </div>
           ))}
         </div>
