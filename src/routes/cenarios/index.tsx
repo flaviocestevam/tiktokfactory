@@ -109,19 +109,25 @@ function Cenarios() {
           acao={<Button onClick={() => setAberto(true)}>Criar cenário</Button>}
         />
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {data?.map((c) => (
-            <div key={c.id} className="rounded-2xl border border-border bg-card p-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {data?.map((c, i) => (
+            <div
+              key={c.id}
+              style={{ animationDelay: `${Math.min(i, 8) * 60}ms` }}
+              className="surface stagger interactive p-5 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lift"
+            >
               <div className="flex items-start justify-between gap-2">
                 <h3 className="font-semibold">{c.nome}</h3>
                 <button aria-label="Excluir cenário" onClick={() => excluir(c.id)}>
                   <Trash2 className="size-4 text-destructive" />
                 </button>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">
+              <p className="mt-3 text-xs text-muted-foreground">
                 {[c.ambiente, c.horario, c.iluminacao, c.enquadramento].filter(Boolean).join(" · ")}
               </p>
-              {c.descricao ? <p className="mt-2 line-clamp-3 text-sm">{c.descricao}</p> : null}
+              {c.descricao ? (
+                <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{c.descricao}</p>
+              ) : null}
             </div>
           ))}
         </div>
