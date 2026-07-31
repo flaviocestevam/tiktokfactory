@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCenariosIndexRouteImport } from './routes/_authenticated/cenarios/index'
 import { Route as AuthenticatedPersonagensIndexRouteImport } from './routes/_authenticated/personagens/index'
@@ -19,7 +20,9 @@ import { Route as AuthenticatedProdutosIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedProdutosIdRouteImport } from './routes/_authenticated/produtos/$id'
 import { Route as AuthenticatedProdutosNovoRouteImport } from './routes/_authenticated/produtos/novo'
 import { Route as AuthenticatedProjetosIndexRouteImport } from './routes/_authenticated/projetos/index'
+import { Route as AuthenticatedProjetosIdRouteImport } from './routes/_authenticated/projetos/$id'
 import { Route as AuthenticatedProjetosNovoRouteImport } from './routes/_authenticated/projetos/novo'
+import { Route as AuthenticatedTemplatesIndexRouteImport } from './routes/_authenticated/templates/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -35,6 +38,12 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedConfiguracoesRoute =
+  AuthenticatedConfiguracoesRouteImport.update({
+    id: '/configuracoes',
+    path: '/configuracoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -75,89 +84,118 @@ const AuthenticatedProjetosIndexRoute =
     path: '/projetos/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedProjetosIdRoute = AuthenticatedProjetosIdRouteImport.update({
+  id: '/projetos/$id',
+  path: '/projetos/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedProjetosNovoRoute =
   AuthenticatedProjetosNovoRouteImport.update({
     id: '/projetos/novo',
     path: '/projetos/novo',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedTemplatesIndexRoute =
+  AuthenticatedTemplatesIndexRouteImport.update({
+    id: '/templates/',
+    path: '/templates/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/produtos/$id': typeof AuthenticatedProdutosIdRoute
   '/produtos/novo': typeof AuthenticatedProdutosNovoRoute
+  '/projetos/$id': typeof AuthenticatedProjetosIdRoute
   '/projetos/novo': typeof AuthenticatedProjetosNovoRoute
   '/cenarios/': typeof AuthenticatedCenariosIndexRoute
   '/personagens/': typeof AuthenticatedPersonagensIndexRoute
   '/produtos/': typeof AuthenticatedProdutosIndexRoute
   '/projetos/': typeof AuthenticatedProjetosIndexRoute
+  '/templates/': typeof AuthenticatedTemplatesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/produtos/$id': typeof AuthenticatedProdutosIdRoute
   '/produtos/novo': typeof AuthenticatedProdutosNovoRoute
+  '/projetos/$id': typeof AuthenticatedProjetosIdRoute
   '/projetos/novo': typeof AuthenticatedProjetosNovoRoute
   '/cenarios': typeof AuthenticatedCenariosIndexRoute
   '/personagens': typeof AuthenticatedPersonagensIndexRoute
   '/produtos': typeof AuthenticatedProdutosIndexRoute
   '/projetos': typeof AuthenticatedProjetosIndexRoute
+  '/templates': typeof AuthenticatedTemplatesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/produtos/$id': typeof AuthenticatedProdutosIdRoute
   '/_authenticated/produtos/novo': typeof AuthenticatedProdutosNovoRoute
+  '/_authenticated/projetos/$id': typeof AuthenticatedProjetosIdRoute
   '/_authenticated/projetos/novo': typeof AuthenticatedProjetosNovoRoute
   '/_authenticated/cenarios/': typeof AuthenticatedCenariosIndexRoute
   '/_authenticated/personagens/': typeof AuthenticatedPersonagensIndexRoute
   '/_authenticated/produtos/': typeof AuthenticatedProdutosIndexRoute
   '/_authenticated/projetos/': typeof AuthenticatedProjetosIndexRoute
+  '/_authenticated/templates/': typeof AuthenticatedTemplatesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/auth'
+    | '/configuracoes'
     | '/dashboard'
     | '/produtos/$id'
     | '/produtos/novo'
+    | '/projetos/$id'
     | '/projetos/novo'
     | '/cenarios/'
     | '/personagens/'
     | '/produtos/'
     | '/projetos/'
+    | '/templates/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/configuracoes'
     | '/dashboard'
     | '/produtos/$id'
     | '/produtos/novo'
+    | '/projetos/$id'
     | '/projetos/novo'
     | '/cenarios'
     | '/personagens'
     | '/produtos'
     | '/projetos'
+    | '/templates'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/configuracoes'
     | '/_authenticated/dashboard'
     | '/_authenticated/produtos/$id'
     | '/_authenticated/produtos/novo'
+    | '/_authenticated/projetos/$id'
     | '/_authenticated/projetos/novo'
     | '/_authenticated/cenarios/'
     | '/_authenticated/personagens/'
     | '/_authenticated/produtos/'
     | '/_authenticated/projetos/'
+    | '/_authenticated/templates/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -188,6 +226,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/configuracoes': {
+      id: '/_authenticated/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/configuracoes'
+      preLoaderRoute: typeof AuthenticatedConfiguracoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
@@ -238,6 +283,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProjetosIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/projetos/$id': {
+      id: '/_authenticated/projetos/$id'
+      path: '/projetos/$id'
+      fullPath: '/projetos/$id'
+      preLoaderRoute: typeof AuthenticatedProjetosIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/projetos/novo': {
       id: '/_authenticated/projetos/novo'
       path: '/projetos/novo'
@@ -245,29 +297,42 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProjetosNovoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/templates/': {
+      id: '/_authenticated/templates/'
+      path: '/templates'
+      fullPath: '/templates/'
+      preLoaderRoute: typeof AuthenticatedTemplatesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedProdutosIdRoute: typeof AuthenticatedProdutosIdRoute
   AuthenticatedProdutosNovoRoute: typeof AuthenticatedProdutosNovoRoute
+  AuthenticatedProjetosIdRoute: typeof AuthenticatedProjetosIdRoute
   AuthenticatedProjetosNovoRoute: typeof AuthenticatedProjetosNovoRoute
   AuthenticatedCenariosIndexRoute: typeof AuthenticatedCenariosIndexRoute
   AuthenticatedPersonagensIndexRoute: typeof AuthenticatedPersonagensIndexRoute
   AuthenticatedProdutosIndexRoute: typeof AuthenticatedProdutosIndexRoute
   AuthenticatedProjetosIndexRoute: typeof AuthenticatedProjetosIndexRoute
+  AuthenticatedTemplatesIndexRoute: typeof AuthenticatedTemplatesIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedProdutosIdRoute: AuthenticatedProdutosIdRoute,
   AuthenticatedProdutosNovoRoute: AuthenticatedProdutosNovoRoute,
+  AuthenticatedProjetosIdRoute: AuthenticatedProjetosIdRoute,
   AuthenticatedProjetosNovoRoute: AuthenticatedProjetosNovoRoute,
   AuthenticatedCenariosIndexRoute: AuthenticatedCenariosIndexRoute,
   AuthenticatedPersonagensIndexRoute: AuthenticatedPersonagensIndexRoute,
   AuthenticatedProdutosIndexRoute: AuthenticatedProdutosIndexRoute,
   AuthenticatedProjetosIndexRoute: AuthenticatedProjetosIndexRoute,
+  AuthenticatedTemplatesIndexRoute: AuthenticatedTemplatesIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
