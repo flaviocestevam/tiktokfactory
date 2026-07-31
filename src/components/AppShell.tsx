@@ -4,21 +4,21 @@ import {
   FileText,
   FolderKanban,
   LayoutDashboard,
-  LogOut,
   Menu,
   Package,
+  Plus,
   Settings,
   Sparkles,
   Users,
   Wand2,
   X,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/", label: "Início", icon: LayoutDashboard },
+  { to: "/projetos/novo", label: "Criar conteúdo", icon: Plus },
   { to: "/projetos", label: "Projetos", icon: FolderKanban },
   { to: "/produtos", label: "Produtos", icon: Package },
   { to: "/personagens", label: "Personagens", icon: Users },
@@ -29,18 +29,15 @@ const NAV = [
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [aberto, setAberto] = useState(false);
-  const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-
-  async function sair() {
-    await supabase.auth.signOut();
-    navigate({ to: "/auth" });
-  }
 
   const nav = (
     <nav className="flex flex-1 flex-col gap-1">
       {NAV.map((item) => {
-        const ativo = pathname === item.to || pathname.startsWith(`${item.to}/`);
+        const ativo =
+          item.to === "/"
+            ? pathname === "/"
+            : pathname === item.to || pathname.startsWith(`${item.to}/`);
         return (
           <Link
             key={item.to}
@@ -66,9 +63,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-sidebar-border bg-sidebar px-4 py-6 lg:flex">
         <Brand />
         <div className="mt-8 flex flex-1 flex-col">{nav}</div>
-        <Button variant="ghost" className="justify-start gap-3 text-muted-foreground" onClick={sair}>
-          <LogOut className="size-4" /> Sair
-        </Button>
       </aside>
 
       {aberto ? (
@@ -86,9 +80,6 @@ export function AppShell({ children }: { children: ReactNode }) {
               </Button>
             </div>
             <div className="mt-8 flex flex-1 flex-col">{nav}</div>
-            <Button variant="ghost" className="justify-start gap-3 text-muted-foreground" onClick={sair}>
-              <LogOut className="size-4" /> Sair
-            </Button>
           </aside>
         </div>
       ) : null}
@@ -108,7 +99,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
 function Brand({ compact }: { compact?: boolean }) {
   return (
-    <Link to="/dashboard" className="flex items-center gap-2.5">
+    <Link to="/" className="flex items-center gap-2.5">
       <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
         <Wand2 className="size-4" />
       </span>

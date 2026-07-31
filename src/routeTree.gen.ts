@@ -10,152 +10,118 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
-import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
-import { Route as AuthenticatedCenariosIndexRouteImport } from './routes/_authenticated/cenarios/index'
-import { Route as AuthenticatedPersonagensIndexRouteImport } from './routes/_authenticated/personagens/index'
-import { Route as AuthenticatedProdutosIndexRouteImport } from './routes/_authenticated/produtos/index'
-import { Route as AuthenticatedProdutosIdRouteImport } from './routes/_authenticated/produtos/$id'
-import { Route as AuthenticatedProdutosNovoRouteImport } from './routes/_authenticated/produtos/novo'
-import { Route as AuthenticatedProjetosIndexRouteImport } from './routes/_authenticated/projetos/index'
-import { Route as AuthenticatedProjetosIdRouteImport } from './routes/_authenticated/projetos/$id'
-import { Route as AuthenticatedProjetosNovoRouteImport } from './routes/_authenticated/projetos/novo'
-import { Route as AuthenticatedTemplatesIndexRouteImport } from './routes/_authenticated/templates/index'
+import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
+import { Route as CenariosIndexRouteImport } from './routes/cenarios/index'
+import { Route as PersonagensIndexRouteImport } from './routes/personagens/index'
+import { Route as ProdutosIndexRouteImport } from './routes/produtos/index'
+import { Route as ProdutosIdRouteImport } from './routes/produtos/$id'
+import { Route as ProdutosNovoRouteImport } from './routes/produtos/novo'
+import { Route as ProjetosIndexRouteImport } from './routes/projetos/index'
+import { Route as ProjetosIdRouteImport } from './routes/projetos/$id'
+import { Route as ProjetosNovoRouteImport } from './routes/projetos/novo'
+import { Route as TemplatesIndexRouteImport } from './routes/templates/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
+const ConfiguracoesRoute = ConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
+const CenariosIndexRoute = CenariosIndexRouteImport.update({
+  id: '/cenarios/',
+  path: '/cenarios/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedConfiguracoesRoute =
-  AuthenticatedConfiguracoesRouteImport.update({
-    id: '/configuracoes',
-    path: '/configuracoes',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const PersonagensIndexRoute = PersonagensIndexRouteImport.update({
+  id: '/personagens/',
+  path: '/personagens/',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedCenariosIndexRoute =
-  AuthenticatedCenariosIndexRouteImport.update({
-    id: '/cenarios/',
-    path: '/cenarios/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedPersonagensIndexRoute =
-  AuthenticatedPersonagensIndexRouteImport.update({
-    id: '/personagens/',
-    path: '/personagens/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedProdutosIndexRoute =
-  AuthenticatedProdutosIndexRouteImport.update({
-    id: '/produtos/',
-    path: '/produtos/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedProdutosIdRoute = AuthenticatedProdutosIdRouteImport.update({
+const ProdutosIndexRoute = ProdutosIndexRouteImport.update({
+  id: '/produtos/',
+  path: '/produtos/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProdutosIdRoute = ProdutosIdRouteImport.update({
   id: '/produtos/$id',
   path: '/produtos/$id',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedProdutosNovoRoute =
-  AuthenticatedProdutosNovoRouteImport.update({
-    id: '/produtos/novo',
-    path: '/produtos/novo',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedProjetosIndexRoute =
-  AuthenticatedProjetosIndexRouteImport.update({
-    id: '/projetos/',
-    path: '/projetos/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedProjetosIdRoute = AuthenticatedProjetosIdRouteImport.update({
+const ProdutosNovoRoute = ProdutosNovoRouteImport.update({
+  id: '/produtos/novo',
+  path: '/produtos/novo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjetosIndexRoute = ProjetosIndexRouteImport.update({
+  id: '/projetos/',
+  path: '/projetos/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjetosIdRoute = ProjetosIdRouteImport.update({
   id: '/projetos/$id',
   path: '/projetos/$id',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedProjetosNovoRoute =
-  AuthenticatedProjetosNovoRouteImport.update({
-    id: '/projetos/novo',
-    path: '/projetos/novo',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedTemplatesIndexRoute =
-  AuthenticatedTemplatesIndexRouteImport.update({
-    id: '/templates/',
-    path: '/templates/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
+const ProjetosNovoRoute = ProjetosNovoRouteImport.update({
+  id: '/projetos/novo',
+  path: '/projetos/novo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemplatesIndexRoute = TemplatesIndexRouteImport.update({
+  id: '/templates/',
+  path: '/templates/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
-  '/configuracoes': typeof AuthenticatedConfiguracoesRoute
-  '/dashboard': typeof AuthenticatedDashboardRoute
-  '/produtos/$id': typeof AuthenticatedProdutosIdRoute
-  '/produtos/novo': typeof AuthenticatedProdutosNovoRoute
-  '/projetos/$id': typeof AuthenticatedProjetosIdRoute
-  '/projetos/novo': typeof AuthenticatedProjetosNovoRoute
-  '/cenarios/': typeof AuthenticatedCenariosIndexRoute
-  '/personagens/': typeof AuthenticatedPersonagensIndexRoute
-  '/produtos/': typeof AuthenticatedProdutosIndexRoute
-  '/projetos/': typeof AuthenticatedProjetosIndexRoute
-  '/templates/': typeof AuthenticatedTemplatesIndexRoute
+  '/configuracoes': typeof ConfiguracoesRoute
+  '/produtos/$id': typeof ProdutosIdRoute
+  '/produtos/novo': typeof ProdutosNovoRoute
+  '/projetos/$id': typeof ProjetosIdRoute
+  '/projetos/novo': typeof ProjetosNovoRoute
+  '/cenarios/': typeof CenariosIndexRoute
+  '/personagens/': typeof PersonagensIndexRoute
+  '/produtos/': typeof ProdutosIndexRoute
+  '/projetos/': typeof ProjetosIndexRoute
+  '/templates/': typeof TemplatesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
-  '/configuracoes': typeof AuthenticatedConfiguracoesRoute
-  '/dashboard': typeof AuthenticatedDashboardRoute
-  '/produtos/$id': typeof AuthenticatedProdutosIdRoute
-  '/produtos/novo': typeof AuthenticatedProdutosNovoRoute
-  '/projetos/$id': typeof AuthenticatedProjetosIdRoute
-  '/projetos/novo': typeof AuthenticatedProjetosNovoRoute
-  '/cenarios': typeof AuthenticatedCenariosIndexRoute
-  '/personagens': typeof AuthenticatedPersonagensIndexRoute
-  '/produtos': typeof AuthenticatedProdutosIndexRoute
-  '/projetos': typeof AuthenticatedProjetosIndexRoute
-  '/templates': typeof AuthenticatedTemplatesIndexRoute
+  '/configuracoes': typeof ConfiguracoesRoute
+  '/produtos/$id': typeof ProdutosIdRoute
+  '/produtos/novo': typeof ProdutosNovoRoute
+  '/projetos/$id': typeof ProjetosIdRoute
+  '/projetos/novo': typeof ProjetosNovoRoute
+  '/cenarios': typeof CenariosIndexRoute
+  '/personagens': typeof PersonagensIndexRoute
+  '/produtos': typeof ProdutosIndexRoute
+  '/projetos': typeof ProjetosIndexRoute
+  '/templates': typeof TemplatesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/auth': typeof AuthRoute
-  '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
-  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/_authenticated/produtos/$id': typeof AuthenticatedProdutosIdRoute
-  '/_authenticated/produtos/novo': typeof AuthenticatedProdutosNovoRoute
-  '/_authenticated/projetos/$id': typeof AuthenticatedProjetosIdRoute
-  '/_authenticated/projetos/novo': typeof AuthenticatedProjetosNovoRoute
-  '/_authenticated/cenarios/': typeof AuthenticatedCenariosIndexRoute
-  '/_authenticated/personagens/': typeof AuthenticatedPersonagensIndexRoute
-  '/_authenticated/produtos/': typeof AuthenticatedProdutosIndexRoute
-  '/_authenticated/projetos/': typeof AuthenticatedProjetosIndexRoute
-  '/_authenticated/templates/': typeof AuthenticatedTemplatesIndexRoute
+  '/configuracoes': typeof ConfiguracoesRoute
+  '/produtos/$id': typeof ProdutosIdRoute
+  '/produtos/novo': typeof ProdutosNovoRoute
+  '/projetos/$id': typeof ProjetosIdRoute
+  '/projetos/novo': typeof ProjetosNovoRoute
+  '/cenarios/': typeof CenariosIndexRoute
+  '/personagens/': typeof PersonagensIndexRoute
+  '/produtos/': typeof ProdutosIndexRoute
+  '/projetos/': typeof ProjetosIndexRoute
+  '/templates/': typeof TemplatesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/auth'
     | '/configuracoes'
-    | '/dashboard'
     | '/produtos/$id'
     | '/produtos/novo'
     | '/projetos/$id'
@@ -168,9 +134,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/auth'
     | '/configuracoes'
-    | '/dashboard'
     | '/produtos/$id'
     | '/produtos/novo'
     | '/projetos/$id'
@@ -183,25 +147,30 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/_authenticated'
-    | '/auth'
-    | '/_authenticated/configuracoes'
-    | '/_authenticated/dashboard'
-    | '/_authenticated/produtos/$id'
-    | '/_authenticated/produtos/novo'
-    | '/_authenticated/projetos/$id'
-    | '/_authenticated/projetos/novo'
-    | '/_authenticated/cenarios/'
-    | '/_authenticated/personagens/'
-    | '/_authenticated/produtos/'
-    | '/_authenticated/projetos/'
-    | '/_authenticated/templates/'
+    | '/configuracoes'
+    | '/produtos/$id'
+    | '/produtos/novo'
+    | '/projetos/$id'
+    | '/projetos/novo'
+    | '/cenarios/'
+    | '/personagens/'
+    | '/produtos/'
+    | '/projetos/'
+    | '/templates/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
-  AuthRoute: typeof AuthRoute
+  ConfiguracoesRoute: typeof ConfiguracoesRoute
+  ProdutosIdRoute: typeof ProdutosIdRoute
+  ProdutosNovoRoute: typeof ProdutosNovoRoute
+  ProjetosIdRoute: typeof ProjetosIdRoute
+  ProjetosNovoRoute: typeof ProjetosNovoRoute
+  CenariosIndexRoute: typeof CenariosIndexRoute
+  PersonagensIndexRoute: typeof PersonagensIndexRoute
+  ProdutosIndexRoute: typeof ProdutosIndexRoute
+  ProjetosIndexRoute: typeof ProjetosIndexRoute
+  TemplatesIndexRoute: typeof TemplatesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -213,135 +182,91 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated': {
-      id: '/_authenticated'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/configuracoes': {
-      id: '/_authenticated/configuracoes'
+    '/configuracoes': {
+      id: '/configuracoes'
       path: '/configuracoes'
       fullPath: '/configuracoes'
-      preLoaderRoute: typeof AuthenticatedConfiguracoesRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof ConfiguracoesRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/dashboard': {
-      id: '/_authenticated/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/cenarios/': {
-      id: '/_authenticated/cenarios/'
+    '/cenarios/': {
+      id: '/cenarios/'
       path: '/cenarios'
       fullPath: '/cenarios/'
-      preLoaderRoute: typeof AuthenticatedCenariosIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof CenariosIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/personagens/': {
-      id: '/_authenticated/personagens/'
+    '/personagens/': {
+      id: '/personagens/'
       path: '/personagens'
       fullPath: '/personagens/'
-      preLoaderRoute: typeof AuthenticatedPersonagensIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof PersonagensIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/produtos/': {
-      id: '/_authenticated/produtos/'
+    '/produtos/': {
+      id: '/produtos/'
       path: '/produtos'
       fullPath: '/produtos/'
-      preLoaderRoute: typeof AuthenticatedProdutosIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof ProdutosIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/produtos/$id': {
-      id: '/_authenticated/produtos/$id'
+    '/produtos/$id': {
+      id: '/produtos/$id'
       path: '/produtos/$id'
       fullPath: '/produtos/$id'
-      preLoaderRoute: typeof AuthenticatedProdutosIdRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof ProdutosIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/produtos/novo': {
-      id: '/_authenticated/produtos/novo'
+    '/produtos/novo': {
+      id: '/produtos/novo'
       path: '/produtos/novo'
       fullPath: '/produtos/novo'
-      preLoaderRoute: typeof AuthenticatedProdutosNovoRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof ProdutosNovoRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/projetos/': {
-      id: '/_authenticated/projetos/'
+    '/projetos/': {
+      id: '/projetos/'
       path: '/projetos'
       fullPath: '/projetos/'
-      preLoaderRoute: typeof AuthenticatedProjetosIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof ProjetosIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/projetos/$id': {
-      id: '/_authenticated/projetos/$id'
+    '/projetos/$id': {
+      id: '/projetos/$id'
       path: '/projetos/$id'
       fullPath: '/projetos/$id'
-      preLoaderRoute: typeof AuthenticatedProjetosIdRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof ProjetosIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/projetos/novo': {
-      id: '/_authenticated/projetos/novo'
+    '/projetos/novo': {
+      id: '/projetos/novo'
       path: '/projetos/novo'
       fullPath: '/projetos/novo'
-      preLoaderRoute: typeof AuthenticatedProjetosNovoRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof ProjetosNovoRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/templates/': {
-      id: '/_authenticated/templates/'
+    '/templates/': {
+      id: '/templates/'
       path: '/templates'
       fullPath: '/templates/'
-      preLoaderRoute: typeof AuthenticatedTemplatesIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof TemplatesIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
 
-interface AuthenticatedRouteRouteChildren {
-  AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
-  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedProdutosIdRoute: typeof AuthenticatedProdutosIdRoute
-  AuthenticatedProdutosNovoRoute: typeof AuthenticatedProdutosNovoRoute
-  AuthenticatedProjetosIdRoute: typeof AuthenticatedProjetosIdRoute
-  AuthenticatedProjetosNovoRoute: typeof AuthenticatedProjetosNovoRoute
-  AuthenticatedCenariosIndexRoute: typeof AuthenticatedCenariosIndexRoute
-  AuthenticatedPersonagensIndexRoute: typeof AuthenticatedPersonagensIndexRoute
-  AuthenticatedProdutosIndexRoute: typeof AuthenticatedProdutosIndexRoute
-  AuthenticatedProjetosIndexRoute: typeof AuthenticatedProjetosIndexRoute
-  AuthenticatedTemplatesIndexRoute: typeof AuthenticatedTemplatesIndexRoute
-}
-
-const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
-  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
-  AuthenticatedProdutosIdRoute: AuthenticatedProdutosIdRoute,
-  AuthenticatedProdutosNovoRoute: AuthenticatedProdutosNovoRoute,
-  AuthenticatedProjetosIdRoute: AuthenticatedProjetosIdRoute,
-  AuthenticatedProjetosNovoRoute: AuthenticatedProjetosNovoRoute,
-  AuthenticatedCenariosIndexRoute: AuthenticatedCenariosIndexRoute,
-  AuthenticatedPersonagensIndexRoute: AuthenticatedPersonagensIndexRoute,
-  AuthenticatedProdutosIndexRoute: AuthenticatedProdutosIndexRoute,
-  AuthenticatedProjetosIndexRoute: AuthenticatedProjetosIndexRoute,
-  AuthenticatedTemplatesIndexRoute: AuthenticatedTemplatesIndexRoute,
-}
-
-const AuthenticatedRouteRouteWithChildren =
-  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
-  AuthRoute: AuthRoute,
+  ConfiguracoesRoute: ConfiguracoesRoute,
+  ProdutosIdRoute: ProdutosIdRoute,
+  ProdutosNovoRoute: ProdutosNovoRoute,
+  ProjetosIdRoute: ProjetosIdRoute,
+  ProjetosNovoRoute: ProjetosNovoRoute,
+  CenariosIndexRoute: CenariosIndexRoute,
+  PersonagensIndexRoute: PersonagensIndexRoute,
+  ProdutosIndexRoute: ProdutosIndexRoute,
+  ProjetosIndexRoute: ProjetosIndexRoute,
+  TemplatesIndexRoute: TemplatesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
