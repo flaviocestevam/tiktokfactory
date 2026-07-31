@@ -56,7 +56,7 @@ function NovoProjeto() {
     duracao: 30,
     formato: "9:16",
     plataforma: "TikTok Shop",
-    objetivo: OBJETIVOS[1],
+    objetivo: OBJETIVOS[1] as string,
     estilo: ESTILOS_VIDEO[0] as string,
     tom_linguagem: TONS_LINGUAGEM[0] as string,
     nivel_energia: "Médio",
@@ -219,7 +219,7 @@ function NovoProjeto() {
               label="Objetivo"
               valor={form.objetivo}
               opcoes={OBJETIVOS}
-              onChange={(v) => setForm({ ...form, objetivo: v as (typeof OBJETIVOS)[number] })}
+              onChange={(v) => setForm({ ...form, objetivo: v })}
             />
             <Opcao
               label="Estilo do vídeo"
