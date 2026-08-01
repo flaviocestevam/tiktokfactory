@@ -17,7 +17,10 @@ export const Route = createFileRoute("/produtos/")({
       { title: "Produtos | TikTok Factory" },
       { name: "description", content: "Cadastre e organize os produtos usados nos seus vídeos." },
       { property: "og:title", content: "Produtos | TikTok Factory" },
-      { property: "og:description", content: "Cadastre e organize os produtos usados nos seus vídeos." },
+      {
+        property: "og:description",
+        content: "Cadastre e organize os produtos usados nos seus vídeos.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -28,7 +31,10 @@ export const Route = createFileRoute("/produtos/")({
 function Produtos() {
   const [busca, setBusca] = useState("");
   const qc = useQueryClient();
-  const { data, isLoading } = useQuery({ queryKey: ["products"], queryFn: () => listar("products") });
+  const { data, isLoading } = useQuery({
+    queryKey: ["products"],
+    queryFn: () => listar("products"),
+  });
 
   const lista = (data ?? []).filter((p) =>
     `${p.nome} ${p.marca ?? ""} ${p.categoria ?? ""}`.toLowerCase().includes(busca.toLowerCase()),
@@ -109,14 +115,18 @@ function Produtos() {
                     <p className="truncate text-xs text-muted-foreground">
                       {[p.marca, p.categoria].filter(Boolean).join(" · ") || "Sem categoria"}
                     </p>
-                    <p className="mt-1 text-sm font-medium text-accent">{p.preco_promocional || p.preco || "—"}</p>
+                    <p className="mt-1 text-sm font-medium text-accent">
+                      {p.preco_promocional || p.preco || "—"}
+                    </p>
                   </div>
                 </div>
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
                   <Badge variant="secondary" className="capitalize">
                     {p.status_extracao === "extraido" ? "extraído" : p.status_extracao}
                   </Badge>
-                  <span className="text-xs text-muted-foreground">{formatarData(p.updated_at)}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {formatarData(p.updated_at)}
+                  </span>
                 </div>
                 <div className="mt-3 flex gap-2">
                   <Button asChild variant="secondary" size="sm" className="h-11 flex-1">
@@ -124,7 +134,13 @@ function Produtos() {
                       Editar
                     </Link>
                   </Button>
-                  <Button variant="ghost" size="sm" aria-label="Excluir" className="size-11" onClick={() => excluir(p.id)}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    aria-label="Excluir"
+                    className="size-11"
+                    onClick={() => excluir(p.id)}
+                  >
                     <Trash2 className="size-4 text-destructive" />
                   </Button>
                 </div>

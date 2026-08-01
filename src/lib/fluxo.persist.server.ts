@@ -190,13 +190,17 @@ async function gerarEGravarClipes(
     };
   });
 
-  await supabase.from("clips").delete().eq("script_id", script.id);
+  // Grava os novos clipes ANTES de apagar os antigos: se a inserção falhar,
+  // o roteiro continua com os clipes que já existiam em vez de ficar vazio.
+  const { data: antigos } = await supabase.from("clips").select("id").eq("script_id", script.id);
   const { data: salvos, error } = await supabase
     .from("clips")
     .insert(linhas)
     .select()
     .order("ordem");
   if (error) throw new Error(error.message);
+  const idsAntigos = (antigos ?? []).map((c: any) => c.id);
+  if (idsAntigos.length) await supabase.from("clips").delete().in("id", idsAntigos);
   return salvos ?? [];
 }
 

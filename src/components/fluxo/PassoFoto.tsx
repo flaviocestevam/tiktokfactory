@@ -1,17 +1,31 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ImageUp, Loader2, RefreshCw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { CopyButton } from "@/components/CopyButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { gerarPromptFoto } from "@/lib/fluxo.functions";
+import { validarImagem } from "@/lib/fotos";
 import { enviarArquivo } from "@/lib/queries";
 
 const AJUSTES = [
-  { id: "produto", label: "PRODUTO MAIS VISÍVEL", instrucao: "Deixe o produto maior, mais próximo da câmera e com o rótulo totalmente legível." },
-  { id: "natural", label: "MAIS NATURAL", instrucao: "Deixe a cena mais espontânea, com pose e expressão menos posadas." },
-  { id: "enquadramento", label: "AJUSTAR ENQUADRAMENTO", instrucao: "Ajuste apenas o enquadramento e a distância da câmera, sem alterar nada mais da cena." },
+  {
+    id: "produto",
+    label: "PRODUTO MAIS VISÍVEL",
+    instrucao: "Deixe o produto maior, mais próximo da câmera e com o rótulo totalmente legível.",
+  },
+  {
+    id: "natural",
+    label: "MAIS NATURAL",
+    instrucao: "Deixe a cena mais espontânea, com pose e expressão menos posadas.",
+  },
+  {
+    id: "enquadramento",
+    label: "AJUSTAR ENQUADRAMENTO",
+    instrucao:
+      "Ajuste apenas o enquadramento e a distância da câmera, sem alterar nada mais da cena.",
+  },
 ];
 
 export function PassoFoto({
@@ -31,12 +45,16 @@ export function PassoFoto({
 }) {
   const [gerando, setGerando] = useState(false);
   const [enviando, setEnviando] = useState(false);
+  const entrada = useRef<HTMLInputElement>(null);
 
   async function gerar(ajuste?: string) {
     setGerando(true);
     try {
       const res: any = await gerarPromptFoto({ data: { projectId, ajuste } });
-      const texto = [res?.prompt, res?.prompt_negativo ? `\n\nNegative prompt: ${res.prompt_negativo}` : ""]
+      const texto = [
+        res?.prompt,
+        res?.prompt_negativo ? `\n\nNegative prompt: ${res.prompt_negativo}` : "",
+      ]
         .filter(Boolean)
         .join("");
       onPrompt(texto);
@@ -50,6 +68,11 @@ export function PassoFoto({
 
   async function subir(file?: File | null) {
     if (!file) return;
+    const erro = validarImagem(file);
+    if (erro) {
+      toast.error(erro);
+      return;
+    }
     setEnviando(true);
     try {
       const url = await enviarArquivo("produtos", file);
@@ -69,8 +92,18 @@ export function PassoFoto({
           <h2 className="text-lg font-semibold">Prompt da foto inicial</h2>
           <div className="flex flex-wrap gap-2">
             <CopyButton value={prompt} label="COPIAR PROMPT" />
-            <Button variant="outline" size="sm" onClick={() => gerar()} disabled={gerando} className="gap-2">
-              {gerando ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => gerar()}
+              disabled={gerando}
+              className="gap-2"
+            >
+              {gerando ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <RefreshCw className="size-4" />
+              )}
               REGERAR
             </Button>
           </div>
@@ -115,7 +148,11 @@ export function PassoFoto({
           <div className="aspect-[9/16] w-full overflow-hidden rounded-xl border border-border bg-secondary/40">
             {fotoUrl ? (
               <a href={fotoUrl} target="_blank" rel="noreferrer">
-                <img src={fotoUrl} alt="Foto inicial da personagem" className="size-full object-cover" />
+                <img
+                  src={fotoUrl}
+                  alt="Foto inicial da personagem"
+                  className="size-full object-cover"
+                />
               </a>
             ) : (
               <div className="flex size-full flex-col items-center justify-center gap-2 text-muted-foreground">
@@ -125,16 +162,37 @@ export function PassoFoto({
             )}
           </div>
           <div className="space-y-3">
-            <Input type="file" accept="image/*" onChange={(e) => subir(e.target.files?.[0])} disabled={enviando} />
+            <Input
+              ref={entrada}
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
+              disabled={enviando}
+              onChange={(e) => {
+                subir(e.target.files?.[0]);
+                e.target.value = "";
+              }}
+            />
             <p className="text-xs text-muted-foreground">
               Envie a imagem vertical criada no GPT. Ela será o primeiro frame do vídeo.
             </p>
             {fotoUrl ? (
-              <Button variant="ghost" size="sm" className="gap-2" onClick={() => onFoto("")}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2"
+                onClick={() => {
+                  onFoto("");
+                  if (entrada.current) entrada.current.value = "";
+                }}
+              >
                 <Trash2 className="size-4" /> Excluir foto
               </Button>
             ) : null}
-            <Button className="h-12 w-full gap-2 text-base" disabled={!fotoUrl} onClick={onConfirmar}>
+            <Button
+              className="h-12 w-full gap-2 text-base"
+              disabled={!fotoUrl}
+              onClick={onConfirmar}
+            >
               CONFIRMAR FOTO E CONTINUAR
             </Button>
           </div>

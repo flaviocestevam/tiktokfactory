@@ -27,9 +27,15 @@ export const Route = createFileRoute("/projetos/$id")({
   head: () => ({
     meta: [
       { title: "Projeto | TikTok Factory" },
-      { name: "description", content: "Estratégia, roteiro e prompts de imagem e vídeo do seu projeto." },
+      {
+        name: "description",
+        content: "Estratégia, roteiro e prompts de imagem e vídeo do seu projeto.",
+      },
       { property: "og:title", content: "Projeto | TikTok Factory" },
-      { property: "og:description", content: "Estratégia, roteiro e prompts de imagem e vídeo do seu projeto." },
+      {
+        property: "og:description",
+        content: "Estratégia, roteiro e prompts de imagem e vídeo do seu projeto.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -93,7 +99,8 @@ function Projeto() {
   const video = promptsVideo.data?.[0];
 
   if (projeto.isLoading) return <Skeleton className="h-96 rounded-2xl" />;
-  if (!projeto.data) return <p className="text-sm text-muted-foreground">Projeto não encontrado.</p>;
+  if (!projeto.data)
+    return <p className="text-sm text-muted-foreground">Projeto não encontrado.</p>;
 
   const p = projeto.data;
 
@@ -128,10 +135,18 @@ function Projeto() {
         {/* Mobile: scroll horizontal controlado; a partir de sm as abas cabem na linha */}
         <div className="-mx-1 mb-5 overflow-x-auto px-1 no-scrollbar">
           <TabsList className="inline-flex h-auto w-max min-w-full justify-start gap-1">
-            <TabsTrigger value="estrategia" className="min-h-11 whitespace-nowrap">Estratégia</TabsTrigger>
-            <TabsTrigger value="roteiro" className="min-h-11 whitespace-nowrap">Roteiro</TabsTrigger>
-            <TabsTrigger value="imagem" className="min-h-11 whitespace-nowrap">Prompt de imagem</TabsTrigger>
-            <TabsTrigger value="video" className="min-h-11 whitespace-nowrap">Prompt de vídeo</TabsTrigger>
+            <TabsTrigger value="estrategia" className="min-h-11 whitespace-nowrap">
+              Estratégia
+            </TabsTrigger>
+            <TabsTrigger value="roteiro" className="min-h-11 whitespace-nowrap">
+              Roteiro
+            </TabsTrigger>
+            <TabsTrigger value="imagem" className="min-h-11 whitespace-nowrap">
+              Prompt de imagem
+            </TabsTrigger>
+            <TabsTrigger value="video" className="min-h-11 whitespace-nowrap">
+              Prompt de vídeo
+            </TabsTrigger>
           </TabsList>
         </div>
 
@@ -139,7 +154,9 @@ function Projeto() {
           <Acao
             label="Gerar estratégia"
             carregando={ocupado === "estrategia"}
-            onClick={() => executar("estrategia", () => fnEstrategia({ data: { projectId: id } }), "strategy")}
+            onClick={() =>
+              executar("estrategia", () => fnEstrategia({ data: { projectId: id } }), "strategy")
+            }
           />
           {estrategia.data ? (
             <div className="space-y-4">
@@ -170,7 +187,11 @@ function Projeto() {
               label={roteiros.data?.length ? "Gerar nova versão" : "Gerar roteiro"}
               carregando={ocupado === "roteiro"}
               onClick={() =>
-                executar("roteiro", () => fnRoteiro({ data: { projectId: id, instrucoes } }), "scripts")
+                executar(
+                  "roteiro",
+                  () => fnRoteiro({ data: { projectId: id, instrucoes } }),
+                  "scripts",
+                )
               }
             />
             {roteiro ? (
@@ -190,7 +211,11 @@ function Projeto() {
                   }
                 }}
               >
-                {ocupado === "alt" ? <Loader2 className="size-4 animate-spin" /> : <Wand2 className="size-4" />}
+                {ocupado === "alt" ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Wand2 className="size-4" />
+                )}
                 Alternativas de gancho
               </Button>
             ) : null}
@@ -201,7 +226,10 @@ function Projeto() {
               <h3 className="mb-2 text-sm font-semibold">Alternativas de gancho</h3>
               <ul className="space-y-2">
                 {alternativas.map((a) => (
-                  <li key={a} className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 text-sm">
+                  <li
+                    key={a}
+                    className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 text-sm"
+                  >
                     <span className="min-w-0 break-words">{a}</span>
                     <CopyButton value={a} size="icon" />
                   </li>
@@ -240,7 +268,9 @@ function Projeto() {
           <Acao
             label="Gerar prompt de imagem"
             carregando={ocupado === "imagem"}
-            onClick={() => executar("imagem", () => fnImagem({ data: { projectId: id } }), "image_prompts")}
+            onClick={() =>
+              executar("imagem", () => fnImagem({ data: { projectId: id } }), "image_prompts")
+            }
           />
           {imagem ? (
             <div className="space-y-4">
@@ -265,7 +295,9 @@ function Projeto() {
           <Acao
             label="Gerar prompt de vídeo"
             carregando={ocupado === "video"}
-            onClick={() => executar("video", () => fnVideo({ data: { projectId: id } }), "video_prompts")}
+            onClick={() =>
+              executar("video", () => fnVideo({ data: { projectId: id } }), "video_prompts")
+            }
           />
           {video ? (
             <div className="space-y-4">
@@ -315,7 +347,9 @@ function Bloco({ titulo, texto }: { titulo: string; texto?: string | null }) {
         <h3 className="min-w-0 truncate text-sm font-semibold">{titulo}</h3>
         <CopyButton value={texto} />
       </div>
-      <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-muted-foreground">{texto}</p>
+      <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-muted-foreground">
+        {texto}
+      </p>
     </div>
   );
 }

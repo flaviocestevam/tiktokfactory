@@ -49,9 +49,7 @@ export function promptFotoInicial(ctx: ProjectContext, ajuste?: string) {
       imagemProduto
         ? `IMAGEM PRINCIPAL DO PRODUTO (referência visual obrigatória): ${imagemProduto}\n`
         : ""
-    }${
-      ajuste ? `AJUSTE PEDIDO PELO USUÁRIO: ${ajuste}\n` : ""
-    }
+    }${ajuste ? `AJUSTE PEDIDO PELO USUÁRIO: ${ajuste}\n` : ""}
 Crie o prompt em inglês para gerar UMA única foto vertical 9:16 da personagem segurando exatamente este produto.
 O prompt deve exigir: seguir exatamente a descrição textual cadastrada da personagem (rosto, olhos, pele, cabelo, corpo conforme o texto); reproduzir o produto exatamente como na imagem de referência (embalagem, rótulo, cores, proporção e tamanho reais); não redesenhar o rótulo; não inventar textos; não duplicar o produto; mãos e dedos anatomicamente corretos; produto totalmente visível com o rótulo voltado para a câmera quando fizer sentido; iluminação realista; enquadramento vertical 9:16; aparência de conteúdo real de TikTok; pele ultrarrealista com poros e textura natural; sem filtro de beleza; sem aparência artificial ou plástica; sem grid, colagem ou múltiplas imagens.`,
     shape: `{"prompt":"","prompt_negativo":"","enquadramento":"","iluminacao":"","pose":"","maos_produto":"","expressao":"","continuidade":""}`,

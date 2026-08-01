@@ -45,11 +45,15 @@ export async function callAIJson<T>(system: string, prompt: string, shape: strin
 export function parseJson<T>(raw: string): T {
   let text = raw.trim();
   if (text.startsWith("```")) {
-    text = text.replace(/^```[a-zA-Z]*\n?/, "").replace(/```$/, "").trim();
+    text = text
+      .replace(/^```[a-zA-Z]*\n?/, "")
+      .replace(/```$/, "")
+      .trim();
   }
   const start = text.search(/[[{]/);
   const end = Math.max(text.lastIndexOf("}"), text.lastIndexOf("]"));
-  if (start === -1 || end === -1) throw new Error("A IA retornou um formato inesperado. Tente gerar novamente.");
+  if (start === -1 || end === -1)
+    throw new Error("A IA retornou um formato inesperado. Tente gerar novamente.");
   try {
     return JSON.parse(text.slice(start, end + 1)) as T;
   } catch {
@@ -63,7 +67,9 @@ function normalizeAiError(error: unknown): Error {
     return new Error("Limite de requisições atingido. Aguarde alguns instantes e tente novamente.");
   }
   if (message.includes("402")) {
-    return new Error("Os créditos de IA acabaram. Adicione créditos em Configurações para continuar gerando.");
+    return new Error(
+      "Os créditos de IA acabaram. Adicione créditos em Configurações para continuar gerando.",
+    );
   }
   return new Error(`Falha ao gerar conteúdo com a IA: ${message}`);
 }

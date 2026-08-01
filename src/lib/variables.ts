@@ -22,7 +22,10 @@ export const VARIAVEIS = [
 export type NomeVariavel = (typeof VARIAVEIS)[number];
 
 /** Substitui variáveis conhecidas. Variáveis sem valor permanecem como marcador — nunca viram "undefined". */
-export function renderVariaveis(texto: string, valores: Record<string, string | null | undefined>): string {
+export function renderVariaveis(
+  texto: string,
+  valores: Record<string, string | null | undefined>,
+): string {
   return texto.replace(/\{\{([A-Z_]+)\}\}/g, (match, chave: string) => {
     const valor = valores[chave];
     if (valor === undefined || valor === null || String(valor).trim() === "") return match;
@@ -30,7 +33,10 @@ export function renderVariaveis(texto: string, valores: Record<string, string | 
   });
 }
 
-export function variaveisAusentes(texto: string, valores: Record<string, string | null | undefined>): string[] {
+export function variaveisAusentes(
+  texto: string,
+  valores: Record<string, string | null | undefined>,
+): string[] {
   const encontradas = texto.match(/\{\{([A-Z_]+)\}\}/g) ?? [];
   return [...new Set(encontradas)].filter((v) => {
     const chave = v.replace(/[{}]/g, "");
@@ -101,8 +107,22 @@ export const VARIACOES_ALTERNATIVAS = [
 ] as const;
 
 export const HORARIOS = ["Manhã", "Tarde", "Fim de tarde", "Noite"] as const;
-export const ILUMINACOES = ["Natural", "Suave difusa", "Luz de janela", "Ring light", "Quente", "Fria", "Dramática"] as const;
-export const ENQUADRAMENTOS = ["Close", "Meio-primeiro plano", "Plano médio", "Plano americano", "Corpo inteiro"] as const;
+export const ILUMINACOES = [
+  "Natural",
+  "Suave difusa",
+  "Luz de janela",
+  "Ring light",
+  "Quente",
+  "Fria",
+  "Dramática",
+] as const;
+export const ENQUADRAMENTOS = [
+  "Close",
+  "Meio-primeiro plano",
+  "Plano médio",
+  "Plano americano",
+  "Corpo inteiro",
+] as const;
 
 export const PLACEHOLDER_PERSONAGEM = "{{PERSONAGEM_A_SER_DEFINIDA}}";
 export const AVISO_SEM_PERSONAGEM =

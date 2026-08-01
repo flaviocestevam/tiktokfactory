@@ -8,9 +8,15 @@ export const Route = createFileRoute("/configuracoes")({
   head: () => ({
     meta: [
       { title: "Configurações | TikTok Factory" },
-      { name: "description", content: "Informações do espaço de trabalho interno do TikTok Factory." },
+      {
+        name: "description",
+        content: "Informações do espaço de trabalho interno do TikTok Factory.",
+      },
       { property: "og:title", content: "Configurações | TikTok Factory" },
-      { property: "og:description", content: "Informações do espaço de trabalho interno do TikTok Factory." },
+      {
+        property: "og:description",
+        content: "Informações do espaço de trabalho interno do TikTok Factory.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -48,12 +54,15 @@ function Configuracoes() {
         {itens.map((i) => (
           <div key={i.rotulo} className="rounded-2xl border border-border bg-card p-4 sm:p-5">
             <p className="truncate text-sm text-muted-foreground">{i.rotulo}</p>
-            <p className="mt-1 text-[clamp(1.25rem,1rem+1.2vw,1.75rem)] font-bold tabular-nums">{i.valor}</p>
+            <p className="mt-1 text-[clamp(1.25rem,1rem+1.2vw,1.75rem)] font-bold tabular-nums">
+              {i.valor}
+            </p>
           </div>
         ))}
       </div>
       <p className="mt-5 max-w-2xl text-xs text-muted-foreground">
-        Todo o acesso ao banco acontece no servidor. O navegador não conversa direto com o banco de dados.
+        Todo o acesso ao banco acontece no servidor. O navegador não conversa direto com o banco de
+        dados.
       </p>
     </>
   );

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import {
@@ -15,7 +16,9 @@ import {
 } from "./generation.server";
 
 export const extrairProduto = createServerFn({ method: "POST" })
-  .inputValidator((i: unknown) => z.object({ url: z.string().url("Informe um link válido.") }).parse(i))
+  .inputValidator((i: unknown) =>
+    z.object({ url: z.string().url("Informe um link válido.") }).parse(i),
+  )
   .handler(async ({ data }) => extrairPagina(data.url));
 
 export const gerarEstrategia = createServerFn({ method: "POST" })
@@ -95,10 +98,22 @@ export const gerarRoteiro = createServerFn({ method: "POST" })
           )
           .join("\n\n"),
         cenas: cenas as never,
-        dialogo: cenas.map((c: any) => c.fala).filter(Boolean).join("\n"),
-        acoes: cenas.map((c: any) => c.acao).filter(Boolean).join("\n"),
-        movimentos_camera: cenas.map((c: any) => c.camera).filter(Boolean).join("\n"),
-        textos_tela: cenas.map((c: any) => c.texto_na_tela).filter(Boolean).join("\n"),
+        dialogo: cenas
+          .map((c: any) => c.fala)
+          .filter(Boolean)
+          .join("\n"),
+        acoes: cenas
+          .map((c: any) => c.acao)
+          .filter(Boolean)
+          .join("\n"),
+        movimentos_camera: cenas
+          .map((c: any) => c.camera)
+          .filter(Boolean)
+          .join("\n"),
+        textos_tela: cenas
+          .map((c: any) => c.texto_na_tela)
+          .filter(Boolean)
+          .join("\n"),
         cta: out.cta ?? null,
         legenda: out.legenda ?? null,
         hashtags: out.hashtags ?? null,
@@ -112,7 +127,9 @@ export const gerarRoteiro = createServerFn({ method: "POST" })
   });
 
 export const gerarPromptImagem = createServerFn({ method: "POST" })
-  .inputValidator((i: unknown) => z.object({ projectId: z.string().uuid(), scriptId: z.string().uuid().optional() }).parse(i))
+  .inputValidator((i: unknown) =>
+    z.object({ projectId: z.string().uuid(), scriptId: z.string().uuid().optional() }).parse(i),
+  )
   .handler(async ({ data }) => {
     const supabase = await db();
     const ctx = await loadContext(supabase, data.projectId);
@@ -213,7 +230,8 @@ export const gerarAlternativas = createServerFn({ method: "POST" })
       .maybeSingle();
 
     return gerarJson<{ opcoes: string[] }>({
-      system: "Você cria variações curtas e naturais de conteúdo para TikTok Shop em português do Brasil.",
+      system:
+        "Você cria variações curtas e naturais de conteúdo para TikTok Shop em português do Brasil.",
       prompt: `${contextoCompleto(ctx)}\n\nROTEIRO ATUAL:\n${JSON.stringify(roteiro ?? {}).slice(0, 5000)}\n\nGere 3 alternativas para: ${data.tipo}.`,
       shape: `{"opcoes":["","",""]}`,
     });
@@ -233,7 +251,11 @@ export const regenerarParte = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const supabase = await db();
     const ctx = await loadContext(supabase, data.projectId);
-    const { data: roteiro } = await supabase.from("scripts").select("*").eq("id", data.scriptId).single();
+    const { data: roteiro } = await supabase
+      .from("scripts")
+      .select("*")
+      .eq("id", data.scriptId)
+      .single();
 
     const texto = await gerarTexto(
       "Você reescreve apenas o trecho pedido de um roteiro de TikTok Shop, mantendo todo o resto intacto. Responda somente com o novo texto, sem explicações.",

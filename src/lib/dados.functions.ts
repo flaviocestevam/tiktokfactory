@@ -63,5 +63,7 @@ export const enviarImagem = createServerFn({ method: "POST" })
   .handler(async ({ data }) => enviarArquivo(data.bucket, data.nome, data.base64, data.tipo));
 
 export const excluirImagem = createServerFn({ method: "POST" })
-  .inputValidator((i: unknown) => z.object({ bucket, caminho: z.string().min(1).max(400) }).parse(i))
+  .inputValidator((i: unknown) =>
+    z.object({ bucket, caminho: z.string().min(1).max(400) }).parse(i),
+  )
   .handler(async ({ data }) => removerArquivo(data.bucket, data.caminho));

@@ -36,7 +36,13 @@ export function CopyButton({
   }
 
   return (
-    <Button type="button" variant={variant} size={size} onClick={copiar} className={cn("gap-1.5", className)}>
+    <Button
+      type="button"
+      variant={variant}
+      size={size}
+      onClick={copiar}
+      className={cn("gap-1.5", className)}
+    >
       {copiado ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
       {size !== "icon" && label}
     </Button>

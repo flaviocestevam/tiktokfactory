@@ -90,7 +90,11 @@ function CriarVideo() {
   }
 
   async function confirmarFoto() {
-    if (!projetoId) return;
+    if (!projetoId) {
+      toast.error("Projeto não encontrado. Refaça a etapa do produto.");
+      setEtapa(2);
+      return;
+    }
     try {
       await atualizar("projects", projetoId, {
         reference_image_url: fotoUrl,
@@ -105,7 +109,11 @@ function CriarVideo() {
   }
 
   async function criarRoteiros() {
-    if (!projetoId) return;
+    if (!projetoId) {
+      toast.error("Projeto não encontrado. Refaça a etapa do produto.");
+      setEtapa(2);
+      return;
+    }
     setGerando(true);
     try {
       await atualizar("projects", projetoId, { cta: cta.valor || null, cta_tipo: cta.tipo });

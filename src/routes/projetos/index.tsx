@@ -15,9 +15,15 @@ export const Route = createFileRoute("/projetos/")({
   head: () => ({
     meta: [
       { title: "Projetos | TikTok Factory" },
-      { name: "description", content: "Todos os seus vídeos em produção, com estratégia, roteiro e prompts." },
+      {
+        name: "description",
+        content: "Todos os seus vídeos em produção, com estratégia, roteiro e prompts.",
+      },
       { property: "og:title", content: "Projetos | TikTok Factory" },
-      { property: "og:description", content: "Todos os seus vídeos em produção, com estratégia, roteiro e prompts." },
+      {
+        property: "og:description",
+        content: "Todos os seus vídeos em produção, com estratégia, roteiro e prompts.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -28,7 +34,10 @@ export const Route = createFileRoute("/projetos/")({
 function Projetos() {
   const [busca, setBusca] = useState("");
   const qc = useQueryClient();
-  const { data, isLoading } = useQuery({ queryKey: ["projects"], queryFn: () => listar("projects") });
+  const { data, isLoading } = useQuery({
+    queryKey: ["projects"],
+    queryFn: () => listar("projects"),
+  });
 
   const lista = (data ?? []).filter((p) => p.nome.toLowerCase().includes(busca.toLowerCase()));
 
@@ -88,10 +97,18 @@ function Projetos() {
               className="surface stagger interactive p-5 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lift"
             >
               <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
-                <Link to="/projetos/$id" params={{ id: p.id }} className="min-w-0 break-words font-semibold hover:text-primary">
+                <Link
+                  to="/projetos/$id"
+                  params={{ id: p.id }}
+                  className="min-w-0 break-words font-semibold hover:text-primary"
+                >
                   {p.nome}
                 </Link>
-                <button aria-label="Excluir projeto" className="touch-target -m-2 shrink-0" onClick={() => excluir(p.id)}>
+                <button
+                  aria-label="Excluir projeto"
+                  className="touch-target -m-2 shrink-0"
+                  onClick={() => excluir(p.id)}
+                >
                   <Trash2 className="size-4 text-destructive" />
                 </button>
               </div>
