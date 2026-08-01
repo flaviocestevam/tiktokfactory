@@ -178,7 +178,7 @@ function EditarPersonagem() {
                 </>
               ) : (
                 <>
-                  <Upload className="size-4" /> {foto ? "TROCAR FOTO DO PERFIL" : "CADASTRAR FOTO DO PERFIL"}
+                  <Upload className="size-4" /> {foto ? "EDITAR FOTO DO PERFIL" : "CADASTRAR FOTO DO PERFIL"}
                 </>
               )}
             </Button>
