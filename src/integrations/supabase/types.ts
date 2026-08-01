@@ -48,6 +48,8 @@ export type Database = {
           expressoes_proibidas: string | null
           forma_demonstrar: string | null
           formatos_roteiro: string | null
+          foto_atualizada_em: string | null
+          foto_canonica_path: string | null
           foto_canonica_principal: string | null
           foto_corpo_inteiro: string | null
           foto_expressao: string | null
@@ -59,6 +61,7 @@ export type Database = {
           id: string
           idade: number | null
           identidade_visual_canonica: string | null
+          identidade_visual_confirmada: boolean
           identity_version: string
           maquiagem: string | null
           missao: string | null
@@ -123,6 +126,8 @@ export type Database = {
           expressoes_proibidas?: string | null
           forma_demonstrar?: string | null
           formatos_roteiro?: string | null
+          foto_atualizada_em?: string | null
+          foto_canonica_path?: string | null
           foto_canonica_principal?: string | null
           foto_corpo_inteiro?: string | null
           foto_expressao?: string | null
@@ -134,6 +139,7 @@ export type Database = {
           id?: string
           idade?: number | null
           identidade_visual_canonica?: string | null
+          identidade_visual_confirmada?: boolean
           identity_version?: string
           maquiagem?: string | null
           missao?: string | null
@@ -198,6 +204,8 @@ export type Database = {
           expressoes_proibidas?: string | null
           forma_demonstrar?: string | null
           formatos_roteiro?: string | null
+          foto_atualizada_em?: string | null
+          foto_canonica_path?: string | null
           foto_canonica_principal?: string | null
           foto_corpo_inteiro?: string | null
           foto_expressao?: string | null
@@ -209,6 +217,7 @@ export type Database = {
           id?: string
           idade?: number | null
           identidade_visual_canonica?: string | null
+          identidade_visual_confirmada?: boolean
           identity_version?: string
           maquiagem?: string | null
           missao?: string | null
