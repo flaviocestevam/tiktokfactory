@@ -110,3 +110,30 @@ export function descreverPreferencias(project: Record<string, any>): string {
     bloco("Observações do usuário", project.observacoes);
   return texto ? `PREFERÊNCIAS DA PRODUÇÃO:\n${texto}` : "";
 }
+
+/**
+ * Descrição textual da aparência da personagem — usada APENAS no prompt da foto
+ * inicial, quando ainda não existe imagem da produção.
+ */
+export function descreverAparenciaParaFoto(character: Record<string, any> | null): string {
+  if (!character) return `APARÊNCIA: ${PLACEHOLDER_PERSONAGEM}. Não invente identidade.`;
+  return (
+    "APARÊNCIA CADASTRADA DA PERSONAGEM (siga exatamente o texto, sem inventar):\n" +
+    bloco("Nome", character.nome_exibicao || character.nome) +
+    bloco("Idade", character.idade) +
+    bloco("Aparência física", character.aparencia_fisica) +
+    bloco("Rosto", character.descricao_rosto) +
+    bloco("Olhos", character.descricao_olhos) +
+    bloco("Pele", character.descricao_pele) +
+    bloco("Cabelo", character.descricao_cabelo) +
+    bloco("Corpo", character.descricao_corpo) +
+    bloco("Altura", character.altura) +
+    bloco("Estilo de roupas", character.estilo_roupas) +
+    bloco("Acessórios", character.acessorios) +
+    bloco("Maquiagem", character.maquiagem) +
+    bloco("Características fixas", character.caracteristicas_fixas) +
+    bloco("Regras de consistência", character.regras_consistencia) +
+    bloco("Prompt mestre de identidade", character.prompt_mestre) +
+    bloco("Prompt negativo", character.prompt_negativo)
+  );
+}

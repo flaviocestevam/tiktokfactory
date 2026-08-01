@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Núcleo do fluxo TikTok Factory (somente servidor).
 import {
-  descreverPersonagem,
+  descreverAparenciaParaFoto,
+  descreverFotoDoProjeto,
   descreverPersonagemParaRoteiro,
-  descreverProduto,
-  REGRAS_FOTO_UNICA_FONTE,
-  type ProjectContext,
-} from "./generation.server";
+  descreverPreferencias,
+  descreverProdutoParaRoteiro,
+  REGRAS_COMERCIAIS,
+} from "./contextos.server";
+import type { ProjectContext } from "./generation.server";
 
 export { contarPalavras } from "./clipes.server";
 
@@ -18,20 +20,16 @@ export function falaDoRoteiro(roteiro: any): string {
     .join(" ");
 }
 
+/** Contexto único usado por todas as gerações do fluxo. */
 function contextoFluxo(ctx: ProjectContext, cta: string) {
-  const p = ctx.project;
   return [
-    descreverProduto(ctx.product),
+    descreverProdutoParaRoteiro(ctx.product),
     descreverPersonagemParaRoteiro(ctx.character),
-    "FORMATO: TikTok Shop, vertical 9:16, português do Brasil. NÃO existe duração alvo: escreva o que for necessário para vender bem. O sistema calcula a duração depois e divide o vídeo em clipes.",
+    descreverFotoDoProjeto(ctx.project),
+    REGRAS_COMERCIAIS,
+    "Não existe duração alvo: escreva o que for necessário para vender bem. O sistema calcula a duração depois e divide o vídeo em clipes.",
     `CTA ESCOLHIDO PELO USUÁRIO (use exatamente esta intenção no fecho): ${cta || "criar um CTA adequado ao produto"}`,
-    REGRAS_FOTO_UNICA_FONTE,
-    p.nivel_energia ? `Nível de energia: ${p.nivel_energia}` : "",
-    p.velocidade_fala ? `Velocidade da fala: ${p.velocidade_fala}` : "",
-    p.observacoes ? `Observações do usuário: ${p.observacoes}` : "",
-    p.reference_image_url
-      ? "A foto enviada neste projeto é a única fonte visual do vídeo e o primeiro frame. Não existe nenhuma outra referência de imagem."
-      : "",
+    descreverPreferencias(ctx.project),
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -45,7 +43,7 @@ export function promptFotoInicial(ctx: ProjectContext, ajuste?: string) {
   return {
     system:
       "Você escreve prompts técnicos de geração de imagem em inglês, para o GPT criar uma foto realista de influenciadora segurando um produto. Nomes próprios e textos de embalagem permanecem como estão.",
-    prompt: `${descreverProduto(ctx.product)}\n\n${descreverPersonagem(ctx.character)}\n\n${
+    prompt: `${descreverProdutoParaRoteiro(ctx.product)}\n\n${descreverAparenciaParaFoto(ctx.character)}\n\n${
       imagemProduto
         ? `IMAGEM PRINCIPAL DO PRODUTO (referência visual obrigatória): ${imagemProduto}\n`
         : ""

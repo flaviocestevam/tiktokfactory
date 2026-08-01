@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CTAS } from "@/lib/ctas";
+import { CTAS } from "@/lib/config";
 import { cn } from "@/lib/utils";
 
 export function PassoCta({
