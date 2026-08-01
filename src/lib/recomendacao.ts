@@ -7,31 +7,36 @@ const REGRAS: Array<{ slug: string; nome: string; rotulo: string; padrao: RegExp
     slug: "isabela",
     nome: "Isabela",
     rotulo: "skincare",
-    padrao: /(skincare|pele|s[ée]rum|hidratante|protetor solar|[áa]cido|niacinamida|limpeza facial|sabonete facial|acne)/i,
+    padrao:
+      /(skincare|pele|s[ée]rum|hidratante|protetor solar|[áa]cido|niacinamida|limpeza facial|sabonete facial|acne)/i,
   },
   {
     slug: "julia",
     nome: "Júlia",
     rotulo: "maquiagem",
-    padrao: /(maquiagem|makeup|batom|base|corretivo|r[íi]mel|m[áa]scara de c[íi]lios|blush|p[óo] compacto|delineador|sombra|gloss|il+uminador)/i,
+    padrao:
+      /(maquiagem|makeup|batom|base|corretivo|r[íi]mel|m[áa]scara de c[íi]lios|blush|p[óo] compacto|delineador|sombra|gloss|il+uminador)/i,
   },
   {
     slug: "camila",
     nome: "Camila",
     rotulo: "cabelo",
-    padrao: /(cabelo|capilar|shampoo|condicionador|m[áa]scara capilar|progressiva|cachos|finalizador|[óo]leo capilar|antiqueda)/i,
+    padrao:
+      /(cabelo|capilar|shampoo|condicionador|m[áa]scara capilar|progressiva|cachos|finalizador|[óo]leo capilar|antiqueda)/i,
   },
   {
     slug: "marina",
     nome: "Marina",
     rotulo: "gadget de beleza",
-    padrao: /(gadget|aparelho|dispositivo|el[ée]tric|massageador|led|depilador|escova alisadora|secador|chapinha|microcorrente|limpador facial|barbeador)/i,
+    padrao:
+      /(gadget|aparelho|dispositivo|el[ée]tric|massageador|led|depilador|escova alisadora|secador|chapinha|microcorrente|limpador facial|barbeador)/i,
   },
   {
     slug: "manu",
     nome: "Manu",
     rotulo: "perfume, rotina e autocuidado",
-    padrao: /(perfume|fragr[âa]ncia|body splash|colônia|deo|rotina|autocuidado|hidratante corporal|creme corporal|bem-estar|aromaterapia|vela)/i,
+    padrao:
+      /(perfume|fragr[âa]ncia|body splash|colônia|deo|rotina|autocuidado|hidratante corporal|creme corporal|bem-estar|aromaterapia|vela)/i,
   },
 ];
 

@@ -13,11 +13,7 @@ import { PassoFoto } from "@/components/fluxo/PassoFoto";
 import { PassoCta } from "@/components/fluxo/PassoCta";
 import { PassoRoteiros } from "@/components/fluxo/PassoRoteiros";
 import { PassoClipes } from "@/components/fluxo/PassoClipes";
-import {
-  aprovarRoteiroVariante,
-  gerarTresRoteiros,
-  listarResultados,
-} from "@/lib/fluxo.functions";
+import { aprovarRoteiroVariante, gerarTresRoteiros, listarResultados } from "@/lib/fluxo.functions";
 import { atualizar, criar, obter } from "@/lib/queries";
 import { CTA_AUTOMATICO } from "@/lib/config";
 

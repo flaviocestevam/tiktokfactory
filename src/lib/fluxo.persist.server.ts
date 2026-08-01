@@ -266,7 +266,10 @@ export async function regerarRoteiro(projectId: string, scriptId: string, instru
 /** Marca um roteiro como aprovado (apenas um por produção). */
 export async function aprovarRoteiro(projectId: string, scriptId: string) {
   const supabase = await db();
-  await supabase.from("scripts").update({ aprovado: false } as any).eq("project_id", projectId);
+  await supabase
+    .from("scripts")
+    .update({ aprovado: false } as any)
+    .eq("project_id", projectId);
   const { data: script, error } = await supabase
     .from("scripts")
     .update({ aprovado: true } as any)
