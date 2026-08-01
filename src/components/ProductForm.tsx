@@ -109,7 +109,7 @@ export function ProductForm({
 
   return (
     <div className="space-y-8">
-      <section className="rounded-2xl border border-border bg-card p-5">
+      <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
         <h2 className="text-base font-semibold">Link da página de vendas</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           A leitura acontece no servidor. Se a página bloquear o acesso, preencha manualmente.
@@ -120,7 +120,7 @@ export function ProductForm({
             onChange={(e) => set("link", e.target.value)}
             placeholder="https://..."
           />
-          <Button type="button" onClick={lerLink} disabled={extraindo} className="gap-2 sm:w-48">
+          <Button type="button" onClick={lerLink} disabled={extraindo} className="h-11 w-full gap-2 sm:w-48">
             {extraindo ? <Loader2 className="size-4 animate-spin" /> : <Link2 className="size-4" />}
             {extraindo ? "Lendo..." : "Extrair informações"}
           </Button>
