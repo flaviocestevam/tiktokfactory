@@ -12,7 +12,6 @@ import {
 type Tabela =
   | "products"
   | "characters"
-  | "scenarios"
   | "projects"
   | "templates"
   | "strategies"

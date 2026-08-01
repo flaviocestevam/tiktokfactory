@@ -20,7 +20,6 @@ const NAV = [
   { to: "/personagens", label: "Personagens", icon: Users },
   { to: "/produtos", label: "Produtos", icon: Package },
   { to: "/projetos", label: "Histórico", icon: FolderKanban },
-  { to: "/cenarios", label: "Cenários", icon: Sparkles },
   { to: "/templates", label: "Templates", icon: FileText },
   { to: "/configuracoes", label: "Configurações", icon: Settings },
 ] as const;

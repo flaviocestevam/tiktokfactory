@@ -24,7 +24,6 @@ function Configuracoes() {
     queryFn: async () => ({
       produtos: await contar("products"),
       personagens: await contar("characters"),
-      cenarios: await contar("scenarios"),
       projetos: await contar("projects"),
       templates: await contar("templates"),
     }),
@@ -35,7 +34,6 @@ function Configuracoes() {
   const itens = [
     { rotulo: "Produtos", valor: resumo.data?.produtos ?? 0 },
     { rotulo: "Personagens", valor: resumo.data?.personagens ?? 0 },
-    { rotulo: "Cenários", valor: resumo.data?.cenarios ?? 0 },
     { rotulo: "Projetos", valor: resumo.data?.projetos ?? 0 },
     { rotulo: "Templates", valor: resumo.data?.templates ?? 0 },
   ];
