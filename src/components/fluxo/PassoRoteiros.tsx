@@ -122,7 +122,6 @@ function CardRoteiro({
             <Film className="size-3.5" />
             Divisão prevista: {medida.num_clipes ?? s.num_clipes ?? 0} clipes
           </p>
-
         </div>
       </header>
 
@@ -189,4 +188,3 @@ function Bloco({ titulo, texto }: { titulo: string; texto?: string | null }) {
     </section>
   );
 }
-
