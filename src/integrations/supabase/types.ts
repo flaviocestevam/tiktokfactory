@@ -275,6 +275,7 @@ export type Database = {
           prompt_negativo: string | null
           restricoes: string | null
           script_id: string
+          status: string
           updated_at: string
         }
         Insert: {
@@ -300,6 +301,7 @@ export type Database = {
           prompt_negativo?: string | null
           restricoes?: string | null
           script_id: string
+          status?: string
           updated_at?: string
         }
         Update: {
@@ -325,6 +327,7 @@ export type Database = {
           prompt_negativo?: string | null
           restricoes?: string | null
           script_id?: string
+          status?: string
           updated_at?: string
         }
         Relationships: [
@@ -566,9 +569,11 @@ export type Database = {
           nome: string
           objetivo: string | null
           observacoes: string | null
+          personagem_motivo: string | null
           plataforma: string
           product_id: string | null
           reference_image_path: string | null
+          reference_image_uploaded_at: string | null
           reference_image_url: string | null
           scenario_id: string | null
           status: string
@@ -594,9 +599,11 @@ export type Database = {
           nome: string
           objetivo?: string | null
           observacoes?: string | null
+          personagem_motivo?: string | null
           plataforma?: string
           product_id?: string | null
           reference_image_path?: string | null
+          reference_image_uploaded_at?: string | null
           reference_image_url?: string | null
           scenario_id?: string | null
           status?: string
@@ -622,9 +629,11 @@ export type Database = {
           nome?: string
           objetivo?: string | null
           observacoes?: string | null
+          personagem_motivo?: string | null
           plataforma?: string
           product_id?: string | null
           reference_image_path?: string | null
+          reference_image_uploaded_at?: string | null
           reference_image_url?: string | null
           scenario_id?: string | null
           status?: string
@@ -711,7 +720,9 @@ export type Database = {
         Row: {
           acoes: string | null
           angulo_nome: string | null
+          aprovado: boolean
           cenas: Json
+          clipes_json: Json | null
           created_at: string
           cta: string | null
           dialogo: string | null
@@ -741,7 +752,9 @@ export type Database = {
         Insert: {
           acoes?: string | null
           angulo_nome?: string | null
+          aprovado?: boolean
           cenas?: Json
+          clipes_json?: Json | null
           created_at?: string
           cta?: string | null
           dialogo?: string | null
@@ -771,7 +784,9 @@ export type Database = {
         Update: {
           acoes?: string | null
           angulo_nome?: string | null
+          aprovado?: boolean
           cenas?: Json
+          clipes_json?: Json | null
           created_at?: string
           cta?: string | null
           dialogo?: string | null
