@@ -89,11 +89,9 @@ export function PassoPersonagem({
                 {p.tipo_comunicacao || p.personalidade || ""}
               </p>
               {!p.foto_canonica_principal ? (
-                <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3">
-                  <p className="flex items-start gap-1.5 text-xs leading-relaxed">
-                    <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-amber-500" />
-                    Foto do perfil ainda não cadastrada. Ela serve apenas para identificar a
-                    personagem e não é necessária para continuar.
+                <div className="rounded-xl border border-border bg-secondary/40 p-3">
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    Foto do perfil ainda não cadastrada.
                   </p>
                   <Button asChild size="sm" variant="outline" className="mt-2 min-h-11 w-full">
                     <Link to="/personagens/$id" params={{ id: p.id }}>
