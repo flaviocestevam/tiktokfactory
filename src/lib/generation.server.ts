@@ -117,40 +117,51 @@ export function descreverPersonagem(character: Record<string, any> | null): stri
     bloco("Gatilhos de persuasão", character.gatilhos_persuasao) +
     bloco("Formatos de roteiro ideais", character.formatos_roteiro) +
     bloco("Estilo de interpretação em vídeo", character.estilo_interpretacao) +
-    bloco("Identidade visual canônica (imutável)", character.identidade_visual_canonica) +
     bloco("Palavras e alegações PROIBIDAS", character.palavras_proibidas) +
     bloco("Prompt mestre de identidade", character.prompt_mestre) +
-    bloco("Prompt negativo", character.prompt_negativo) +
-    bloco("Referências visuais cadastradas", descreverFotos(character))
+    bloco("Prompt negativo", character.prompt_negativo)
   );
 }
 
-function descreverFotos(character: any): string {
-  const aux = Array.isArray(character.fotos_canonicas_auxiliares)
-    ? (character.fotos_canonicas_auxiliares as any[])
-    : [];
-  const linhas: string[] = [];
-  if (character.foto_canonica_principal) {
-    linhas.push(
-      "Existe uma FOTO CANÔNICA PRINCIPAL cadastrada desta personagem. Ela é a referência visual mais importante: rosto, olhos, pele, cabelo, corpo e proporções devem seguir exatamente essa foto.",
-    );
-  } else {
-    linhas.push(
-      "Ainda não há foto canônica principal cadastrada; siga estritamente a descrição física escrita e nunca invente traços novos.",
-    );
+/** Somente comunicação e comportamento — nada de aparência ou fotos. Usado nos roteiros. */
+export function descreverPersonagemParaRoteiro(character: Record<string, any> | null): string {
+  if (!character) {
+    return `PERSONAGEM: ainda não definida. Use o marcador ${PLACEHOLDER_PERSONAGEM} onde o nome apareceria.\n${AVISO_SEM_PERSONAGEM}\nNão invente nome, biografia ou identidade.`;
   }
-  if (aux.length) {
-    linhas.push(
-      `Fotos auxiliares cadastradas (${aux.length}): ${aux
-        .map((f) => f?.rotulo || f?.tipo)
-        .filter(Boolean)
-        .join(", ")}. Elas complementam apenas rosto, cabelo, corpo, proporções e expressões.`,
-    );
-  }
-  linhas.push(
-    "Nunca misture características de personagens diferentes. A identidade canônica sempre prevalece sobre qualquer imagem enviada no projeto.",
+  return (
+    "PERSONAGEM SELECIONADA (comunicação e comportamento — respeite integralmente):\n" +
+    bloco("Nome", character.nome_exibicao || character.nome) +
+    bloco("Nicho", character.nicho) +
+    bloco("Idade", character.idade) +
+    bloco("Profissão", character.profissao) +
+    bloco("Biografia", character.biografia) +
+    bloco("Personalidade", character.personalidade) +
+    bloco("Público principal", character.publico_principal) +
+    bloco("Tipo de comunicação", character.tipo_comunicacao) +
+    bloco("Velocidade da fala", character.velocidade_fala) +
+    bloco("Nível de energia", character.nivel_energia) +
+    bloco("Estilo de humor", character.estilo_humor) +
+    bloco("Vocabulário", character.vocabulario) +
+    bloco("Expressões permitidas", character.expressoes_permitidas) +
+    bloco("Expressões PROIBIDAS", character.expressoes_proibidas) +
+    bloco("Bordões", character.bordoes) +
+    bloco("Estilo de venda", character.estilo_venda) +
+    bloco("Nível de autoridade", character.nivel_autoridade) +
+    bloco("Forma de demonstrar produtos", character.forma_demonstrar) +
+    bloco("Tipos de CTA", character.tipos_cta) +
+    bloco("Categorias permitidas", character.categorias_permitidas) +
+    bloco("Categorias PROIBIDAS", character.categorias_proibidas) +
+    bloco("Posicionamento", character.posicionamento) +
+    bloco("Promessa central", character.promessa_central) +
+    bloco("Direção estratégica interna", character.biografia_interna) +
+    bloco("Dores do público", character.dores_publico) +
+    bloco("Desejos do público", character.desejos_publico) +
+    bloco("Pilares de conteúdo", character.pilares_conteudo) +
+    bloco("Gatilhos de persuasão", character.gatilhos_persuasao) +
+    bloco("Formatos de roteiro ideais", character.formatos_roteiro) +
+    bloco("Estilo de interpretação em vídeo", character.estilo_interpretacao) +
+    bloco("Palavras e alegações PROIBIDAS", character.palavras_proibidas)
   );
-  return linhas.join(" ");
 }
 
 export const REGRAS_FOTO_UNICA_FONTE = `FONTE VISUAL ÚNICA: a foto enviada pelo usuário é a única referência visual do vídeo. Ela já contém personagem, produto na mão, roupa, posição, iluminação, enquadramento e fundo completos.
