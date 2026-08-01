@@ -1,14 +1,33 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, createFileRoute, useParams } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ImagePlus, Loader2, Maximize2, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, ImagePlus, Loader2, Save, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { enviarFoto, removerFoto, validarImagem } from "@/lib/fotos";
-import { obter } from "@/lib/queries";
+import { atualizar, obter } from "@/lib/queries";
+
+const CAMPOS_BIO = [
+  { campo: "biografia", rotulo: "Biografia pública", linhas: 4 },
+  { campo: "biografia_interna", rotulo: "Biografia interna", linhas: 4 },
+  { campo: "historia_pessoal", rotulo: "História pessoal", linhas: 4 },
+  { campo: "personalidade", rotulo: "Personalidade", linhas: 3 },
+  { campo: "posicionamento", rotulo: "Posicionamento", linhas: 3 },
+  { campo: "promessa_central", rotulo: "Promessa central", linhas: 2 },
+  { campo: "publico_principal", rotulo: "Público principal", linhas: 2 },
+  { campo: "dores_publico", rotulo: "Dores do público", linhas: 3 },
+  { campo: "desejos_publico", rotulo: "Desejos do público", linhas: 3 },
+  { campo: "pilares_conteudo", rotulo: "Pilares de conteúdo", linhas: 3 },
+  { campo: "tipo_comunicacao", rotulo: "Tipo de comunicação", linhas: 2 },
+  { campo: "estilo_humor", rotulo: "Estilo de humor", linhas: 2 },
+  { campo: "vocabulario", rotulo: "Vocabulário", linhas: 2 },
+  { campo: "bordoes", rotulo: "Bordões", linhas: 2 },
+  { campo: "palavras_proibidas", rotulo: "Palavras proibidas", linhas: 2 },
+] as const;
 
 const DESCRICAO = "Cadastre a foto do perfil usada para identificar a personagem na interface.";
 
@@ -29,7 +48,7 @@ export const Route = createFileRoute("/personagens/$id")({
 function EditarPersonagem() {
   const { id } = useParams({ from: "/personagens/$id" });
   const queryClient = useQueryClient();
-  const [ampliada, setAmpliada] = useState<string | null>(null);
+  const [bio, setBio] = useState<Record<string, string>>({});
   const entradaPrincipal = useRef<HTMLInputElement>(null);
 
   const { data: p, isLoading } = useQuery({
@@ -41,6 +60,24 @@ function EditarPersonagem() {
     queryClient.invalidateQueries({ queryKey: ["character", id] });
     queryClient.invalidateQueries({ queryKey: ["characters"] });
   }
+
+  useEffect(() => {
+    if (!p) return;
+    const inicial: Record<string, string> = {};
+    for (const { campo } of CAMPOS_BIO) {
+      inicial[campo] = ((p as Record<string, unknown>)[campo] as string | null) ?? "";
+    }
+    setBio(inicial);
+  }, [p]);
+
+  const salvarBio = useMutation({
+    mutationFn: () => atualizar("characters", id, bio),
+    onSuccess: () => {
+      atualizarCaches();
+      toast.success("Textos da personagem salvos.");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const upload = useMutation({
     mutationFn: (arquivo: File) => enviarFoto(id, "canonica", arquivo),
@@ -148,9 +185,6 @@ function EditarPersonagem() {
 
             {foto ? (
               <>
-                <Button variant="outline" className="min-h-11 w-full" onClick={() => setAmpliada(foto)}>
-                  <Maximize2 className="size-4" /> VISUALIZAR
-                </Button>
                 <Button
                   variant="outline"
                   className="min-h-11 w-full text-destructive"
@@ -170,14 +204,37 @@ function EditarPersonagem() {
         </div>
       </section>
 
-      <Dialog open={!!ampliada} onOpenChange={(o) => !o && setAmpliada(null)}>
-        <DialogContent className="max-w-3xl">
-          <DialogTitle className="sr-only">Foto ampliada</DialogTitle>
-          {ampliada ? (
-            <img src={ampliada} alt="Foto do perfil ampliada" className="max-h-[80vh] w-full object-contain" />
-          ) : null}
-        </DialogContent>
-      </Dialog>
+      <section className="surface mt-5 space-y-4 p-5 sm:p-6">
+        <div>
+          <h2 className="text-lg font-semibold">Textos da personagem</h2>
+          <p className="text-sm text-muted-foreground">
+            Estes textos definem comportamento e comunicação usados na geração dos roteiros.
+          </p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          {CAMPOS_BIO.map(({ campo, rotulo, linhas }) => (
+            <div key={campo} className="space-y-1.5">
+              <Label htmlFor={campo}>{rotulo}</Label>
+              <Textarea
+                id={campo}
+                rows={linhas}
+                value={bio[campo] ?? ""}
+                onChange={(e) => setBio((b) => ({ ...b, [campo]: e.target.value }))}
+              />
+            </div>
+          ))}
+        </div>
+
+        <Button
+          className="min-h-11 w-full sm:w-auto"
+          disabled={salvarBio.isPending}
+          onClick={() => salvarBio.mutate()}
+        >
+          {salvarBio.isPending ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+          SALVAR TEXTOS
+        </Button>
+      </section>
     </>
   );
 }
