@@ -46,7 +46,7 @@ function Personagens() {
     <>
       <PageHeader
         titulo="Personagens"
-        descricao="Cinco influenciadoras virtuais com identidade canônica fixa: nome, idade, cidade, nicho, personalidade e aparência não mudam entre campanhas."
+        descricao="Cinco influenciadoras virtuais com identidade fixa: nome, idade, cidade, nicho e personalidade não mudam entre campanhas. A foto do perfil serve apenas para identificar cada personagem."
       />
       {isLoading ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -70,14 +70,14 @@ function Personagens() {
                   {c.foto_canonica_principal ? (
                     <img
                       src={c.foto_canonica_principal}
-                      alt={`Foto canônica de ${c.nome_exibicao || c.nome}`}
+                      alt={`Foto do perfil de ${c.nome_exibicao || c.nome}`}
                       loading="lazy"
                       className="aspect-[3/4] w-full object-contain"
                     />
                   ) : (
                     <div className="flex aspect-[3/4] w-full flex-col items-center justify-center gap-2 p-6 text-center">
                       <ImagePlus className="size-7 text-muted-foreground" />
-                      <p className="text-xs text-muted-foreground">Foto canônica ainda não cadastrada</p>
+                      <p className="text-xs text-muted-foreground">Foto do perfil ainda não cadastrada</p>
                     </div>
                   )}
                 </div>
@@ -124,11 +124,6 @@ function Personagens() {
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-1">
                     <Badge variant="secondary">v{c.identity_version}</Badge>
-                    {c.identidade_visual_confirmada ? (
-                      <Badge className="gap-1">
-                        <BadgeCheck className="size-3" /> Confirmada
-                      </Badge>
-                    ) : null}
                   </div>
                 </header>
 
@@ -156,14 +151,6 @@ function Personagens() {
                     <Campo titulo="Interpretação em vídeo" texto={c.estilo_interpretacao} />
                     <Campo titulo="CTAs recomendados" texto={c.tipos_cta} />
                     <Campo titulo="Proibições" texto={c.palavras_proibidas} />
-                    <div className="rounded-xl border border-primary/30 bg-primary/8 p-3">
-                      <p className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-primary">
-                        <Lock className="size-3" /> Identidade canônica protegida
-                      </p>
-                      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                        {c.identidade_visual_canonica}
-                      </p>
-                    </div>
                   </div>
                 ) : null}
 
@@ -191,7 +178,7 @@ function Personagens() {
         <DialogContent className="max-w-3xl">
           <DialogTitle className="sr-only">Foto da personagem</DialogTitle>
           {ampliada ? (
-            <img src={ampliada} alt="Foto canônica ampliada" className="max-h-[80vh] w-full object-contain" />
+            <img src={ampliada} alt="Foto do perfil ampliada" className="max-h-[80vh] w-full object-contain" />
           ) : null}
         </DialogContent>
       </Dialog>

@@ -69,7 +69,7 @@ export function PassoPersonagem({
               ) : (
                 <div className="flex size-full flex-col items-center justify-center gap-2 p-4 text-center text-muted-foreground">
                   <ImagePlus className="size-7" />
-                  <p className="text-xs">Foto canônica ainda não cadastrada</p>
+                  <p className="text-xs">Foto do perfil ainda não cadastrada</p>
                 </div>
               )}
             </div>
@@ -92,8 +92,8 @@ export function PassoPersonagem({
                 <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3">
                   <p className="flex items-start gap-1.5 text-xs leading-relaxed">
                     <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-amber-500" />
-                    Esta personagem ainda não possui foto canônica. Cadastre a imagem antes de gerar o
-                    prompt da foto.
+                    Foto do perfil ainda não cadastrada. Ela serve apenas para identificar a
+                    personagem e não é necessária para continuar.
                   </p>
                   <Button asChild size="sm" variant="outline" className="mt-2 min-h-11 w-full">
                     <Link to="/personagens/$id" params={{ id: p.id }}>
