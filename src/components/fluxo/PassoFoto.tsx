@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ImageUp, Loader2, RefreshCw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { CopyButton } from "@/components/CopyButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { gerarPromptFoto } from "@/lib/fluxo.functions";
+import { validarImagem } from "@/lib/fotos";
 import { enviarArquivo } from "@/lib/queries";
 
 const AJUSTES = [
@@ -31,6 +32,7 @@ export function PassoFoto({
 }) {
   const [gerando, setGerando] = useState(false);
   const [enviando, setEnviando] = useState(false);
+  const entrada = useRef<HTMLInputElement>(null);
 
   async function gerar(ajuste?: string) {
     setGerando(true);
@@ -50,6 +52,11 @@ export function PassoFoto({
 
   async function subir(file?: File | null) {
     if (!file) return;
+    const erro = validarImagem(file);
+    if (erro) {
+      toast.error(erro);
+      return;
+    }
     setEnviando(true);
     try {
       const url = await enviarArquivo("produtos", file);
@@ -125,12 +132,29 @@ export function PassoFoto({
             )}
           </div>
           <div className="space-y-3">
-            <Input type="file" accept="image/*" onChange={(e) => subir(e.target.files?.[0])} disabled={enviando} />
+            <Input
+              ref={entrada}
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
+              disabled={enviando}
+              onChange={(e) => {
+                subir(e.target.files?.[0]);
+                e.target.value = "";
+              }}
+            />
             <p className="text-xs text-muted-foreground">
               Envie a imagem vertical criada no GPT. Ela será o primeiro frame do vídeo.
             </p>
             {fotoUrl ? (
-              <Button variant="ghost" size="sm" className="gap-2" onClick={() => onFoto("")}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2"
+                onClick={() => {
+                  onFoto("");
+                  if (entrada.current) entrada.current.value = "";
+                }}
+              >
                 <Trash2 className="size-4" /> Excluir foto
               </Button>
             ) : null}
