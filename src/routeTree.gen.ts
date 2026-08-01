@@ -19,7 +19,6 @@ import { Route as ProdutosNovoRouteImport } from './routes/produtos/novo'
 import { Route as ProjetosIndexRouteImport } from './routes/projetos/index'
 import { Route as ProjetosIdRouteImport } from './routes/projetos/$id'
 import { Route as ProjetosNovoRouteImport } from './routes/projetos/novo'
-import { Route as TemplatesIndexRouteImport } from './routes/templates/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -71,11 +70,6 @@ const ProjetosNovoRoute = ProjetosNovoRouteImport.update({
   path: '/projetos/novo',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TemplatesIndexRoute = TemplatesIndexRouteImport.update({
-  id: '/templates/',
-  path: '/templates/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -88,7 +82,6 @@ export interface FileRoutesByFullPath {
   '/personagens/': typeof PersonagensIndexRoute
   '/produtos/': typeof ProdutosIndexRoute
   '/projetos/': typeof ProjetosIndexRoute
-  '/templates/': typeof TemplatesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -101,7 +94,6 @@ export interface FileRoutesByTo {
   '/personagens': typeof PersonagensIndexRoute
   '/produtos': typeof ProdutosIndexRoute
   '/projetos': typeof ProjetosIndexRoute
-  '/templates': typeof TemplatesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -115,7 +107,6 @@ export interface FileRoutesById {
   '/personagens/': typeof PersonagensIndexRoute
   '/produtos/': typeof ProdutosIndexRoute
   '/projetos/': typeof ProjetosIndexRoute
-  '/templates/': typeof TemplatesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -130,7 +121,6 @@ export interface FileRouteTypes {
     | '/personagens/'
     | '/produtos/'
     | '/projetos/'
-    | '/templates/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -143,7 +133,6 @@ export interface FileRouteTypes {
     | '/personagens'
     | '/produtos'
     | '/projetos'
-    | '/templates'
   id:
     | '__root__'
     | '/'
@@ -156,7 +145,6 @@ export interface FileRouteTypes {
     | '/personagens/'
     | '/produtos/'
     | '/projetos/'
-    | '/templates/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -170,7 +158,6 @@ export interface RootRouteChildren {
   PersonagensIndexRoute: typeof PersonagensIndexRoute
   ProdutosIndexRoute: typeof ProdutosIndexRoute
   ProjetosIndexRoute: typeof ProjetosIndexRoute
-  TemplatesIndexRoute: typeof TemplatesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -245,13 +232,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjetosNovoRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/templates/': {
-      id: '/templates/'
-      path: '/templates'
-      fullPath: '/templates/'
-      preLoaderRoute: typeof TemplatesIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -266,7 +246,6 @@ const rootRouteChildren: RootRouteChildren = {
   PersonagensIndexRoute: PersonagensIndexRoute,
   ProdutosIndexRoute: ProdutosIndexRoute,
   ProjetosIndexRoute: ProjetosIndexRoute,
-  TemplatesIndexRoute: TemplatesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
