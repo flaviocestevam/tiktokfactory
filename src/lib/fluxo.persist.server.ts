@@ -148,8 +148,15 @@ async function gerarEGravarClipes(
   clipes: ClipePlanejado[],
   cta: string,
 ) {
-  const out = await gerar<{ clipes: any[] }>(promptClipes(ctx, roteiro, clipes, cta));
-  const gerados = Array.isArray(out?.clipes) ? out.clipes : [];
+  let gerados: any[] = [];
+  try {
+    const out = await gerar<{ clipes: any[] }>(promptClipes(ctx, roteiro, clipes, cta));
+    gerados = Array.isArray(out?.clipes) ? out.clipes : [];
+  } catch (e) {
+    // Sem os detalhes da IA ainda gravamos o plano de clipes (fala, duração e ordem),
+    // para o usuário poder regerar clipe a clipe em vez de perder o roteiro inteiro.
+    console.error("Falha ao gerar os prompts dos clipes:", e);
+  }
 
   const linhas = clipes.map((c, i) => {
     const g = gerados.find((x: any) => Number(x?.ordem) === c.ordem) ?? gerados[i] ?? {};
@@ -211,12 +218,13 @@ export async function criarTresRoteiros(projectId: string) {
     .select("id, variante")
     .eq("project_id", projectId);
 
-  const resultados = [];
-  for (let i = 0; i < 3; i++) {
-    const variante = i + 1;
-    const anterior = (existentes ?? []).find((s: any) => s.variante === variante);
-    resultados.push(await salvarRoteiro(supabase, ctx, roteiros[i], variante, cta, anterior?.id));
-  }
+  const resultados = await Promise.all(
+    roteiros.map((roteiro, i) => {
+      const variante = i + 1;
+      const anterior = (existentes ?? []).find((s: any) => s.variante === variante);
+      return salvarRoteiro(supabase, ctx, roteiro, variante, cta, anterior?.id);
+    }),
+  );
 
   await supabase
     .from("projects")
