@@ -311,11 +311,11 @@ function Bloco({ titulo, texto }: { titulo: string; texto?: string | null }) {
   if (!texto) return null;
   return (
     <div className="rounded-2xl border border-border bg-card p-4">
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <h3 className="text-sm font-semibold">{titulo}</h3>
+      <div className="mb-2 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+        <h3 className="min-w-0 truncate text-sm font-semibold">{titulo}</h3>
         <CopyButton value={texto} />
       </div>
-      <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">{texto}</p>
+      <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-muted-foreground">{texto}</p>
     </div>
   );
 }
