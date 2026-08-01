@@ -132,7 +132,7 @@ export function ProductForm({
         ) : null}
       </section>
 
-      <section className="rounded-2xl border border-border bg-card p-5">
+      <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
         <h2 className="mb-4 text-base font-semibold">Informações do produto</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           {CAMPOS_PRODUTO.filter((c) => !c.area).map((c) => (
