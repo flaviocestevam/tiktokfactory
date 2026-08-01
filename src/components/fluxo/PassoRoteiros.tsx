@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
-import { AlertTriangle, Clock, Film, Loader2, RefreshCw, Scissors } from "lucide-react";
+import { Clock, Film, Loader2, RefreshCw, Scissors } from "lucide-react";
 import { toast } from "sonner";
 import { CopyButton } from "@/components/CopyButton";
 import { Badge } from "@/components/ui/badge";
