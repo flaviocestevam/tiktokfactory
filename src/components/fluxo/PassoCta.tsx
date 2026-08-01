@@ -10,12 +10,14 @@ export function PassoCta({
   onMudar,
   onContinuar,
   gerando,
+  compacto,
 }: {
   valor: string;
   tipo: string;
   onMudar: (valor: string, tipo: string) => void;
   onContinuar: () => void;
   gerando?: boolean;
+  compacto?: boolean;
 }) {
   const [personalizado, setPersonalizado] = useState(tipo === "personalizado" ? valor : "");
 
