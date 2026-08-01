@@ -90,24 +90,26 @@ function Templates() {
           acao={<Button onClick={() => setAberto(true)}>Criar template</Button>}
         />
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
           {data?.map((t) => (
             <div key={t.id} className="rounded-2xl border border-border bg-card p-4">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <h3 className="font-semibold">{t.nome}</h3>
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
+                <div className="min-w-0">
+                  <h3 className="break-words font-semibold">{t.nome}</h3>
                   <p className="text-xs text-muted-foreground">
                     {[t.tipo, t.categoria].filter(Boolean).join(" · ")}
                   </p>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex shrink-0 items-center gap-1">
                   <CopyButton value={t.conteudo} size="icon" />
-                  <button aria-label="Excluir template" onClick={() => excluir(t.id)}>
+                  <button aria-label="Excluir template" className="touch-target" onClick={() => excluir(t.id)}>
                     <Trash2 className="size-4 text-destructive" />
                   </button>
                 </div>
               </div>
-              <p className="mt-3 line-clamp-4 whitespace-pre-wrap text-sm text-muted-foreground">{t.conteudo}</p>
+              <p className="mt-3 line-clamp-4 whitespace-pre-wrap break-words text-sm text-muted-foreground">
+                {t.conteudo}
+              </p>
             </div>
           ))}
         </div>
