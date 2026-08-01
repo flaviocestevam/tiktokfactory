@@ -338,8 +338,8 @@ export function promptImagem(ctx: ProjectContext, roteiro: Record<string, any> |
     system:
       "Você escreve prompts técnicos de geração de imagem em inglês. Falas, textos de tela e informações comerciais permanecem em português do Brasil.",
     prompt: `${contextoCompleto(ctx)}\n\nROTEIRO BASE:\n${JSON.stringify(roteiro ?? {}).slice(0, 6000)}\n\nCrie o prompt em inglês técnico para gerar a FOTO INICIAL da personagem segurando/usando o produto.
-Use as variáveis literais {{NOME_DA_PERSONAGEM}}, {{IMAGEM_CANONICA_PRINCIPAL}}, {{IMAGENS_CANONICAS_AUXILIARES}}, {{DESCRICAO_VISUAL_DA_PERSONAGEM}}, {{REGRAS_DE_IDENTIDADE}}, {{PRODUTO}}, {{IMAGEM_DO_PRODUTO}} sempre que o dado ainda não existir.
-O prompt deve exigir: imagem canônica como referência visual principal; exatamente a mesma mulher; rosto, tom de pele, cabelo e proporções corporais inalterados; produto reproduzido corretamente com embalagem, logotipo, formato, cor e proporções preservados; mãos e dedos corretos; interação natural; iluminação realista; aparência de frame real de TikTok; vertical 9:16; textura natural de pele; sem aparência plástica; sem texto aleatório; sem produtos duplicados; sem deformações. Não descreva um novo local nem invente elementos de fundo.`,
+Use as variáveis literais {{NOME_DA_PERSONAGEM}}, {{DESCRICAO_VISUAL_DA_PERSONAGEM}}, {{REGRAS_DE_IDENTIDADE}}, {{PRODUTO}}, {{IMAGEM_DO_PRODUTO}} sempre que o dado ainda não existir.
+O prompt deve exigir: seguir exatamente a descrição textual cadastrada da personagem; produto reproduzido corretamente com embalagem, logotipo, formato, cor e proporções preservados; mãos e dedos corretos; interação natural; iluminação realista; aparência de frame real de TikTok; vertical 9:16; textura natural de pele; sem aparência plástica; sem texto aleatório; sem produtos duplicados; sem deformações. Não descreva um novo local nem invente elementos de fundo.`,
     shape: `{"prompt":"","prompt_negativo":"","enquadramento":"","iluminacao":"","pose":"","maos_produto":"","expressao":"","continuidade":""}`,
   };
 }
