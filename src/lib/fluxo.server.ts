@@ -118,6 +118,7 @@ ${instrucao ? `AJUSTE PEDIDO: ${instrucao}` : ""}`,
 /* ─────────── Prompts por clipe (Google Flow / Gemini Omni Flash) ─────────── */
 
 const REGRAS_CONTINUIDADE = `Cada prompt deve preservar rigorosamente: a mesma personagem, o mesmo rosto, a mesma pele, o mesmo cabelo, a mesma roupa, o mesmo cenário, a mesma iluminação, o mesmo produto, a mesma embalagem, a mesma mão segurando o produto, a posição corporal aproximada, a continuidade do movimento, da expressão e da câmera.
+A foto enviada no projeto é apenas o PRIMEIRO FRAME do vídeo: a identidade canônica da personagem (rosto, olhos, pele, cabelo, corpo e proporções) deve continuar baseada nas fotos de referência cadastradas para ela, nunca em outra pessoa.
 Proibido: redesenhar o rótulo, inventar textos, duplicar ou sumir com o produto, deformar mãos e dedos, trocar de roupa, cenário ou enquadramento sem instrução, adicionar pessoas ou objetos.`;
 
 const SHAPE_CLIPE = `{"ordem":1,"estado_inicial":"","fala_exata":"","acao":"","gesto":"","expressao":"","posicao_produto":"","camera":"","estado_final":"","ligacao_proximo":"","continuidade":"","restricoes":"","prompt_negativo":"","prompt_flow":""}`;
