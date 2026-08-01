@@ -3,6 +3,8 @@ import { z } from "zod";
 import { analisarProdutoTikTokShop } from "./tiktok.server";
 import {
   ajustarClipes,
+  aprovarRoteiro,
+  prepararClipes,
   carregarResultados,
   criarTresRoteiros,
   gerarFotoInicial,
@@ -64,3 +66,15 @@ export const reorganizarClipes = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data }) => ajustarClipes(data.projectId, data.scriptId, data.modo, data.ordem));
+
+export const aprovarRoteiroVariante = createServerFn({ method: "POST" })
+  .inputValidator((i: unknown) =>
+    z.object({ projectId: z.string().uuid(), scriptId: z.string().uuid() }).parse(i),
+  )
+  .handler(async ({ data }) => aprovarRoteiro(data.projectId, data.scriptId));
+
+export const gerarClipesDoRoteiro = createServerFn({ method: "POST" })
+  .inputValidator((i: unknown) =>
+    z.object({ projectId: z.string().uuid(), scriptId: z.string().uuid() }).parse(i),
+  )
+  .handler(async ({ data }) => prepararClipes(data.projectId, data.scriptId));
