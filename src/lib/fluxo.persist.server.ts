@@ -61,7 +61,10 @@ export async function gerarFotoInicial(projectId: string, ajuste?: string) {
 
   await supabase
     .from("projects")
-    .update({ image_prompt_used: out.prompt ?? null, etapa: Math.max(3, ctx.project.etapa ?? 1) } as any)
+    .update({
+      image_prompt_used: out.prompt ?? null,
+      etapa: Math.max(3, ctx.project.etapa ?? 1),
+    } as any)
     .eq("id", projectId);
   await registrarHistorico(supabase, projectId, "prompt_foto", null, saved);
   return saved;
@@ -114,10 +117,18 @@ async function salvarRoteiro(
   if (error) throw new Error(error.message);
 
   const clipes = await gerarEGravarClipes(supabase, ctx, script, roteiro, plano.clipes, cta);
-  return { script, clipes, plano: resumoPlano(plano.clipes, plano), medida: resumoPlano(plano.clipes, plano) };
+  return {
+    script,
+    clipes,
+    plano: resumoPlano(plano.clipes, plano),
+    medida: resumoPlano(plano.clipes, plano),
+  };
 }
 
-function resumoPlano(clipes: ClipePlanejado[], plano: { duracaoFala: number; duracaoTotal: number; palavras: number }) {
+function resumoPlano(
+  clipes: ClipePlanejado[],
+  plano: { duracaoFala: number; duracaoTotal: number; palavras: number },
+) {
   return {
     palavras: plano.palavras,
     estimada: plano.duracaoTotal,
@@ -153,9 +164,15 @@ async function gerarEGravarClipes(
       expressao: g.expressao ?? null,
       camera: g.camera ?? null,
       posicao_produto: g.posicao_produto ?? null,
-      estado_inicial: c.ordem === 1 ? g.estado_inicial ?? "Foto enviada como primeiro frame." : g.estado_inicial ?? null,
+      estado_inicial:
+        c.ordem === 1
+          ? (g.estado_inicial ?? "Foto enviada como primeiro frame.")
+          : (g.estado_inicial ?? null),
       estado_final: g.estado_final ?? null,
-      continuidade: c.ordem === 1 ? g.continuidade ?? null : [CONTINUIDADE_AVISO, g.continuidade].filter(Boolean).join("\n"),
+      continuidade:
+        c.ordem === 1
+          ? (g.continuidade ?? null)
+          : [CONTINUIDADE_AVISO, g.continuidade].filter(Boolean).join("\n"),
       ligacao_proximo: g.ligacao_proximo ?? null,
       restricoes: g.restricoes ?? null,
       prompt_negativo: g.prompt_negativo ?? null,
@@ -167,7 +184,11 @@ async function gerarEGravarClipes(
   });
 
   await supabase.from("clips").delete().eq("script_id", script.id);
-  const { data: salvos, error } = await supabase.from("clips").insert(linhas).select().order("ordem");
+  const { data: salvos, error } = await supabase
+    .from("clips")
+    .insert(linhas)
+    .select()
+    .order("ordem");
   if (error) throw new Error(error.message);
   return salvos ?? [];
 }
@@ -177,14 +198,18 @@ export async function criarTresRoteiros(projectId: string) {
   const ctx = await loadContext(supabase, projectId);
   if (!ctx.character) throw new Error("Selecione uma personagem.");
   if (!ctx.product) throw new Error("Confirme o produto.");
-  if (!ctx.project.image_confirmed) throw new Error("Confirme a foto inicial antes de criar os roteiros.");
+  if (!ctx.project.image_confirmed)
+    throw new Error("Confirme a foto inicial antes de criar os roteiros.");
 
   const cta = ctx.project.cta ?? "";
   const out = await gerar<{ roteiros: any[] }>(promptTresRoteiros(ctx, cta));
   const roteiros = Array.isArray(out.roteiros) ? out.roteiros.slice(0, 3) : [];
   if (roteiros.length < 3) throw new Error("A IA não retornou os três roteiros. Tente novamente.");
 
-  const { data: existentes } = await supabase.from("scripts").select("id, variante").eq("project_id", projectId);
+  const { data: existentes } = await supabase
+    .from("scripts")
+    .select("id, variante")
+    .eq("project_id", projectId);
 
   const resultados = [];
   for (let i = 0; i < 3; i++) {
@@ -193,15 +218,28 @@ export async function criarTresRoteiros(projectId: string) {
     resultados.push(await salvarRoteiro(supabase, ctx, roteiros[i], variante, cta, anterior?.id));
   }
 
-  await supabase.from("projects").update({ etapa: 5, status: "finalizado" } as any).eq("id", projectId);
-  await registrarHistorico(supabase, projectId, "tres_roteiros", null, resultados.map((r) => r.script));
+  await supabase
+    .from("projects")
+    .update({ etapa: 5, status: "finalizado" } as any)
+    .eq("id", projectId);
+  await registrarHistorico(
+    supabase,
+    projectId,
+    "tres_roteiros",
+    null,
+    resultados.map((r) => r.script),
+  );
   return resultados;
 }
 
 export async function regerarRoteiro(projectId: string, scriptId: string, instrucao?: string) {
   const supabase = await db();
   const ctx = await loadContext(supabase, projectId);
-  const { data: atual, error } = await supabase.from("scripts").select("*").eq("id", scriptId).single();
+  const { data: atual, error } = await supabase
+    .from("scripts")
+    .select("*")
+    .eq("id", scriptId)
+    .single();
   if (error) throw new Error(error.message);
 
   const variante = atual.variante ?? atual.versao ?? 1;
@@ -215,8 +253,16 @@ export async function regerarRoteiro(projectId: string, scriptId: string, instru
 export async function carregarResultados(projectId: string) {
   const supabase = await db();
   const [{ data: scripts }, { data: clipes }] = await Promise.all([
-    supabase.from("scripts").select("*").eq("project_id", projectId).order("variante", { ascending: true }),
-    supabase.from("clips").select("*").eq("project_id", projectId).order("ordem", { ascending: true }),
+    supabase
+      .from("scripts")
+      .select("*")
+      .eq("project_id", projectId)
+      .order("variante", { ascending: true }),
+    supabase
+      .from("clips")
+      .select("*")
+      .eq("project_id", projectId)
+      .order("ordem", { ascending: true }),
   ]);
   return (scripts ?? []).map((s: any) => {
     const meus = (clipes ?? []).filter((c: any) => c.script_id === s.id);
@@ -242,7 +288,13 @@ function gruposDoScript(script: any): Unidade[][] {
   return Array.isArray(plano) ? (plano as Unidade[][]).filter((g) => Array.isArray(g)) : [];
 }
 
-async function regravarPlano(supabase: any, ctx: ProjectContext, script: any, novos: ClipePlanejado[], cta: string) {
+async function regravarPlano(
+  supabase: any,
+  ctx: ProjectContext,
+  script: any,
+  novos: ClipePlanejado[],
+  cta: string,
+) {
   await supabase
     .from("scripts")
     .update({
@@ -257,7 +309,11 @@ async function regravarPlano(supabase: any, ctx: ProjectContext, script: any, no
 async function carregarClipe(supabase: any, clipId: string) {
   const { data: clipe, error } = await supabase.from("clips").select("*").eq("id", clipId).single();
   if (error) throw new Error(error.message);
-  const { data: script, error: e2 } = await supabase.from("scripts").select("*").eq("id", clipe.script_id).single();
+  const { data: script, error: e2 } = await supabase
+    .from("scripts")
+    .select("*")
+    .eq("id", clipe.script_id)
+    .single();
   if (e2) throw new Error(e2.message);
   return { clipe, script };
 }
@@ -278,7 +334,9 @@ export async function regerarClipe(projectId: string, clipId: string, instrucao?
   const proximo = lista.find((c: any) => c.ordem === clipe.ordem + 1) ?? null;
   const roteiro = { cenas: script.cenas ?? [], cta: script.cta ?? cta };
 
-  const g = await gerar<any>(promptClipeUnico(ctx, roteiro, clipe, anterior, proximo, cta, instrucao));
+  const g = await gerar<any>(
+    promptClipeUnico(ctx, roteiro, clipe, anterior, proximo, cta, instrucao),
+  );
   const payload = {
     fala: g.fala_exata || clipe.fala,
     acao: g.acao ?? clipe.acao,
@@ -288,14 +346,22 @@ export async function regerarClipe(projectId: string, clipId: string, instrucao?
     posicao_produto: g.posicao_produto ?? clipe.posicao_produto,
     estado_inicial: g.estado_inicial ?? clipe.estado_inicial,
     estado_final: g.estado_final ?? clipe.estado_final,
-    continuidade: clipe.ordem === 1 ? g.continuidade ?? null : [CONTINUIDADE_AVISO, g.continuidade].filter(Boolean).join("\n"),
+    continuidade:
+      clipe.ordem === 1
+        ? (g.continuidade ?? null)
+        : [CONTINUIDADE_AVISO, g.continuidade].filter(Boolean).join("\n"),
     ligacao_proximo: g.ligacao_proximo ?? clipe.ligacao_proximo,
     restricoes: g.restricoes ?? clipe.restricoes,
     prompt_negativo: g.prompt_negativo ?? clipe.prompt_negativo,
     prompt_flow: g.prompt_flow ?? clipe.prompt_flow,
     updated_at: new Date().toISOString(),
   };
-  const { data: salvo, error } = await supabase.from("clips").update(payload).eq("id", clipId).select().single();
+  const { data: salvo, error } = await supabase
+    .from("clips")
+    .update(payload)
+    .eq("id", clipId)
+    .select()
+    .single();
   if (error) throw new Error(error.message);
   await registrarHistorico(supabase, projectId, `clipe:${clipe.ordem}`, clipe, salvo);
   return salvo;
@@ -310,17 +376,29 @@ export async function ajustarClipes(
 ) {
   const supabase = await db();
   const ctx = await loadContext(supabase, projectId);
-  const { data: script, error } = await supabase.from("scripts").select("*").eq("id", scriptId).single();
+  const { data: script, error } = await supabase
+    .from("scripts")
+    .select("*")
+    .eq("id", scriptId)
+    .single();
   if (error) throw new Error(error.message);
   const cta = ctx.project.cta ?? script.cta ?? "";
 
   let novos: ClipePlanejado[];
   if (modo === "redistribuir") {
-    novos = planejarRoteiro({ cenas: script.cenas ?? [], cta: script.cta }, ctx.character, cta).clipes;
+    novos = planejarRoteiro(
+      { cenas: script.cenas ?? [], cta: script.cta },
+      ctx.character,
+      cta,
+    ).clipes;
   } else {
     const grupos = gruposDoScript(script);
     if (!grupos.length) {
-      novos = planejarRoteiro({ cenas: script.cenas ?? [], cta: script.cta }, ctx.character, cta).clipes;
+      novos = planejarRoteiro(
+        { cenas: script.cenas ?? [], cta: script.cta },
+        ctx.character,
+        cta,
+      ).clipes;
     } else if (modo === "unir") {
       novos = unirComAnterior(grupos, ordem ?? 2);
     } else {
@@ -330,6 +408,9 @@ export async function ajustarClipes(
   }
 
   const clipes = await regravarPlano(supabase, ctx, script, novos, cta);
-  await registrarHistorico(supabase, projectId, `clipes:${modo}`, null, { scriptId, total: novos.length });
+  await registrarHistorico(supabase, projectId, `clipes:${modo}`, null, {
+    scriptId,
+    total: novos.length,
+  });
   return clipes;
 }

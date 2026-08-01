@@ -6,7 +6,10 @@ export { contarPalavras } from "./clipes.server";
 
 export function falaDoRoteiro(roteiro: any): string {
   const cenas = Array.isArray(roteiro?.cenas) ? roteiro.cenas : [];
-  return cenas.map((c: any) => String(c?.fala ?? "")).filter(Boolean).join(" ");
+  return cenas
+    .map((c: any) => String(c?.fala ?? ""))
+    .filter(Boolean)
+    .join(" ");
 }
 
 function contextoFluxo(ctx: ProjectContext, cta: string) {
@@ -31,12 +34,15 @@ function contextoFluxo(ctx: ProjectContext, cta: string) {
 /* ─────────── Prompt da foto inicial ─────────── */
 
 export function promptFotoInicial(ctx: ProjectContext, ajuste?: string) {
-  const imagemProduto = ctx.project.imagem_produto_referencia || ctx.product?.imagem_principal || "";
+  const imagemProduto =
+    ctx.project.imagem_produto_referencia || ctx.product?.imagem_principal || "";
   return {
     system:
       "Você escreve prompts técnicos de geração de imagem em inglês, para o GPT criar uma foto realista de influenciadora segurando um produto. Nomes próprios e textos de embalagem permanecem como estão.",
     prompt: `${descreverProduto(ctx.product)}\n\n${descreverPersonagem(ctx.character)}\n\n${
-      imagemProduto ? `IMAGEM PRINCIPAL DO PRODUTO (referência visual obrigatória): ${imagemProduto}\n` : ""
+      imagemProduto
+        ? `IMAGEM PRINCIPAL DO PRODUTO (referência visual obrigatória): ${imagemProduto}\n`
+        : ""
     }${ctx.project.cenario_texto ? `CENÁRIO PEDIDO: ${ctx.project.cenario_texto}\n` : ""}${
       ajuste ? `AJUSTE PEDIDO PELO USUÁRIO: ${ajuste}\n` : ""
     }
@@ -89,7 +95,12 @@ Nunca escreva na fala pública qualquer aviso sobre dados faltantes: simplesment
   };
 }
 
-export function promptRoteiroUnico(ctx: ProjectContext, cta: string, variante: number, instrucao?: string) {
+export function promptRoteiroUnico(
+  ctx: ProjectContext,
+  cta: string,
+  variante: number,
+  instrucao?: string,
+) {
   const angulo = ANGULOS.find((a) => a.variante === variante) ?? ANGULOS[0];
   return {
     system:
@@ -187,5 +198,8 @@ export function textoRoteiro(roteiro: any) {
 
 export function linhasCena(roteiro: any, campo: string) {
   const cenas = Array.isArray(roteiro?.cenas) ? roteiro.cenas : [];
-  return cenas.map((c: any) => c?.[campo]).filter(Boolean).join("\n");
+  return cenas
+    .map((c: any) => c?.[campo])
+    .filter(Boolean)
+    .join("\n");
 }

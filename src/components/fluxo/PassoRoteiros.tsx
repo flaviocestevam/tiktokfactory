@@ -13,7 +13,10 @@ const AVISO_CONTINUIDADE =
 
 const AJUSTES = [
   { label: "MAIS CURTO", instrucao: "Reduza a fala para caber com folga na duração alvo." },
-  { label: "MAIS PERSUASIVO", instrucao: "Aumente a persuasão sem inventar informações que não estejam no produto." },
+  {
+    label: "MAIS PERSUASIVO",
+    instrucao: "Aumente a persuasão sem inventar informações que não estejam no produto.",
+  },
   { label: "OUTRO GANCHO", instrucao: "Troque completamente o gancho falado e o gancho visual." },
 ];
 
@@ -35,7 +38,11 @@ export function PassoRoteiros({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-semibold">Seus 3 roteiros</h2>
         <Button variant="outline" className="gap-2" disabled={gerandoTudo} onClick={onRegerarTudo}>
-          {gerandoTudo ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
+          {gerandoTudo ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <RefreshCw className="size-4" />
+          )}
           GERAR NOVAS OPÇÕES
         </Button>
       </div>
@@ -96,7 +103,9 @@ function CardRoteiro({
   async function regerar(texto?: string) {
     setCarregando(true);
     try {
-      await regerarRoteiroVariante({ data: { projectId, scriptId: s.id, instrucao: texto || instrucao || undefined } });
+      await regerarRoteiroVariante({
+        data: { projectId, scriptId: s.id, instrucao: texto || instrucao || undefined },
+      });
       setInstrucao("");
       onAtualizar();
       toast.success("Roteiro atualizado.");
@@ -120,12 +129,13 @@ function CardRoteiro({
           <p className="flex items-center gap-1.5">
             <Clock className="size-3.5" />
             Fala: {Number(medida.duracao_fala ?? s.duracao_fala ?? 0).toFixed(1)}s · com ações:{" "}
-            {Number(medida.duracao_total ?? s.duracao_total ?? 0).toFixed(1)}s · {medida.palavras ?? s.palavras ?? 0}{" "}
-            palavras
+            {Number(medida.duracao_total ?? s.duracao_total ?? 0).toFixed(1)}s ·{" "}
+            {medida.palavras ?? s.palavras ?? 0} palavras
           </p>
           <p className="flex items-center gap-1.5">
             <Film className="size-3.5" />
-            {clipes.length} clipes · vídeo completo: {medida.duracao_clipes ?? clipes.reduce((t, c) => t + (c.duracao ?? 0), 0)}s
+            {clipes.length} clipes · vídeo completo:{" "}
+            {medida.duracao_clipes ?? clipes.reduce((t, c) => t + (c.duracao ?? 0), 0)}s
           </p>
           {clipes.length ? (
             <p className="text-[11px] text-muted-foreground/80">
@@ -147,7 +157,12 @@ function CardRoteiro({
             <CopyButton value={todosPrompts} label="Copiar todos os prompts" />
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button size="sm" variant="secondary" disabled={carregando} onClick={() => acaoClipes("redistribuir")}>
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={carregando}
+              onClick={() => acaoClipes("redistribuir")}
+            >
               REDISTRIBUIR ROTEIRO
             </Button>
           </div>
@@ -168,7 +183,13 @@ function CardRoteiro({
       <div className="mt-auto space-y-3">
         <div className="flex flex-wrap gap-2">
           {AJUSTES.map((a) => (
-            <Button key={a.label} size="sm" variant="secondary" disabled={carregando} onClick={() => regerar(a.instrucao)}>
+            <Button
+              key={a.label}
+              size="sm"
+              variant="secondary"
+              disabled={carregando}
+              onClick={() => regerar(a.instrucao)}
+            >
               {a.label}
             </Button>
           ))}
@@ -181,7 +202,11 @@ function CardRoteiro({
             className="h-11"
           />
           <Button className="h-11 gap-2" disabled={carregando} onClick={() => regerar()}>
-            {carregando ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
+            {carregando ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <RefreshCw className="size-4" />
+            )}
             AJUSTAR
           </Button>
         </div>
@@ -195,7 +220,9 @@ function Bloco({ titulo, texto }: { titulo: string; texto?: string | null }) {
   return (
     <section className="space-y-2">
       <div className="flex items-center justify-between gap-2">
-        <h4 className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">{titulo}</h4>
+        <h4 className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+          {titulo}
+        </h4>
         <CopyButton value={texto} size="icon" />
       </div>
       <pre className="max-h-64 overflow-y-auto whitespace-pre-wrap break-words rounded-xl border border-border bg-secondary/40 p-3 text-xs leading-relaxed">
@@ -254,7 +281,9 @@ function CardClipe({
       </div>
 
       {clipe.ordem > 1 ? (
-        <p className="mt-2 rounded-lg bg-primary/10 p-2 text-[11px] text-primary">{AVISO_CONTINUIDADE}</p>
+        <p className="mt-2 rounded-lg bg-primary/10 p-2 text-[11px] text-primary">
+          {AVISO_CONTINUIDADE}
+        </p>
       ) : (
         <p className="mt-2 rounded-lg bg-secondary/60 p-2 text-[11px] text-muted-foreground">
           Use a foto enviada como primeiro frame deste clipe.
@@ -277,14 +306,22 @@ function CardClipe({
 
       <div className="mt-3 flex flex-wrap gap-2">
         <Button size="sm" variant="outline" disabled={carregando} onClick={() => onRegerar()}>
-          {carregando ? <Loader2 className="size-3.5 animate-spin" /> : <RefreshCw className="size-3.5" />}
+          {carregando ? (
+            <Loader2 className="size-3.5 animate-spin" />
+          ) : (
+            <RefreshCw className="size-3.5" />
+          )}
           REGENERAR CLIPE
         </Button>
         <Button
           size="sm"
           variant="outline"
           disabled={carregando}
-          onClick={() => onRegerar("Encurte a fala deste clipe mantendo o sentido, para caber com folga na duração.")}
+          onClick={() =>
+            onRegerar(
+              "Encurte a fala deste clipe mantendo o sentido, para caber com folga na duração.",
+            )
+          }
         >
           ENCURTAR FALA
         </Button>

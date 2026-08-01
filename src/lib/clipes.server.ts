@@ -5,7 +5,9 @@ export const TAMANHOS_CLIPE = [4, 6, 8, 10] as const;
 export const OCUPACAO_MAXIMA = 0.88; // 85%–90% da capacidade de fala do clipe
 
 export function contarPalavras(texto: string) {
-  return String(texto ?? "").split(/\s+/).filter(Boolean).length;
+  return String(texto ?? "")
+    .split(/\s+/)
+    .filter(Boolean).length;
 }
 
 /** Velocidade de fala em palavras por segundo, a partir da personagem. */
@@ -25,7 +27,8 @@ export function segundosDePausa(texto: string) {
   return fortes * 0.45 + fracas * 0.22;
 }
 
-const DEMO = /(mostr|demonstr|aplic|abre|abrir|gira|espirr|passa|borrif|toca|textur|derrama|encaixa|liga|test)/i;
+const DEMO =
+  /(mostr|demonstr|aplic|abre|abrir|gira|espirr|passa|borrif|toca|textur|derrama|encaixa|liga|test)/i;
 
 /** Tempo extra de ações, gestos, reações e demonstrações de uma cena. */
 export function segundosDeAcao(cena: Record<string, any>) {
@@ -123,10 +126,7 @@ export function planejarClipes(unidades: Unidade[], quantidadeForcada?: number):
     quantidadeForcada && quantidadeForcada > 0
       ? Math.min(
           maximo,
-          Math.max(
-            1,
-            unidades.reduce((s, u) => s + u.segundos, 0) / quantidadeForcada,
-          ),
+          Math.max(1, unidades.reduce((s, u) => s + u.segundos, 0) / quantidadeForcada),
         )
       : maximo;
 
@@ -158,7 +158,10 @@ export function planejarClipes(unidades: Unidade[], quantidadeForcada?: number):
   return grupos.map((g, i) => {
     const segundos = g.reduce((s, u) => s + u.segundos, 0);
     const segundosFala = g.reduce((s, u) => s + u.segundosFala, 0);
-    const fala = g.map((u) => u.fala).filter(Boolean).join(" ");
+    const fala = g
+      .map((u) => u.fala)
+      .filter(Boolean)
+      .join(" ");
     const duracao = menorTamanhoQueCabe(segundos);
     return {
       ordem: i + 1,
@@ -210,7 +213,10 @@ export function montarClipes(grupos: Unidade[][]): ClipePlanejado[] {
     .map((g, i) => {
       const segundos = g.reduce((s, u) => s + u.segundos, 0);
       const segundosFala = g.reduce((s, u) => s + u.segundosFala, 0);
-      const fala = g.map((u) => u.fala).filter(Boolean).join(" ");
+      const fala = g
+        .map((u) => u.fala)
+        .filter(Boolean)
+        .join(" ");
       const duracao = menorTamanhoQueCabe(segundos);
       return {
         ordem: i + 1,

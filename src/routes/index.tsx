@@ -57,7 +57,9 @@ function CriarVideo() {
 
   function nomeAutomatico(produtoNome?: string | null) {
     const data = new Date().toLocaleDateString("pt-BR");
-    return [personagemNome || "Personagem", produtoNome || produto?.nome || "Produto", data].join(" — ");
+    return [personagemNome || "Personagem", produtoNome || produto?.nome || "Produto", data].join(
+      " — ",
+    );
   }
 
   async function salvarProjeto(valores: Record<string, unknown>) {
@@ -135,7 +137,11 @@ function CriarVideo() {
       ) : null}
 
       {etapa === 2 ? (
-        <PassoProduto produto={produto} onProdutoSalvo={setProduto} onContinuar={confirmarProduto} />
+        <PassoProduto
+          produto={produto}
+          onProdutoSalvo={setProduto}
+          onContinuar={confirmarProduto}
+        />
       ) : null}
 
       {etapa === 3 && projetoId ? (
