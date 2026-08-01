@@ -22,13 +22,17 @@ export function PassoCta({
   const [personalizado, setPersonalizado] = useState(tipo === "personalizado" ? valor : "");
 
   return (
-    <section className="surface p-4 sm:p-6">
-      <h2 className="text-lg font-semibold">Chamada final do vídeo</h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Escolha como a personagem vai encerrar o vídeo. A IA aplica a chamada nos três roteiros.
-      </p>
+    <section className={cn("surface p-4 sm:p-6", compacto && "p-4 sm:p-4")}>
+      <h2 className={cn("font-semibold", compacto ? "text-base" : "text-lg")}>
+        Chamada final do vídeo
+      </h2>
+      {compacto ? null : (
+        <p className="mt-1 text-sm text-muted-foreground">
+          Escolha como a personagem vai encerrar o vídeo. A IA aplica a chamada nos três roteiros.
+        </p>
+      )}
 
-      <div className="mt-5 grid gap-2 sm:grid-cols-2">
+      <div className={cn("grid gap-2 sm:grid-cols-2", compacto ? "mt-3" : "mt-5")}>
         <button
           type="button"
           onClick={() => onMudar("", "auto")}
@@ -56,7 +60,7 @@ export function PassoCta({
         ))}
       </div>
 
-      <div className="mt-5 space-y-2">
+      <div className={cn("space-y-2", compacto ? "mt-3" : "mt-5")}>
         <label className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground">
           Chamada personalizada
         </label>
@@ -72,11 +76,15 @@ export function PassoCta({
       </div>
 
       <Button
-        className="mt-6 h-12 w-full text-base sm:w-auto"
+        className={cn("w-full sm:w-auto", compacto ? "mt-4 h-11" : "mt-6 h-12 text-base")}
         disabled={gerando}
         onClick={onContinuar}
       >
-        {gerando ? "GERANDO ROTEIROS..." : "GERAR OS 3 ROTEIROS"}
+        {gerando
+          ? "GERANDO ROTEIROS..."
+          : compacto
+            ? "GERAR NOVOS ROTEIROS COM ESTA CHAMADA"
+            : "GERAR OS 3 ROTEIROS"}
       </Button>
     </section>
   );
