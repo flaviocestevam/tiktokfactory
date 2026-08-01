@@ -6,21 +6,12 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Stepper } from "@/components/fluxo/Stepper";
 import { PassoPersonagem } from "@/components/fluxo/PassoPersonagem";
 import { PassoProduto, type ProdutoFluxo } from "@/components/fluxo/PassoProduto";
 import { PassoFoto } from "@/components/fluxo/PassoFoto";
 import { PassoCta } from "@/components/fluxo/PassoCta";
 import { PassoRoteiros } from "@/components/fluxo/PassoRoteiros";
-import { DURACOES_FLUXO } from "@/lib/ctas";
 import { gerarTresRoteiros, listarResultados } from "@/lib/fluxo.functions";
 import { atualizar, criar } from "@/lib/queries";
 
@@ -45,10 +36,9 @@ function CriarVideo() {
   const [etapa, setEtapa] = useState(1);
   const [maximo, setMaximo] = useState(1);
   const [personagem, setPersonagem] = useState<string | null>(null);
+  const [personagemNome, setPersonagemNome] = useState("");
   const [produto, setProduto] = useState<ProdutoFluxo | null>(null);
   const [projetoId, setProjetoId] = useState<string | null>(null);
-  const [duracao, setDuracao] = useState(30);
-  const [nome, setNome] = useState("");
   const [promptFoto, setPromptFoto] = useState("");
   const [fotoUrl, setFotoUrl] = useState("");
   const [cta, setCta] = useState({ valor: "", tipo: "auto" });
@@ -65,11 +55,17 @@ function CriarVideo() {
     setMaximo((m) => Math.max(m, n));
   }
 
+  function nomeAutomatico(produtoNome?: string | null) {
+    const data = new Date().toLocaleDateString("pt-BR");
+    return [personagemNome || "Personagem", produtoNome || produto?.nome || "Produto", data].join(
+      " — ",
+    );
+  }
+
   async function salvarProjeto(valores: Record<string, unknown>) {
     if (projetoId) return atualizar("projects", projetoId, valores);
     const criado = await criar("projects", {
-      nome: nome.trim() || `Vídeo ${new Date().toLocaleDateString("pt-BR")}`,
-      duracao,
+      nome: nomeAutomatico(),
       character_id: personagem,
       status: "em_andamento",
       ...valores,
@@ -83,10 +79,9 @@ function CriarVideo() {
       await salvarProjeto({
         product_id: p.id,
         character_id: personagem,
-        duracao,
         etapa: 3,
         imagem_produto_referencia: p.imagem_principal ?? null,
-        nome: nome.trim() || p.nome || "Novo vídeo",
+        nome: nomeAutomatico(p.nome),
       });
       avancar(3);
     } catch (e) {
@@ -131,44 +126,22 @@ function CriarVideo() {
       <Stepper atual={etapa} maximo={maximo} onIr={setEtapa} />
 
       {etapa === 1 ? (
-        <div className="space-y-6">
-          <section className="surface grid gap-4 p-4 sm:grid-cols-2 sm:p-6">
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground">
-                Nome do vídeo
-              </label>
-              <Input value={nome} onChange={(e) => setNome(e.target.value)} className="h-11" placeholder="Opcional" />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground">
-                Duração alvo
-              </label>
-              <Select value={String(duracao)} onValueChange={(v) => setDuracao(Number(v))}>
-                <SelectTrigger className="h-11">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {DURACOES_FLUXO.map((d) => (
-                    <SelectItem key={d} value={String(d)}>
-                      {d} segundos
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </section>
-          <PassoPersonagem
-            selecionada={personagem}
-            onSelecionar={(id) => {
-              setPersonagem(id);
-              avancar(2);
-            }}
-          />
-        </div>
+        <PassoPersonagem
+          selecionada={personagem}
+          onSelecionar={(id, nomePersonagem) => {
+            setPersonagem(id);
+            setPersonagemNome(nomePersonagem);
+            avancar(2);
+          }}
+        />
       ) : null}
 
       {etapa === 2 ? (
-        <PassoProduto produto={produto} onProdutoSalvo={setProduto} onContinuar={confirmarProduto} />
+        <PassoProduto
+          produto={produto}
+          onProdutoSalvo={setProduto}
+          onContinuar={confirmarProduto}
+        />
       ) : null}
 
       {etapa === 3 && projetoId ? (

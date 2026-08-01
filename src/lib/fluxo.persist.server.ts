@@ -4,15 +4,26 @@ import { callAIJson } from "./ai.server";
 import { db, loadContext, registrarHistorico, type ProjectContext } from "./generation.server";
 import {
   ANGULOS,
-  avaliarDuracao,
   falaDoRoteiro,
   linhasCena,
-  promptFlow,
+  promptClipeUnico,
+  promptClipes,
   promptFotoInicial,
   promptRoteiroUnico,
   promptTresRoteiros,
   textoRoteiro,
 } from "./fluxo.server";
+import {
+  montarClipes,
+  planejarRoteiro,
+  separarClipe,
+  unirComAnterior,
+  type ClipePlanejado,
+  type Unidade,
+} from "./clipes.server";
+
+const CONTINUIDADE_AVISO =
+  "Depois de gerar o clipe anterior no Google Flow, salve o último frame e use-o como primeiro frame do próximo clipe.";
 
 async function gerar<T>(p: { system: string; prompt: string; shape: string }) {
   return callAIJson<T>(p.system, p.prompt, p.shape);
@@ -50,7 +61,10 @@ export async function gerarFotoInicial(projectId: string, ajuste?: string) {
 
   await supabase
     .from("projects")
-    .update({ image_prompt_used: out.prompt ?? null, etapa: Math.max(3, ctx.project.etapa ?? 1) } as any)
+    .update({
+      image_prompt_used: out.prompt ?? null,
+      etapa: Math.max(3, ctx.project.etapa ?? 1),
+    } as any)
     .eq("id", projectId);
   await registrarHistorico(supabase, projectId, "prompt_foto", null, saved);
   return saved;
@@ -64,10 +78,9 @@ async function salvarRoteiro(
   cta: string,
   scriptIdExistente?: string,
 ) {
-  const alvo = ctx.project.duracao ?? 30;
   const fala = falaDoRoteiro(roteiro);
-  const medida = avaliarDuracao(fala, alvo);
   const angulo = ANGULOS.find((a) => a.variante === variante);
+  const plano = planejarRoteiro(roteiro, ctx.character, cta);
 
   const payload = {
     project_id: ctx.project.id,
@@ -89,8 +102,12 @@ async function salvarRoteiro(
     cta: roteiro.cta || cta || null,
     legenda: roteiro.legenda ?? null,
     hashtags: roteiro.hashtags ?? null,
-    duracao_estimada: medida.estimada,
-    palavras: medida.palavras,
+    duracao_estimada: Math.round(plano.duracaoTotal),
+    palavras: plano.palavras,
+    duracao_fala: plano.duracaoFala,
+    duracao_total: plano.duracaoTotal,
+    num_clipes: plano.clipes.length,
+    plano_clipes: plano.clipes.map((c) => c.unidades) as any,
   };
 
   const q = scriptIdExistente
@@ -99,35 +116,81 @@ async function salvarRoteiro(
   const { data: script, error } = await q;
   if (error) throw new Error(error.message);
 
-  const flow = await gerar<Record<string, string>>(promptFlow(ctx, roteiro, cta));
-  const promptPayload = {
-    project_id: ctx.project.id,
-    script_id: script.id,
-    versao: variante,
-    prompt_flow: flow.prompt_flow ?? null,
-    descricao_cena: [flow.descricao_geral, flow.cenas].filter(Boolean).join("\n\n") || null,
-    acoes: [flow.acoes, flow.gestos].filter(Boolean).join("\n") || null,
-    camera: flow.camera ?? null,
-    dialogo: flow.fala_exata ?? null,
-    expressao: flow.expressoes ?? null,
-    produto: flow.produto ?? null,
-    continuidade: [flow.continuidade, flow.sincronizacao_labial].filter(Boolean).join("\n") || null,
-    restricoes: [flow.restricoes, flow.prompt_negativo].filter(Boolean).join("\n") || null,
+  const clipes = await gerarEGravarClipes(supabase, ctx, script, roteiro, plano.clipes, cta);
+  return {
+    script,
+    clipes,
+    plano: resumoPlano(plano.clipes, plano),
+    medida: resumoPlano(plano.clipes, plano),
   };
+}
 
-  const { data: antigo } = await supabase
-    .from("video_prompts")
-    .select("id")
-    .eq("script_id", script.id)
-    .maybeSingle();
+function resumoPlano(
+  clipes: ClipePlanejado[],
+  plano: { duracaoFala: number; duracaoTotal: number; palavras: number },
+) {
+  return {
+    palavras: plano.palavras,
+    estimada: plano.duracaoTotal,
+    duracao_fala: plano.duracaoFala,
+    duracao_total: plano.duracaoTotal,
+    duracao_clipes: clipes.reduce((s, c) => s + c.duracao, 0),
+    num_clipes: clipes.length,
+  };
+}
 
-  const qp = antigo
-    ? supabase.from("video_prompts").update(promptPayload).eq("id", antigo.id).select().single()
-    : supabase.from("video_prompts").insert(promptPayload).select().single();
-  const { data: videoPrompt, error: erroPrompt } = await qp;
-  if (erroPrompt) throw new Error(erroPrompt.message);
+/** Gera os prompts de cada clipe com a IA e grava na tabela clips. */
+async function gerarEGravarClipes(
+  supabase: any,
+  ctx: ProjectContext,
+  script: any,
+  roteiro: any,
+  clipes: ClipePlanejado[],
+  cta: string,
+) {
+  const out = await gerar<{ clipes: any[] }>(promptClipes(ctx, roteiro, clipes, cta));
+  const gerados = Array.isArray(out?.clipes) ? out.clipes : [];
 
-  return { script, videoPrompt, medida };
+  const linhas = clipes.map((c, i) => {
+    const g = gerados.find((x: any) => Number(x?.ordem) === c.ordem) ?? gerados[i] ?? {};
+    return {
+      project_id: ctx.project.id,
+      script_id: script.id,
+      ordem: c.ordem,
+      duracao: c.duracao,
+      fala: c.fala || g.fala_exata || null,
+      acao: g.acao ?? null,
+      gesto: g.gesto ?? null,
+      expressao: g.expressao ?? null,
+      camera: g.camera ?? null,
+      posicao_produto: g.posicao_produto ?? null,
+      estado_inicial:
+        c.ordem === 1
+          ? (g.estado_inicial ?? "Foto enviada como primeiro frame.")
+          : (g.estado_inicial ?? null),
+      estado_final: g.estado_final ?? null,
+      continuidade:
+        c.ordem === 1
+          ? (g.continuidade ?? null)
+          : [CONTINUIDADE_AVISO, g.continuidade].filter(Boolean).join("\n"),
+      ligacao_proximo: g.ligacao_proximo ?? null,
+      restricoes: g.restricoes ?? null,
+      prompt_negativo: g.prompt_negativo ?? null,
+      prompt_flow: g.prompt_flow ?? null,
+      duracao_fala: c.segundosFala,
+      duracao_estimada: c.segundos,
+      palavras: c.palavras,
+    };
+  });
+
+  await supabase.from("clips").delete().eq("script_id", script.id);
+  const { data: salvos, error } = await supabase
+    .from("clips")
+    .insert(linhas)
+    .select()
+    .order("ordem");
+  if (error) throw new Error(error.message);
+  return salvos ?? [];
 }
 
 export async function criarTresRoteiros(projectId: string) {
@@ -135,14 +198,18 @@ export async function criarTresRoteiros(projectId: string) {
   const ctx = await loadContext(supabase, projectId);
   if (!ctx.character) throw new Error("Selecione uma personagem.");
   if (!ctx.product) throw new Error("Confirme o produto.");
-  if (!ctx.project.image_confirmed) throw new Error("Confirme a foto inicial antes de criar os roteiros.");
+  if (!ctx.project.image_confirmed)
+    throw new Error("Confirme a foto inicial antes de criar os roteiros.");
 
   const cta = ctx.project.cta ?? "";
   const out = await gerar<{ roteiros: any[] }>(promptTresRoteiros(ctx, cta));
   const roteiros = Array.isArray(out.roteiros) ? out.roteiros.slice(0, 3) : [];
   if (roteiros.length < 3) throw new Error("A IA não retornou os três roteiros. Tente novamente.");
 
-  const { data: existentes } = await supabase.from("scripts").select("id, variante").eq("project_id", projectId);
+  const { data: existentes } = await supabase
+    .from("scripts")
+    .select("id, variante")
+    .eq("project_id", projectId);
 
   const resultados = [];
   for (let i = 0; i < 3; i++) {
@@ -151,15 +218,28 @@ export async function criarTresRoteiros(projectId: string) {
     resultados.push(await salvarRoteiro(supabase, ctx, roteiros[i], variante, cta, anterior?.id));
   }
 
-  await supabase.from("projects").update({ etapa: 5, status: "finalizado" } as any).eq("id", projectId);
-  await registrarHistorico(supabase, projectId, "tres_roteiros", null, resultados.map((r) => r.script));
+  await supabase
+    .from("projects")
+    .update({ etapa: 5, status: "finalizado" } as any)
+    .eq("id", projectId);
+  await registrarHistorico(
+    supabase,
+    projectId,
+    "tres_roteiros",
+    null,
+    resultados.map((r) => r.script),
+  );
   return resultados;
 }
 
 export async function regerarRoteiro(projectId: string, scriptId: string, instrucao?: string) {
   const supabase = await db();
   const ctx = await loadContext(supabase, projectId);
-  const { data: atual, error } = await supabase.from("scripts").select("*").eq("id", scriptId).single();
+  const { data: atual, error } = await supabase
+    .from("scripts")
+    .select("*")
+    .eq("id", scriptId)
+    .single();
   if (error) throw new Error(error.message);
 
   const variante = atual.variante ?? atual.versao ?? 1;
@@ -172,15 +252,165 @@ export async function regerarRoteiro(projectId: string, scriptId: string, instru
 
 export async function carregarResultados(projectId: string) {
   const supabase = await db();
-  const [{ data: scripts }, { data: prompts }, { data: projeto }] = await Promise.all([
-    supabase.from("scripts").select("*").eq("project_id", projectId).order("variante", { ascending: true }),
-    supabase.from("video_prompts").select("*").eq("project_id", projectId),
-    supabase.from("projects").select("duracao").eq("id", projectId).maybeSingle(),
+  const [{ data: scripts }, { data: clipes }] = await Promise.all([
+    supabase
+      .from("scripts")
+      .select("*")
+      .eq("project_id", projectId)
+      .order("variante", { ascending: true }),
+    supabase
+      .from("clips")
+      .select("*")
+      .eq("project_id", projectId)
+      .order("ordem", { ascending: true }),
   ]);
-  const alvo = Number(projeto?.duracao ?? 30);
-  return (scripts ?? []).map((s: any) => ({
-    script: s,
-    videoPrompt: (prompts ?? []).find((p: any) => p.script_id === s.id) ?? null,
-    medida: avaliarDuracao(s.dialogo ?? "", alvo),
-  }));
+  return (scripts ?? []).map((s: any) => {
+    const meus = (clipes ?? []).filter((c: any) => c.script_id === s.id);
+    return {
+      script: s,
+      clipes: meus,
+      medida: {
+        palavras: s.palavras ?? 0,
+        estimada: s.duracao_total ?? s.duracao_estimada ?? 0,
+        duracao_fala: s.duracao_fala ?? 0,
+        duracao_total: s.duracao_total ?? s.duracao_estimada ?? 0,
+        duracao_clipes: meus.reduce((t: number, c: any) => t + (c.duracao ?? 0), 0),
+        num_clipes: meus.length,
+      },
+    };
+  });
+}
+
+/* ─────────── Ajustes por clipe ─────────── */
+
+function gruposDoScript(script: any): Unidade[][] {
+  const plano = script?.plano_clipes;
+  return Array.isArray(plano) ? (plano as Unidade[][]).filter((g) => Array.isArray(g)) : [];
+}
+
+async function regravarPlano(
+  supabase: any,
+  ctx: ProjectContext,
+  script: any,
+  novos: ClipePlanejado[],
+  cta: string,
+) {
+  await supabase
+    .from("scripts")
+    .update({
+      num_clipes: novos.length,
+      plano_clipes: novos.map((c) => c.unidades) as any,
+    })
+    .eq("id", script.id);
+  const roteiro = { cenas: script.cenas ?? [], cta: script.cta ?? cta };
+  return gerarEGravarClipes(supabase, ctx, script, roteiro, novos, cta);
+}
+
+async function carregarClipe(supabase: any, clipId: string) {
+  const { data: clipe, error } = await supabase.from("clips").select("*").eq("id", clipId).single();
+  if (error) throw new Error(error.message);
+  const { data: script, error: e2 } = await supabase
+    .from("scripts")
+    .select("*")
+    .eq("id", clipe.script_id)
+    .single();
+  if (e2) throw new Error(e2.message);
+  return { clipe, script };
+}
+
+/** Regenera (ou encurta) apenas um clipe. */
+export async function regerarClipe(projectId: string, clipId: string, instrucao?: string) {
+  const supabase = await db();
+  const ctx = await loadContext(supabase, projectId);
+  const { clipe, script } = await carregarClipe(supabase, clipId);
+  const cta = ctx.project.cta ?? script.cta ?? "";
+  const { data: irmaos } = await supabase
+    .from("clips")
+    .select("*")
+    .eq("script_id", script.id)
+    .order("ordem", { ascending: true });
+  const lista = irmaos ?? [];
+  const anterior = lista.find((c: any) => c.ordem === clipe.ordem - 1) ?? null;
+  const proximo = lista.find((c: any) => c.ordem === clipe.ordem + 1) ?? null;
+  const roteiro = { cenas: script.cenas ?? [], cta: script.cta ?? cta };
+
+  const g = await gerar<any>(
+    promptClipeUnico(ctx, roteiro, clipe, anterior, proximo, cta, instrucao),
+  );
+  const payload = {
+    fala: g.fala_exata || clipe.fala,
+    acao: g.acao ?? clipe.acao,
+    gesto: g.gesto ?? clipe.gesto,
+    expressao: g.expressao ?? clipe.expressao,
+    camera: g.camera ?? clipe.camera,
+    posicao_produto: g.posicao_produto ?? clipe.posicao_produto,
+    estado_inicial: g.estado_inicial ?? clipe.estado_inicial,
+    estado_final: g.estado_final ?? clipe.estado_final,
+    continuidade:
+      clipe.ordem === 1
+        ? (g.continuidade ?? null)
+        : [CONTINUIDADE_AVISO, g.continuidade].filter(Boolean).join("\n"),
+    ligacao_proximo: g.ligacao_proximo ?? clipe.ligacao_proximo,
+    restricoes: g.restricoes ?? clipe.restricoes,
+    prompt_negativo: g.prompt_negativo ?? clipe.prompt_negativo,
+    prompt_flow: g.prompt_flow ?? clipe.prompt_flow,
+    updated_at: new Date().toISOString(),
+  };
+  const { data: salvo, error } = await supabase
+    .from("clips")
+    .update(payload)
+    .eq("id", clipId)
+    .select()
+    .single();
+  if (error) throw new Error(error.message);
+  await registrarHistorico(supabase, projectId, `clipe:${clipe.ordem}`, clipe, salvo);
+  return salvo;
+}
+
+/** Redistribui o roteiro entre os clipes, unindo ou separando conforme o modo. */
+export async function ajustarClipes(
+  projectId: string,
+  scriptId: string,
+  modo: "redistribuir" | "unir" | "separar",
+  ordem?: number,
+) {
+  const supabase = await db();
+  const ctx = await loadContext(supabase, projectId);
+  const { data: script, error } = await supabase
+    .from("scripts")
+    .select("*")
+    .eq("id", scriptId)
+    .single();
+  if (error) throw new Error(error.message);
+  const cta = ctx.project.cta ?? script.cta ?? "";
+
+  let novos: ClipePlanejado[];
+  if (modo === "redistribuir") {
+    novos = planejarRoteiro(
+      { cenas: script.cenas ?? [], cta: script.cta },
+      ctx.character,
+      cta,
+    ).clipes;
+  } else {
+    const grupos = gruposDoScript(script);
+    if (!grupos.length) {
+      novos = planejarRoteiro(
+        { cenas: script.cenas ?? [], cta: script.cta },
+        ctx.character,
+        cta,
+      ).clipes;
+    } else if (modo === "unir") {
+      novos = unirComAnterior(grupos, ordem ?? 2);
+    } else {
+      novos = separarClipe(grupos, ordem ?? 1);
+    }
+    if (!novos.length) novos = montarClipes(grupos);
+  }
+
+  const clipes = await regravarPlano(supabase, ctx, script, novos, cta);
+  await registrarHistorico(supabase, projectId, `clipes:${modo}`, null, {
+    scriptId,
+    total: novos.length,
+  });
+  return clipes;
 }

@@ -12,9 +12,12 @@ export function PassoPersonagem({
   onSelecionar,
 }: {
   selecionada: string | null;
-  onSelecionar: (id: string) => void;
+  onSelecionar: (id: string, nome: string) => void;
 }) {
-  const { data, isLoading } = useQuery({ queryKey: ["characters"], queryFn: () => listar("characters") });
+  const { data, isLoading } = useQuery({
+    queryKey: ["characters"],
+    queryFn: () => listar("characters"),
+  });
 
   if (isLoading) {
     return (
@@ -50,7 +53,9 @@ export function PassoPersonagem({
             key={p.id}
             className={cn(
               "surface flex flex-col overflow-hidden p-0 interactive",
-              ativa ? "border-primary shadow-lift ring-1 ring-primary/40" : "hover:border-primary/40",
+              ativa
+                ? "border-primary shadow-lift ring-1 ring-primary/40"
+                : "hover:border-primary/40",
             )}
           >
             <div className="aspect-[4/5] w-full overflow-hidden bg-secondary/60">
@@ -73,7 +78,8 @@ export function PassoPersonagem({
                 {ativa ? <Check className="size-4 shrink-0 text-primary" /> : null}
               </div>
               <p className="text-xs text-muted-foreground">
-                {[p.nicho, p.idade ? `${p.idade} anos` : null].filter(Boolean).join(" · ") || "Nicho não definido"}
+                {[p.nicho, p.idade ? `${p.idade} anos` : null].filter(Boolean).join(" · ") ||
+                  "Nicho não definido"}
               </p>
               <p className="line-clamp-3 text-xs text-muted-foreground">
                 {p.biografia || "Biografia ainda não cadastrada."}
@@ -84,7 +90,7 @@ export function PassoPersonagem({
               <Button
                 className="mt-auto w-full"
                 variant={ativa ? "default" : "outline"}
-                onClick={() => onSelecionar(p.id)}
+                onClick={() => onSelecionar(p.id, p.nome_exibicao || p.nome || "")}
               >
                 {ativa ? "PERSONAGEM SELECIONADA" : "USAR ESTA PERSONAGEM"}
               </Button>

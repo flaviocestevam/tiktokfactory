@@ -2,24 +2,14 @@
 // Núcleo do fluxo TikTok Factory (somente servidor).
 import { descreverPersonagem, descreverProduto, type ProjectContext } from "./generation.server";
 
-export const PALAVRAS_POR_SEGUNDO = 2.7;
-
-export function contarPalavras(texto: string) {
-  return texto.split(/\s+/).filter(Boolean).length;
-}
-
-export function avaliarDuracao(fala: string, alvo: number) {
-  const palavras = contarPalavras(fala);
-  const estimada = Math.round((palavras / PALAVRAS_POR_SEGUNDO) * 10) / 10;
-  const razao = alvo > 0 ? estimada / alvo : 0;
-  const status =
-    razao > 1.15 ? "provavelmente longo" : razao > 1 ? "próximo do limite" : razao < 0.6 ? "muito curto" : "adequado";
-  return { palavras, estimada, status, palavras_por_segundo: PALAVRAS_POR_SEGUNDO };
-}
+export { contarPalavras } from "./clipes.server";
 
 export function falaDoRoteiro(roteiro: any): string {
   const cenas = Array.isArray(roteiro?.cenas) ? roteiro.cenas : [];
-  return cenas.map((c: any) => String(c?.fala ?? "")).filter(Boolean).join(" ");
+  return cenas
+    .map((c: any) => String(c?.fala ?? ""))
+    .filter(Boolean)
+    .join(" ");
 }
 
 function contextoFluxo(ctx: ProjectContext, cta: string) {
@@ -27,7 +17,7 @@ function contextoFluxo(ctx: ProjectContext, cta: string) {
   return [
     descreverProduto(ctx.product),
     descreverPersonagem(ctx.character),
-    `FORMATO: TikTok Shop, vertical 9:16, português do Brasil. Duração alvo: ${p.duracao ?? 30} segundos.`,
+    "FORMATO: TikTok Shop, vertical 9:16, português do Brasil. NÃO existe duração alvo: escreva o que for necessário para vender bem. O sistema calcula a duração depois e divide o vídeo em clipes.",
     `CTA ESCOLHIDO PELO USUÁRIO (use exatamente esta intenção no fecho): ${cta || "criar um CTA adequado ao produto"}`,
     p.cenario_texto ? `CENÁRIO: ${p.cenario_texto}` : "",
     p.nivel_energia ? `Nível de energia: ${p.nivel_energia}` : "",
@@ -44,12 +34,15 @@ function contextoFluxo(ctx: ProjectContext, cta: string) {
 /* ─────────── Prompt da foto inicial ─────────── */
 
 export function promptFotoInicial(ctx: ProjectContext, ajuste?: string) {
-  const imagemProduto = ctx.project.imagem_produto_referencia || ctx.product?.imagem_principal || "";
+  const imagemProduto =
+    ctx.project.imagem_produto_referencia || ctx.product?.imagem_principal || "";
   return {
     system:
       "Você escreve prompts técnicos de geração de imagem em inglês, para o GPT criar uma foto realista de influenciadora segurando um produto. Nomes próprios e textos de embalagem permanecem como estão.",
     prompt: `${descreverProduto(ctx.product)}\n\n${descreverPersonagem(ctx.character)}\n\n${
-      imagemProduto ? `IMAGEM PRINCIPAL DO PRODUTO (referência visual obrigatória): ${imagemProduto}\n` : ""
+      imagemProduto
+        ? `IMAGEM PRINCIPAL DO PRODUTO (referência visual obrigatória): ${imagemProduto}\n`
+        : ""
     }${ctx.project.cenario_texto ? `CENÁRIO PEDIDO: ${ctx.project.cenario_texto}\n` : ""}${
       ajuste ? `AJUSTE PEDIDO PELO USUÁRIO: ${ajuste}\n` : ""
     }
@@ -85,7 +78,6 @@ export const ANGULOS = [
 const SHAPE_ROTEIRO = `{"angulo_nome":"","objetivo":"","publico":"","emocao":"","gancho_falado":"","gancho_visual":"","cenas":[{"inicio":0,"fim":3,"fala":"","acao":"","movimento_corpo":"","movimento_maos":"","expressao":"","posicao_produto":"","direcao_olhar":"","camera":"","texto_na_tela":""}],"demonstracao":"","cta":"","legenda":"","hashtags":""}`;
 
 export function promptTresRoteiros(ctx: ProjectContext, cta: string) {
-  const dur = ctx.project.duracao ?? 30;
   return {
     system:
       "Você é roteirista brasileira de vídeos de venda para TikTok Shop. Escreve fala falada, natural e curta, como uma criadora real conversando com a câmera. Nada de locução publicitária, formalidade, palavras difíceis, frases longas ou texto robótico.",
@@ -95,7 +87,7 @@ Crie TRÊS roteiros REALMENTE diferentes entre si — gancho diferente, ângulo 
 
 ${ANGULOS.map((a) => `ROTEIRO ${a.variante} — ${a.nome}\nEstrutura obrigatória: ${a.estrutura}`).join("\n\n")}
 
-Cada roteiro deve caber em ${dur} segundos: aproximadamente ${Math.round(dur * PALAVRAS_POR_SEGUNDO)} palavras de fala no total, com cenas cronometradas somando exatamente ${dur} segundos.
+Não existe limite de duração. Escreva o roteiro completo necessário para apresentar, demonstrar e vender o produto, com começo, demonstração e fecho. Divida em cenas curtas e naturais (cada cena com uma ideia). Os campos "inicio" e "fim" são apenas uma referência aproximada em segundos.
 Hashtags: no máximo 6, específicas do produto e do nicho.
 A fala deve obedecer integralmente à biografia e ao estilo de comunicação da personagem.
 Nunca escreva na fala pública qualquer aviso sobre dados faltantes: simplesmente não mencione o que não foi confirmado.`,
@@ -103,8 +95,12 @@ Nunca escreva na fala pública qualquer aviso sobre dados faltantes: simplesment
   };
 }
 
-export function promptRoteiroUnico(ctx: ProjectContext, cta: string, variante: number, instrucao?: string) {
-  const dur = ctx.project.duracao ?? 30;
+export function promptRoteiroUnico(
+  ctx: ProjectContext,
+  cta: string,
+  variante: number,
+  instrucao?: string,
+) {
   const angulo = ANGULOS.find((a) => a.variante === variante) ?? ANGULOS[0];
   return {
     system:
@@ -113,27 +109,80 @@ export function promptRoteiroUnico(ctx: ProjectContext, cta: string, variante: n
 
 Crie UM roteiro no ângulo "${angulo.nome}".
 Estrutura obrigatória: ${angulo.estrutura}
-Duração alvo: ${dur} segundos (~${Math.round(dur * PALAVRAS_POR_SEGUNDO)} palavras de fala).
+Sem limite de duração: escreva o necessário, em cenas curtas e naturais.
 ${instrucao ? `AJUSTE PEDIDO: ${instrucao}` : ""}`,
     shape: SHAPE_ROTEIRO,
   };
 }
 
-/* ─────────── Prompt do Google Flow ─────────── */
+/* ─────────── Prompts por clipe (Google Flow / Gemini Omni Flash) ─────────── */
 
-export function promptFlow(ctx: ProjectContext, roteiro: any, cta: string) {
-  const dur = ctx.project.duracao ?? 30;
+const REGRAS_CONTINUIDADE = `Cada prompt deve preservar rigorosamente: a mesma personagem, o mesmo rosto, a mesma pele, o mesmo cabelo, a mesma roupa, o mesmo cenário, a mesma iluminação, o mesmo produto, a mesma embalagem, a mesma mão segurando o produto, a posição corporal aproximada, a continuidade do movimento, da expressão e da câmera.
+Proibido: redesenhar o rótulo, inventar textos, duplicar ou sumir com o produto, deformar mãos e dedos, trocar de roupa, cenário ou enquadramento sem instrução, adicionar pessoas ou objetos.`;
+
+const SHAPE_CLIPE = `{"ordem":1,"estado_inicial":"","fala_exata":"","acao":"","gesto":"","expressao":"","posicao_produto":"","camera":"","estado_final":"","ligacao_proximo":"","continuidade":"","restricoes":"","prompt_negativo":"","prompt_flow":""}`;
+
+function listaClipes(clipes: any[]) {
+  return clipes
+    .map(
+      (c: any) =>
+        `CLIPE ${c.ordem} — ${c.duracao} segundos\nFala exata (não altere uma palavra): ${c.fala || "(sem fala, só ação)"}\nAções e cenas de referência: ${JSON.stringify(
+          c.unidades?.map((u: any) => u.cena) ?? [],
+        ).slice(0, 1500)}`,
+    )
+    .join("\n\n");
+}
+
+export function promptClipes(ctx: ProjectContext, roteiro: any, clipes: any[], cta: string) {
   return {
     system:
-      "Você escreve prompts de vídeo para o Google Flow partindo de uma foto inicial já existente. Estruture em blocos claros. As falas ficam em português do Brasil; o restante em inglês técnico.",
+      "Você escreve prompts de vídeo para o Google Flow (Gemini Omni Flash), clipe a clipe, partindo de uma foto inicial já existente. As falas ficam em português do Brasil; o restante em inglês técnico. Estruture em blocos claros.",
     prompt: `${contextoFluxo(ctx, cta)}
 
-ROTEIRO BASE (use a fala exatamente como está):
-${JSON.stringify(roteiro).slice(0, 8000)}
+O vídeo será produzido em ${clipes.length} clipes individuais e depois unido no Scenebuilder.
+O CLIPE 1 usa a foto já enviada como primeiro frame. Cada clipe seguinte usa o ÚLTIMO FRAME do clipe anterior como primeiro frame — descreva isso explicitamente no prompt.
 
-Crie o prompt do Google Flow para animar a foto enviada como PRIMEIRO FRAME, com ${dur} segundos, vertical 9:16.
-O prompt deve instruir explicitamente: usar a imagem enviada como primeiro frame; preservar a mesma personagem, o rosto exato, pele, olhos, cabelo, corpo, roupa, cenário e iluminação; preservar o produto com embalagem, cores e proporções; não redesenhar o rótulo; não inventar textos; não duplicar o produto; não fazer o produto desaparecer; mãos naturais e dedos corretos; contato visual com a câmera quando necessário; sincronização labial com a fala; movimentos naturais e contidos; sem deformações; sem adicionar pessoas ou objetos; sem mudar o enquadramento sem instrução; sem cortes impossíveis.`,
-    shape: `{"prompt_flow":"","descricao_geral":"","duracao":"","imagem_inicial":"","fala_exata":"","cenas":"","acoes":"","gestos":"","expressoes":"","camera":"","produto":"","continuidade":"","sincronizacao_labial":"","prompt_negativo":"","restricoes":""}`,
+${REGRAS_CONTINUIDADE}
+
+ROTEIRO BASE:
+${JSON.stringify(roteiro).slice(0, 6000)}
+
+PLANO DE CLIPES (respeite a divisão e a fala exata de cada clipe):
+${listaClipes(clipes)}
+
+Para CADA clipe devolva: estado inicial, fala exata, ação, gesto, expressão, posição do produto, câmera, estado final, ligação com o próximo clipe, continuidade, restrições, prompt negativo e o prompt final pronto para colar no Google Flow (campo prompt_flow, completo e autossuficiente, incluindo a duração do clipe e o formato vertical 9:16).`,
+    shape: `{"clipes":[${SHAPE_CLIPE}]}`,
+  };
+}
+
+export function promptClipeUnico(
+  ctx: ProjectContext,
+  roteiro: any,
+  clipe: any,
+  anterior: any,
+  proximo: any,
+  cta: string,
+  instrucao?: string,
+) {
+  return {
+    system:
+      "Você escreve prompts de vídeo para o Google Flow (Gemini Omni Flash) para UM clipe específico dentro de uma sequência. As falas ficam em português do Brasil; o restante em inglês técnico.",
+    prompt: `${contextoFluxo(ctx, cta)}
+
+${REGRAS_CONTINUIDADE}
+
+ROTEIRO BASE:
+${JSON.stringify(roteiro).slice(0, 4000)}
+
+${anterior ? `CLIPE ANTERIOR (${anterior.ordem}) terminou assim: ${anterior.estado_final ?? ""}\nFala anterior: ${anterior.fala ?? ""}` : "Este é o PRIMEIRO clipe: usa a foto enviada como primeiro frame."}
+${proximo ? `PRÓXIMO CLIPE começa com a fala: ${proximo.fala ?? ""}` : "Este é o ÚLTIMO clipe: fecha com o CTA."}
+
+CLIPE ${clipe.ordem} — ${clipe.duracao} segundos
+Fala: ${clipe.fala || "(sem fala, só ação)"}
+${instrucao ? `AJUSTE PEDIDO PELO USUÁRIO: ${instrucao}` : ""}
+
+Devolva o clipe completo, com o prompt final pronto para colar no Google Flow.`,
+    shape: SHAPE_CLIPE,
   };
 }
 
@@ -149,5 +198,8 @@ export function textoRoteiro(roteiro: any) {
 
 export function linhasCena(roteiro: any, campo: string) {
   const cenas = Array.isArray(roteiro?.cenas) ? roteiro.cenas : [];
-  return cenas.map((c: any) => c?.[campo]).filter(Boolean).join("\n");
+  return cenas
+    .map((c: any) => c?.[campo])
+    .filter(Boolean)
+    .join("\n");
 }

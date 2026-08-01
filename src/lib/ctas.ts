@@ -10,7 +10,7 @@ export const CTAS = [
 export const CTA_AUTOMATICO = "auto";
 export const CTA_PERSONALIZADO = "personalizado";
 
-export const DURACOES_FLUXO = [15, 20, 30, 45, 60] as const;
+export const TAMANHOS_CLIPE = [4, 6, 8, 10] as const;
 
 export const ETAPAS = [
   { numero: 1, titulo: "Personagem" },

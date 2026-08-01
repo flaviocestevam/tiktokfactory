@@ -242,6 +242,99 @@ export type Database = {
         }
         Relationships: []
       }
+      clips: {
+        Row: {
+          acao: string | null
+          camera: string | null
+          continuidade: string | null
+          created_at: string
+          duracao: number
+          duracao_estimada: number | null
+          duracao_fala: number | null
+          estado_final: string | null
+          estado_inicial: string | null
+          expressao: string | null
+          fala: string | null
+          gesto: string | null
+          id: string
+          ligacao_proximo: string | null
+          ordem: number
+          palavras: number | null
+          posicao_produto: string | null
+          project_id: string
+          prompt_flow: string | null
+          prompt_negativo: string | null
+          restricoes: string | null
+          script_id: string
+          updated_at: string
+        }
+        Insert: {
+          acao?: string | null
+          camera?: string | null
+          continuidade?: string | null
+          created_at?: string
+          duracao: number
+          duracao_estimada?: number | null
+          duracao_fala?: number | null
+          estado_final?: string | null
+          estado_inicial?: string | null
+          expressao?: string | null
+          fala?: string | null
+          gesto?: string | null
+          id?: string
+          ligacao_proximo?: string | null
+          ordem: number
+          palavras?: number | null
+          posicao_produto?: string | null
+          project_id: string
+          prompt_flow?: string | null
+          prompt_negativo?: string | null
+          restricoes?: string | null
+          script_id: string
+          updated_at?: string
+        }
+        Update: {
+          acao?: string | null
+          camera?: string | null
+          continuidade?: string | null
+          created_at?: string
+          duracao?: number
+          duracao_estimada?: number | null
+          duracao_fala?: number | null
+          estado_final?: string | null
+          estado_inicial?: string | null
+          expressao?: string | null
+          fala?: string | null
+          gesto?: string | null
+          id?: string
+          ligacao_proximo?: string | null
+          ordem?: number
+          palavras?: number | null
+          posicao_produto?: string | null
+          project_id?: string
+          prompt_flow?: string | null
+          prompt_negativo?: string | null
+          restricoes?: string | null
+          script_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clips_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clips_script_id_fkey"
+            columns: ["script_id"]
+            isOneToOne: false
+            referencedRelation: "scripts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       image_prompts: {
         Row: {
           continuidade: string | null
@@ -614,6 +707,8 @@ export type Database = {
           cta: string | null
           dialogo: string | null
           duracao_estimada: number | null
+          duracao_fala: number | null
+          duracao_total: number | null
           emocao: string | null
           gancho: string | null
           gancho_visual: string | null
@@ -621,8 +716,10 @@ export type Database = {
           id: string
           legenda: string | null
           movimentos_camera: string | null
+          num_clipes: number | null
           objetivo: string | null
           palavras: number | null
+          plano_clipes: Json | null
           project_id: string
           publico: string | null
           roteiro_completo: string | null
@@ -640,6 +737,8 @@ export type Database = {
           cta?: string | null
           dialogo?: string | null
           duracao_estimada?: number | null
+          duracao_fala?: number | null
+          duracao_total?: number | null
           emocao?: string | null
           gancho?: string | null
           gancho_visual?: string | null
@@ -647,8 +746,10 @@ export type Database = {
           id?: string
           legenda?: string | null
           movimentos_camera?: string | null
+          num_clipes?: number | null
           objetivo?: string | null
           palavras?: number | null
+          plano_clipes?: Json | null
           project_id: string
           publico?: string | null
           roteiro_completo?: string | null
@@ -666,6 +767,8 @@ export type Database = {
           cta?: string | null
           dialogo?: string | null
           duracao_estimada?: number | null
+          duracao_fala?: number | null
+          duracao_total?: number | null
           emocao?: string | null
           gancho?: string | null
           gancho_visual?: string | null
@@ -673,8 +776,10 @@ export type Database = {
           id?: string
           legenda?: string | null
           movimentos_camera?: string | null
+          num_clipes?: number | null
           objetivo?: string | null
           palavras?: number | null
+          plano_clipes?: Json | null
           project_id?: string
           publico?: string | null
           roteiro_completo?: string | null
