@@ -180,7 +180,7 @@ export function ProductForm({
           </label>
         </div>
         {valores.imagens?.length ? (
-          {/* Grade fluida: colunas nascem conforme a largura, sem breakpoints rígidos */}
+          // Grade fluida: colunas nascem conforme a largura, sem breakpoints rígidos
           <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(5.5rem,1fr))] gap-3">
             {valores.imagens.map((url) => (
               <div key={url} className="group relative overflow-hidden rounded-lg border border-border">
@@ -191,7 +191,7 @@ export function ProductForm({
                   onClick={() =>
                     onChange({ ...valores, imagens: (valores.imagens ?? []).filter((u) => u !== url) })
                   }
-                  className="absolute right-1 top-1 rounded-md bg-background/85 p-1 opacity-0 transition-opacity group-hover:opacity-100"
+                  className="absolute right-1 top-1 rounded-md bg-background/85 p-1.5 opacity-100 transition-opacity group-hover:opacity-100 sm:opacity-0"
                 >
                   <Trash2 className="size-3.5 text-destructive" />
                 </button>
