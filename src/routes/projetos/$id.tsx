@@ -201,8 +201,8 @@ function Projeto() {
               <h3 className="mb-2 text-sm font-semibold">Alternativas de gancho</h3>
               <ul className="space-y-2">
                 {alternativas.map((a) => (
-                  <li key={a} className="flex items-start justify-between gap-3 text-sm">
-                    <span>{a}</span>
+                  <li key={a} className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 text-sm">
+                    <span className="min-w-0 break-words">{a}</span>
                     <CopyButton value={a} size="icon" />
                   </li>
                 ))}
