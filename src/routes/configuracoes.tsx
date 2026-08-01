@@ -31,7 +31,6 @@ function Configuracoes() {
       produtos: await contar("products"),
       personagens: await contar("characters"),
       projetos: await contar("projects"),
-      templates: await contar("templates"),
     }),
   });
 
@@ -41,7 +40,6 @@ function Configuracoes() {
     { rotulo: "Produtos", valor: resumo.data?.produtos ?? 0 },
     { rotulo: "Personagens", valor: resumo.data?.personagens ?? 0 },
     { rotulo: "Projetos", valor: resumo.data?.projetos ?? 0 },
-    { rotulo: "Templates", valor: resumo.data?.templates ?? 0 },
   ];
 
   return (

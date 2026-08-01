@@ -1,7 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
-  FileText,
   FolderKanban,
   Menu,
   Package,
@@ -20,7 +19,6 @@ const NAV = [
   { to: "/personagens", label: "Personagens", icon: Users },
   { to: "/produtos", label: "Produtos", icon: Package },
   { to: "/projetos", label: "Histórico", icon: FolderKanban },
-  { to: "/templates", label: "Templates", icon: FileText },
   { to: "/configuracoes", label: "Configurações", icon: Settings },
 ] as const;
 
