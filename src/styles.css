@@ -128,6 +128,12 @@
     border-color: var(--color-border);
   }
 
+  html {
+    /* Bloqueia scroll horizontal indesejado em qualquer resolução */
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
