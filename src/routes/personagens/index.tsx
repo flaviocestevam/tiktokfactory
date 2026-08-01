@@ -1,7 +1,10 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { Lock, Users } from "lucide-react";
+import { Link, createFileRoute } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { BadgeCheck, ImagePlus, Lock, Users } from "lucide-react";
+import { toast } from "sonner";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { removerFoto } from "@/lib/fotos";
 import { PageHeader } from "@/components/AppShell";
 import { EmptyState } from "@/components/EmptyState";
 import { Badge } from "@/components/ui/badge";
@@ -24,8 +27,20 @@ export const Route = createFileRoute("/personagens/")({
 });
 
 function Personagens() {
+  const queryClient = useQueryClient();
   const { data, isLoading } = useQuery({ queryKey: ["characters"], queryFn: () => listar("characters") });
   const [aberta, setAberta] = useState<string | null>(null);
+  const [ampliada, setAmpliada] = useState<string | null>(null);
+
+  const remover = useMutation({
+    mutationFn: (characterId: string) => removerFoto(characterId, "canonica"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["characters"] });
+      queryClient.invalidateQueries({ queryKey: ["character"] });
+      toast.success("Foto removida.");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   return (
     <>
@@ -51,6 +66,55 @@ function Personagens() {
             const expandida = aberta === c.id;
             return (
               <article key={c.id} className="surface flex flex-col gap-3 p-5">
+                <div className="overflow-hidden rounded-2xl border border-border bg-secondary/40">
+                  {c.foto_canonica_principal ? (
+                    <img
+                      src={c.foto_canonica_principal}
+                      alt={`Foto canônica de ${c.nome_exibicao || c.nome}`}
+                      loading="lazy"
+                      className="aspect-[3/4] w-full object-contain"
+                    />
+                  ) : (
+                    <div className="flex aspect-[3/4] w-full flex-col items-center justify-center gap-2 p-6 text-center">
+                      <ImagePlus className="size-7 text-muted-foreground" />
+                      <p className="text-xs text-muted-foreground">Foto canônica ainda não cadastrada</p>
+                    </div>
+                  )}
+                </div>
+
+                {c.foto_canonica_principal ? (
+                  <div className="grid grid-cols-3 gap-2">
+                    <Button asChild size="sm" variant="outline" className="min-h-11">
+                      <Link to="/personagens/$id" params={{ id: c.id }}>
+                        TROCAR
+                      </Link>
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="min-h-11"
+                      onClick={() => setAmpliada(c.foto_canonica_principal)}
+                    >
+                      VER
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="min-h-11 text-destructive"
+                      disabled={remover.isPending}
+                      onClick={() => remover.mutate(c.id)}
+                    >
+                      REMOVER
+                    </Button>
+                  </div>
+                ) : (
+                  <Button asChild className="min-h-11 w-full">
+                    <Link to="/personagens/$id" params={{ id: c.id }}>
+                      <ImagePlus className="size-4" /> CADASTRAR FOTO
+                    </Link>
+                  </Button>
+                )}
+
                 <header className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
                   <div className="min-w-0">
                     <h2 className="break-words text-lg font-semibold">{c.nome_exibicao || c.nome}</h2>
@@ -58,9 +122,14 @@ function Personagens() {
                       {[c.nicho, c.idade ? `${c.idade} anos` : null, c.cidade_natal].filter(Boolean).join(" · ")}
                     </p>
                   </div>
-                  <Badge variant="secondary" className="shrink-0">
-                    v{c.identity_version}
-                  </Badge>
+                  <div className="flex shrink-0 flex-col items-end gap-1">
+                    <Badge variant="secondary">v{c.identity_version}</Badge>
+                    {c.identidade_visual_confirmada ? (
+                      <Badge className="gap-1">
+                        <BadgeCheck className="size-3" /> Confirmada
+                      </Badge>
+                    ) : null}
+                  </div>
                 </header>
 
                 <p className="text-sm leading-relaxed text-muted-foreground">{c.biografia}</p>
@@ -98,18 +167,34 @@ function Personagens() {
                   </div>
                 ) : null}
 
-                <Button
-                  variant="outline"
-                  className="mt-auto w-full"
-                  onClick={() => setAberta(expandida ? null : c.id)}
-                >
-                  {expandida ? "OCULTAR FICHA COMPLETA" : "VER FICHA COMPLETA"}
-                </Button>
+                <div className="mt-auto space-y-2">
+                  <Button asChild className="min-h-11 w-full" variant="secondary">
+                    <Link to="/personagens/$id" params={{ id: c.id }}>
+                      EDITAR PERSONAGEM
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="min-h-11 w-full"
+                    onClick={() => setAberta(expandida ? null : c.id)}
+                  >
+                    {expandida ? "OCULTAR FICHA COMPLETA" : "VER FICHA COMPLETA"}
+                  </Button>
+                </div>
               </article>
             );
           })}
         </div>
       )}
+
+      <Dialog open={!!ampliada} onOpenChange={(o) => !o && setAmpliada(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogTitle className="sr-only">Foto da personagem</DialogTitle>
+          {ampliada ? (
+            <img src={ampliada} alt="Foto canônica ampliada" className="max-h-[80vh] w-full object-contain" />
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
