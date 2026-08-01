@@ -155,11 +155,6 @@ function Personagens() {
                 ) : null}
 
                 <div className="mt-auto space-y-2">
-                  <Button asChild className="min-h-11 w-full" variant="secondary">
-                    <Link to="/personagens/$id" params={{ id: c.id }}>
-                      EDITAR PERSONAGEM
-                    </Link>
-                  </Button>
                   <Button
                     variant="outline"
                     className="min-h-11 w-full"
