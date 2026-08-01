@@ -70,7 +70,8 @@ function Dashboard() {
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      {/* Bento fluido: 2 col no mobile, cresce por ponto de quebra do conteúdo */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-6">
         <Metrica indice={0} titulo="Projetos" valor={projetos.data?.length} icon={FolderKanban} to="/projetos" />
         <Metrica indice={1} titulo="Produtos" valor={produtos.data?.length} icon={Package} to="/produtos" />
         <Metrica indice={2} titulo="Personagens" valor={personagens.data?.length} icon={Users} to="/personagens" />
@@ -85,21 +86,21 @@ function Dashboard() {
         />
       </div>
 
-      <section className="mt-16">
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <section className="mt-[clamp(2.5rem,6vw,4rem)]">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-xl font-semibold">Projetos recentes</h2>
-          <div className="flex gap-3">
-            <div className="relative">
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="relative min-w-0">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
                 placeholder="Buscar projeto"
-                className="w-full pl-9 sm:w-56"
+                className="h-11 w-full pl-9 sm:w-56"
               />
             </div>
             <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="h-11 w-full sm:w-40">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
