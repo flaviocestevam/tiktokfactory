@@ -81,7 +81,8 @@ export function AppShell({ children }: { children: ReactNode }) {
             className="absolute inset-0 bg-background/80 backdrop-blur-sm"
             onClick={() => setAberto(false)}
           />
-          <aside className="absolute inset-y-0 left-0 flex w-72 flex-col border-r border-sidebar-border bg-sidebar px-4 py-6">
+          {/* Drawer nunca ultrapassa a viewport em telas muito estreitas */}
+          <aside className="absolute inset-y-0 left-0 flex w-[min(18rem,85vw)] flex-col overflow-y-auto overscroll-contain border-r border-sidebar-border bg-sidebar px-4 py-6">
             <div className="flex items-center justify-between">
               <Brand />
               <Button variant="ghost" size="icon" onClick={() => setAberto(false)}>
@@ -94,13 +95,16 @@ export function AppShell({ children }: { children: ReactNode }) {
       ) : null}
 
       <div className="lg:pl-64">
-        <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-background/70 px-4 py-3 backdrop-blur-xl lg:hidden">
+        <header className="sticky top-0 z-20 flex min-h-14 items-center gap-3 border-b border-border bg-background/70 px-4 py-2 backdrop-blur-xl lg:hidden">
           <Button variant="ghost" size="icon" onClick={() => setAberto(true)} aria-label="Abrir menu">
             <Menu className="size-5" />
           </Button>
           <Brand compact />
         </header>
-        <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-8 lg:py-14">{children}</main>
+        {/* Padding fluido: acompanha a largura entre mobile e ultrawide */}
+        <main className="mx-auto w-full max-w-6xl px-[clamp(1rem,4vw,2rem)] py-[clamp(1.5rem,4vw,3.5rem)]">
+          {children}
+        </main>
       </div>
     </div>
   );
