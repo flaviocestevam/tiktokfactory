@@ -188,12 +188,16 @@ function Metrica({
   indice?: number;
 }) {
   const conteudo = (
-    <div className="surface interactive h-full p-5 hover:border-primary/35 hover:shadow-lift">
+    <div className="surface interactive h-full p-4 sm:p-5 hover:border-primary/35 hover:shadow-lift">
       <div className="flex items-center justify-between">
-        <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{titulo}</span>
-        <Icon className="size-4 text-accent transition-transform duration-500 group-hover:scale-110" />
+        <span className="min-w-0 truncate text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+          {titulo}
+        </span>
+        <Icon className="size-4 shrink-0 text-accent transition-transform duration-500 group-hover:scale-110" />
       </div>
-      <p className="mt-4 font-display text-3xl font-bold tracking-[-0.03em] tabular-nums">{valor ?? "—"}</p>
+      <p className="mt-3 font-display text-[clamp(1.5rem,1.1rem+1.6vw,2rem)] font-bold tracking-[-0.03em] tabular-nums sm:mt-4">
+        {valor ?? "—"}
+      </p>
       {sub ? <p className="mt-1.5 text-xs text-muted-foreground">{sub}</p> : null}
     </div>
   );
