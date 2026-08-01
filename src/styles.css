@@ -228,6 +228,24 @@
   animation: var(--animate-rise);
 }
 
+/* Alvo de toque acessível (44x44) para botões só de ícone */
+@utility touch-target {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+  border-radius: var(--radius-md);
+}
+
+/* Scroll horizontal controlado (tabs, chips) sem barra visível */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
