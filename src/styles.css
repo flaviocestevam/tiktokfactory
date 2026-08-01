@@ -162,6 +162,31 @@
     background: oklch(0.685 0.208 12 / 0.3);
   }
 
+  /* Palavras longas (URLs, prompts) não estouram containers estreitos */
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  li {
+    overflow-wrap: anywhere;
+  }
+
+  img,
+  video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Ergonomia touch: alvo mínimo de 44x44px em dispositivos sem mouse */
+  @media (pointer: coarse) {
+    button,
+    [role="tab"],
+    a[data-touch] {
+      min-height: 2.75rem;
+    }
+  }
+
   ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
