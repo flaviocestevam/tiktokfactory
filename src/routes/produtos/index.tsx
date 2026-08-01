@@ -14,9 +14,9 @@ import { excluir as excluirRegistro, formatarData, listar } from "@/lib/queries"
 export const Route = createFileRoute("/produtos/")({
   head: () => ({
     meta: [
-      { title: "Produtos | StudioIA" },
+      { title: "Produtos | TikTok Factory" },
       { name: "description", content: "Cadastre e organize os produtos usados nos seus vídeos." },
-      { property: "og:title", content: "Produtos | StudioIA" },
+      { property: "og:title", content: "Produtos | TikTok Factory" },
       { property: "og:description", content: "Cadastre e organize os produtos usados nos seus vídeos." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

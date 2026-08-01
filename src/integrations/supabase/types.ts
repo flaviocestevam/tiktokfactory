@@ -57,12 +57,17 @@ export type Database = {
           nivel_energia: string | null
           nome: string
           nome_exibicao: string | null
+          objecoes_comuns: string | null
+          palavras_proibidas: string | null
           personalidade: string | null
           profissao: string | null
           prompt_mestre: string | null
           prompt_negativo: string | null
           publico_principal: string | null
           regras_consistencia: string | null
+          regras_flow: string | null
+          regras_imagem: string | null
+          regras_video: string | null
           status: string
           tipo_comunicacao: string | null
           tipos_cta: string | null
@@ -113,12 +118,17 @@ export type Database = {
           nivel_energia?: string | null
           nome: string
           nome_exibicao?: string | null
+          objecoes_comuns?: string | null
+          palavras_proibidas?: string | null
           personalidade?: string | null
           profissao?: string | null
           prompt_mestre?: string | null
           prompt_negativo?: string | null
           publico_principal?: string | null
           regras_consistencia?: string | null
+          regras_flow?: string | null
+          regras_imagem?: string | null
+          regras_video?: string | null
           status?: string
           tipo_comunicacao?: string | null
           tipos_cta?: string | null
@@ -169,12 +179,17 @@ export type Database = {
           nivel_energia?: string | null
           nome?: string
           nome_exibicao?: string | null
+          objecoes_comuns?: string | null
+          palavras_proibidas?: string | null
           personalidade?: string | null
           profissao?: string | null
           prompt_mestre?: string | null
           prompt_negativo?: string | null
           publico_principal?: string | null
           regras_consistencia?: string | null
+          regras_flow?: string | null
+          regras_imagem?: string | null
+          regras_video?: string | null
           status?: string
           tipo_comunicacao?: string | null
           tipos_cta?: string | null
@@ -250,30 +265,45 @@ export type Database = {
           categoria: string | null
           cores: string | null
           created_at: string
+          cupom: string | null
           dados_adicionais: string | null
           dados_extraidos: Json
+          desconto: string | null
           descricao: string | null
+          descricao_colada: string | null
           diferenciais: string | null
           duvidas_frequentes: string | null
           entrega: string | null
+          frete: string | null
           garantias: string | null
           id: string
+          imagem_principal: string | null
           imagens: Json
+          imagens_enviadas: Json
           informacoes_tecnicas: string | null
           ingredientes: string | null
+          last_analyzed_at: string | null
           link: string | null
           marca: string | null
           modo_de_uso: string | null
           nome: string
+          numero_avaliacoes: string | null
           oferta: string | null
+          origem_dados: Json
+          original_tiktok_url: string | null
           preco: string | null
           preco_promocional: string | null
           publico: string | null
+          quantidade_vendida: string | null
+          resolved_tiktok_url: string | null
           restricoes: string | null
           status_extracao: string
           tamanho: string | null
+          tiktok_product_id: string | null
+          tiktok_region: string | null
           updated_at: string
           variacoes: string | null
+          vendedor: string | null
         }
         Insert: {
           advertencias?: string | null
@@ -283,30 +313,45 @@ export type Database = {
           categoria?: string | null
           cores?: string | null
           created_at?: string
+          cupom?: string | null
           dados_adicionais?: string | null
           dados_extraidos?: Json
+          desconto?: string | null
           descricao?: string | null
+          descricao_colada?: string | null
           diferenciais?: string | null
           duvidas_frequentes?: string | null
           entrega?: string | null
+          frete?: string | null
           garantias?: string | null
           id?: string
+          imagem_principal?: string | null
           imagens?: Json
+          imagens_enviadas?: Json
           informacoes_tecnicas?: string | null
           ingredientes?: string | null
+          last_analyzed_at?: string | null
           link?: string | null
           marca?: string | null
           modo_de_uso?: string | null
           nome: string
+          numero_avaliacoes?: string | null
           oferta?: string | null
+          origem_dados?: Json
+          original_tiktok_url?: string | null
           preco?: string | null
           preco_promocional?: string | null
           publico?: string | null
+          quantidade_vendida?: string | null
+          resolved_tiktok_url?: string | null
           restricoes?: string | null
           status_extracao?: string
           tamanho?: string | null
+          tiktok_product_id?: string | null
+          tiktok_region?: string | null
           updated_at?: string
           variacoes?: string | null
+          vendedor?: string | null
         }
         Update: {
           advertencias?: string | null
@@ -316,30 +361,45 @@ export type Database = {
           categoria?: string | null
           cores?: string | null
           created_at?: string
+          cupom?: string | null
           dados_adicionais?: string | null
           dados_extraidos?: Json
+          desconto?: string | null
           descricao?: string | null
+          descricao_colada?: string | null
           diferenciais?: string | null
           duvidas_frequentes?: string | null
           entrega?: string | null
+          frete?: string | null
           garantias?: string | null
           id?: string
+          imagem_principal?: string | null
           imagens?: Json
+          imagens_enviadas?: Json
           informacoes_tecnicas?: string | null
           ingredientes?: string | null
+          last_analyzed_at?: string | null
           link?: string | null
           marca?: string | null
           modo_de_uso?: string | null
           nome?: string
+          numero_avaliacoes?: string | null
           oferta?: string | null
+          origem_dados?: Json
+          original_tiktok_url?: string | null
           preco?: string | null
           preco_promocional?: string | null
           publico?: string | null
+          quantidade_vendida?: string | null
+          resolved_tiktok_url?: string | null
           restricoes?: string | null
           status_extracao?: string
           tamanho?: string | null
+          tiktok_product_id?: string | null
+          tiktok_region?: string | null
           updated_at?: string
           variacoes?: string | null
+          vendedor?: string | null
         }
         Relationships: []
       }
@@ -348,16 +408,24 @@ export type Database = {
           cenario_texto: string | null
           character_id: string | null
           created_at: string
+          cta: string | null
+          cta_tipo: string | null
           duracao: number
           estilo: string | null
+          etapa: number
           formato: string
           id: string
+          image_confirmed: boolean
+          image_prompt_used: string | null
+          imagem_produto_referencia: string | null
           nivel_energia: string | null
           nome: string
           objetivo: string | null
           observacoes: string | null
           plataforma: string
           product_id: string | null
+          reference_image_path: string | null
+          reference_image_url: string | null
           scenario_id: string | null
           status: string
           tom_linguagem: string | null
@@ -368,16 +436,24 @@ export type Database = {
           cenario_texto?: string | null
           character_id?: string | null
           created_at?: string
+          cta?: string | null
+          cta_tipo?: string | null
           duracao?: number
           estilo?: string | null
+          etapa?: number
           formato?: string
           id?: string
+          image_confirmed?: boolean
+          image_prompt_used?: string | null
+          imagem_produto_referencia?: string | null
           nivel_energia?: string | null
           nome: string
           objetivo?: string | null
           observacoes?: string | null
           plataforma?: string
           product_id?: string | null
+          reference_image_path?: string | null
+          reference_image_url?: string | null
           scenario_id?: string | null
           status?: string
           tom_linguagem?: string | null
@@ -388,16 +464,24 @@ export type Database = {
           cenario_texto?: string | null
           character_id?: string | null
           created_at?: string
+          cta?: string | null
+          cta_tipo?: string | null
           duracao?: number
           estilo?: string | null
+          etapa?: number
           formato?: string
           id?: string
+          image_confirmed?: boolean
+          image_prompt_used?: string | null
+          imagem_produto_referencia?: string | null
           nivel_energia?: string | null
           nome?: string
           objetivo?: string | null
           observacoes?: string | null
           plataforma?: string
           product_id?: string | null
+          reference_image_path?: string | null
+          reference_image_url?: string | null
           scenario_id?: string | null
           status?: string
           tom_linguagem?: string | null
@@ -482,56 +566,80 @@ export type Database = {
       scripts: {
         Row: {
           acoes: string | null
+          angulo_nome: string | null
           cenas: Json
           created_at: string
           cta: string | null
           dialogo: string | null
+          duracao_estimada: number | null
+          emocao: string | null
           gancho: string | null
+          gancho_visual: string | null
           hashtags: string | null
           id: string
           legenda: string | null
           movimentos_camera: string | null
+          objetivo: string | null
+          palavras: number | null
           project_id: string
+          publico: string | null
           roteiro_completo: string | null
           rotulo: string | null
           textos_tela: string | null
           updated_at: string
+          variante: number | null
           versao: number
         }
         Insert: {
           acoes?: string | null
+          angulo_nome?: string | null
           cenas?: Json
           created_at?: string
           cta?: string | null
           dialogo?: string | null
+          duracao_estimada?: number | null
+          emocao?: string | null
           gancho?: string | null
+          gancho_visual?: string | null
           hashtags?: string | null
           id?: string
           legenda?: string | null
           movimentos_camera?: string | null
+          objetivo?: string | null
+          palavras?: number | null
           project_id: string
+          publico?: string | null
           roteiro_completo?: string | null
           rotulo?: string | null
           textos_tela?: string | null
           updated_at?: string
+          variante?: number | null
           versao?: number
         }
         Update: {
           acoes?: string | null
+          angulo_nome?: string | null
           cenas?: Json
           created_at?: string
           cta?: string | null
           dialogo?: string | null
+          duracao_estimada?: number | null
+          emocao?: string | null
           gancho?: string | null
+          gancho_visual?: string | null
           hashtags?: string | null
           id?: string
           legenda?: string | null
           movimentos_camera?: string | null
+          objetivo?: string | null
+          palavras?: number | null
           project_id?: string
+          publico?: string | null
           roteiro_completo?: string | null
           rotulo?: string | null
           textos_tela?: string | null
           updated_at?: string
+          variante?: number | null
           versao?: number
         }
         Relationships: [
@@ -676,6 +784,7 @@ export type Database = {
           project_id: string
           prompt_flow: string | null
           restricoes: string | null
+          script_id: string | null
           updated_at: string
           versao: number
         }
@@ -692,6 +801,7 @@ export type Database = {
           project_id: string
           prompt_flow?: string | null
           restricoes?: string | null
+          script_id?: string | null
           updated_at?: string
           versao?: number
         }
@@ -708,6 +818,7 @@ export type Database = {
           project_id?: string
           prompt_flow?: string | null
           restricoes?: string | null
+          script_id?: string | null
           updated_at?: string
           versao?: number
         }
@@ -717,6 +828,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "video_prompts_script_id_fkey"
+            columns: ["script_id"]
+            isOneToOne: false
+            referencedRelation: "scripts"
             referencedColumns: ["id"]
           },
         ]

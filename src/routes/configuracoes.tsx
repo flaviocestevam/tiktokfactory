@@ -7,10 +7,10 @@ import { contar } from "@/lib/queries";
 export const Route = createFileRoute("/configuracoes")({
   head: () => ({
     meta: [
-      { title: "Configurações | StudioIA" },
-      { name: "description", content: "Informações do espaço de trabalho interno do StudioIA." },
-      { property: "og:title", content: "Configurações | StudioIA" },
-      { property: "og:description", content: "Informações do espaço de trabalho interno do StudioIA." },
+      { title: "Configurações | TikTok Factory" },
+      { name: "description", content: "Informações do espaço de trabalho interno do TikTok Factory." },
+      { property: "og:title", content: "Configurações | TikTok Factory" },
+      { property: "og:description", content: "Informações do espaço de trabalho interno do TikTok Factory." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

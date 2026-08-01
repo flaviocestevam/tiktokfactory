@@ -28,9 +28,9 @@ import { criar, listar } from "@/lib/queries";
 export const Route = createFileRoute("/projetos/novo")({
   head: () => ({
     meta: [
-      { title: "Criar novo vídeo | StudioIA" },
+      { title: "Criar novo vídeo | TikTok Factory" },
       { name: "description", content: "Monte um projeto escolhendo produto, cenário, duração e objetivo." },
-      { property: "og:title", content: "Criar novo vídeo | StudioIA" },
+      { property: "og:title", content: "Criar novo vídeo | TikTok Factory" },
       { property: "og:description", content: "Monte um projeto escolhendo produto, cenário, duração e objetivo." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

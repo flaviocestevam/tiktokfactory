@@ -1,0 +1,139 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState } from "react";
+import { AlertTriangle, Clock, Loader2, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
+import { CopyButton } from "@/components/CopyButton";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { regerarRoteiroVariante } from "@/lib/fluxo.functions";
+
+const AJUSTES = [
+  { label: "MAIS CURTO", instrucao: "Reduza a fala para caber com folga na duração alvo." },
+  { label: "MAIS PERSUASIVO", instrucao: "Aumente a persuasão sem inventar informações que não estejam no produto." },
+  { label: "OUTRO GANCHO", instrucao: "Troque completamente o gancho falado e o gancho visual." },
+];
+
+export function PassoRoteiros({
+  projectId,
+  resultados,
+  onAtualizar,
+  onRegerarTudo,
+  gerandoTudo,
+}: {
+  projectId: string;
+  resultados: any[];
+  onAtualizar: () => void;
+  onRegerarTudo: () => void;
+  gerandoTudo?: boolean;
+}) {
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-lg font-semibold">Seus 3 roteiros</h2>
+        <Button variant="outline" className="gap-2" disabled={gerandoTudo} onClick={onRegerarTudo}>
+          {gerandoTudo ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
+          GERAR NOVAS OPÇÕES
+        </Button>
+      </div>
+      <div className="grid gap-5 xl:grid-cols-3">
+        {resultados.map((r) => (
+          <CardRoteiro key={r.script.id} projectId={projectId} item={r} onAtualizar={onAtualizar} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CardRoteiro({
+  projectId,
+  item,
+  onAtualizar,
+}: {
+  projectId: string;
+  item: any;
+  onAtualizar: () => void;
+}) {
+  const [carregando, setCarregando] = useState(false);
+  const [instrucao, setInstrucao] = useState("");
+  const s = item.script;
+  const medida = item.medida ?? {};
+
+  async function regerar(texto?: string) {
+    setCarregando(true);
+    try {
+      await regerarRoteiroVariante({ data: { projectId, scriptId: s.id, instrucao: texto || instrucao || undefined } });
+      setInstrucao("");
+      onAtualizar();
+      toast.success("Roteiro atualizado.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha ao regerar o roteiro.");
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  return (
+    <article className="surface flex flex-col gap-4 p-4 sm:p-5">
+      <header className="space-y-2">
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="min-w-0 break-words font-semibold">{s.angulo_nome || s.rotulo}</h3>
+          <Badge variant="secondary" className="shrink-0">
+            #{s.variante ?? s.versao}
+          </Badge>
+        </div>
+        <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Clock className="size-3.5" />
+          {medida.estimada ?? s.duracao_estimada ?? "—"}s estimados · {medida.palavras ?? s.palavras ?? 0} palavras
+        </p>
+        {medida.excede ? (
+          <p className="flex items-start gap-1.5 rounded-lg bg-destructive/10 p-2 text-xs text-destructive">
+            <AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
+            A fala provavelmente não cabe na duração escolhida. Use "mais curto".
+          </p>
+        ) : null}
+      </header>
+
+      <Bloco titulo="Roteiro" texto={s.roteiro_completo} />
+      <Bloco titulo="Fala exata" texto={s.dialogo} />
+      <Bloco titulo="Prompt do Google Flow" texto={item.videoPrompt?.prompt_flow} />
+
+      <div className="mt-auto space-y-3">
+        <div className="flex flex-wrap gap-2">
+          {AJUSTES.map((a) => (
+            <Button key={a.label} size="sm" variant="secondary" disabled={carregando} onClick={() => regerar(a.instrucao)}>
+              {a.label}
+            </Button>
+          ))}
+        </div>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Input
+            value={instrucao}
+            onChange={(e) => setInstrucao(e.target.value)}
+            placeholder="Peça um ajuste específico"
+            className="h-11"
+          />
+          <Button className="h-11 gap-2" disabled={carregando} onClick={() => regerar()}>
+            {carregando ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
+            AJUSTAR
+          </Button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function Bloco({ titulo, texto }: { titulo: string; texto?: string | null }) {
+  if (!texto) return null;
+  return (
+    <section className="space-y-2">
+      <div className="flex items-center justify-between gap-2">
+        <h4 className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">{titulo}</h4>
+        <CopyButton value={texto} size="icon" />
+      </div>
+      <pre className="max-h-64 overflow-y-auto whitespace-pre-wrap break-words rounded-xl border border-border bg-secondary/40 p-3 text-xs leading-relaxed">
+        {texto}
+      </pre>
+    </section>
+  );
+}

@@ -10,9 +10,9 @@ import { listar } from "@/lib/queries";
 export const Route = createFileRoute("/personagens/")({
   head: () => ({
     meta: [
-      { title: "Personagens | StudioIA" },
+      { title: "Personagens | TikTok Factory" },
       { name: "description", content: "Biblioteca de personagens de IA usadas nos vídeos." },
-      { property: "og:title", content: "Personagens | StudioIA" },
+      { property: "og:title", content: "Personagens | TikTok Factory" },
       { property: "og:description", content: "Biblioteca de personagens de IA usadas nos vídeos." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

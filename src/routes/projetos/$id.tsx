@@ -26,9 +26,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 export const Route = createFileRoute("/projetos/$id")({
   head: () => ({
     meta: [
-      { title: "Projeto | StudioIA" },
+      { title: "Projeto | TikTok Factory" },
       { name: "description", content: "Estratégia, roteiro e prompts de imagem e vídeo do seu projeto." },
-      { property: "og:title", content: "Projeto | StudioIA" },
+      { property: "og:title", content: "Projeto | TikTok Factory" },
       { property: "og:description", content: "Estratégia, roteiro e prompts de imagem e vídeo do seu projeto." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
