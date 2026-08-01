@@ -46,7 +46,7 @@ function Projetos() {
     <>
       <PageHeader
         titulo="Projetos"
-        descricao="Cada projeto reúne produto, personagem, cenário, estratégia, roteiro e prompts."
+        descricao="Cada projeto reúne produto, personagem, foto, estratégia, roteiro e prompts."
         acoes={
           <Button asChild className="gap-2">
             <Link to="/projetos/novo">

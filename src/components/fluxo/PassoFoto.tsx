@@ -11,7 +11,7 @@ import { enviarArquivo } from "@/lib/queries";
 const AJUSTES = [
   { id: "produto", label: "PRODUTO MAIS VISÍVEL", instrucao: "Deixe o produto maior, mais próximo da câmera e com o rótulo totalmente legível." },
   { id: "natural", label: "MAIS NATURAL", instrucao: "Deixe a cena mais espontânea, com pose e expressão menos posadas." },
-  { id: "cenario", label: "MUDAR CENÁRIO", instrucao: "Proponha outro cenário coerente com o produto e o nicho da personagem." },
+  { id: "enquadramento", label: "AJUSTAR ENQUADRAMENTO", instrucao: "Ajuste apenas o enquadramento e a distância da câmera, sem alterar nada mais da cena." },
 ];
 
 export function PassoFoto({
