@@ -2,6 +2,7 @@
 // Núcleo do fluxo TikTok Factory (somente servidor).
 import {
   descreverPersonagem,
+  descreverPersonagemParaRoteiro,
   descreverProduto,
   REGRAS_FOTO_UNICA_FONTE,
   type ProjectContext,
@@ -21,7 +22,7 @@ function contextoFluxo(ctx: ProjectContext, cta: string) {
   const p = ctx.project;
   return [
     descreverProduto(ctx.product),
-    descreverPersonagem(ctx.character),
+    descreverPersonagemParaRoteiro(ctx.character),
     "FORMATO: TikTok Shop, vertical 9:16, português do Brasil. NÃO existe duração alvo: escreva o que for necessário para vender bem. O sistema calcula a duração depois e divide o vídeo em clipes.",
     `CTA ESCOLHIDO PELO USUÁRIO (use exatamente esta intenção no fecho): ${cta || "criar um CTA adequado ao produto"}`,
     REGRAS_FOTO_UNICA_FONTE,
@@ -29,7 +30,7 @@ function contextoFluxo(ctx: ProjectContext, cta: string) {
     p.velocidade_fala ? `Velocidade da fala: ${p.velocidade_fala}` : "",
     p.observacoes ? `Observações do usuário: ${p.observacoes}` : "",
     p.reference_image_url
-      ? "Já existe uma foto inicial confirmada da personagem segurando o produto; ela é o primeiro frame e a única fonte visual do vídeo."
+      ? "A foto enviada neste projeto é a única fonte visual do vídeo e o primeiro frame. Não existe nenhuma outra referência de imagem."
       : "",
   ]
     .filter(Boolean)
@@ -52,7 +53,7 @@ export function promptFotoInicial(ctx: ProjectContext, ajuste?: string) {
       ajuste ? `AJUSTE PEDIDO PELO USUÁRIO: ${ajuste}\n` : ""
     }
 Crie o prompt em inglês para gerar UMA única foto vertical 9:16 da personagem segurando exatamente este produto.
-O prompt deve exigir: manter a identidade da personagem (rosto, olhos, pele, cabelo, corpo inalterados); usar as fotos canônicas como referência; reproduzir o produto exatamente como na imagem de referência (embalagem, rótulo, cores, proporção e tamanho reais); não redesenhar o rótulo; não inventar textos; não duplicar o produto; mãos e dedos anatomicamente corretos; produto totalmente visível com o rótulo voltado para a câmera quando fizer sentido; iluminação realista; enquadramento vertical 9:16; aparência de conteúdo real de TikTok; pele ultrarrealista com poros e textura natural; sem filtro de beleza; sem aparência artificial ou plástica; sem grid, colagem ou múltiplas imagens.`,
+O prompt deve exigir: seguir exatamente a descrição textual cadastrada da personagem (rosto, olhos, pele, cabelo, corpo conforme o texto); reproduzir o produto exatamente como na imagem de referência (embalagem, rótulo, cores, proporção e tamanho reais); não redesenhar o rótulo; não inventar textos; não duplicar o produto; mãos e dedos anatomicamente corretos; produto totalmente visível com o rótulo voltado para a câmera quando fizer sentido; iluminação realista; enquadramento vertical 9:16; aparência de conteúdo real de TikTok; pele ultrarrealista com poros e textura natural; sem filtro de beleza; sem aparência artificial ou plástica; sem grid, colagem ou múltiplas imagens.`,
     shape: `{"prompt":"","prompt_negativo":"","enquadramento":"","iluminacao":"","pose":"","maos_produto":"","expressao":"","continuidade":""}`,
   };
 }
@@ -125,7 +126,9 @@ ${instrucao ? `AJUSTE PEDIDO: ${instrucao}` : ""}`,
 const REGRAS_CONTINUIDADE = `A foto enviada é a ÚNICA fonte visual do vídeo e o primeiro frame do clipe 1. Cada prompt deve preservar exatamente o conteúdo visual dessa foto: o mesmo fundo, a mesma iluminação, a mesma roupa, o mesmo enquadramento, a mesma posição inicial, a mesma personagem, o mesmo produto, a mesma embalagem e os mesmos objetos já presentes na imagem.
 Não descreva um novo local, não troque o fundo, não mova a personagem para outro espaço, não adicione, remova, substitua ou invente elementos visuais.
 Nos clipes seguintes, mantenha a continuidade visual usando o ÚLTIMO FRAME do clipe anterior como PRIMEIRO FRAME do próximo, descrevendo isso explicitamente.
-A identidade da personagem (rosto, olhos, pele, cabelo, corpo e proporções) deve permanecer idêntica à da foto e às fotos canônicas cadastradas, nunca outra pessoa.
+A foto enviada neste projeto é a única fonte visual do vídeo. Use essa imagem como primeiro frame e preserve exatamente a pessoa, o produto e todos os elementos já presentes nela.
+Rosto, cabelo, roupa e produto devem permanecer exatamente como aparecem na foto do projeto. Não reconstrua a pessoa a partir de descrição textual, não compare com nenhuma outra imagem e não misture referências diferentes.
+Nos clipes seguintes, use o último frame do clipe anterior como primeiro frame e preserve a continuidade do próprio vídeo.
 Proibido: redesenhar o rótulo, inventar textos, duplicar ou sumir com o produto, deformar mãos e dedos, trocar roupa, fundo ou enquadramento, adicionar pessoas ou objetos.`;
 
 const SHAPE_CLIPE = `{"ordem":1,"estado_inicial":"","fala_exata":"","acao":"","gesto":"","expressao":"","posicao_produto":"","camera":"","estado_final":"","ligacao_proximo":"","continuidade":"","restricoes":"","prompt_negativo":"","prompt_flow":""}`;

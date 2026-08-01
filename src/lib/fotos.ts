@@ -7,12 +7,12 @@ import {
 export type TipoFoto = "canonica" | "rosto" | "tres_quartos" | "corpo_inteiro" | "expressao" | "referencia";
 
 export const ROTULOS_FOTO: Record<TipoFoto, string> = {
-  canonica: "Foto canônica principal",
+  canonica: "Foto do perfil",
   rosto: "Foto do rosto",
   tres_quartos: "Foto em três quartos",
   corpo_inteiro: "Foto de corpo inteiro",
   expressao: "Foto com expressão natural",
-  referencia: "Foto canônica auxiliar",
+  referencia: "Foto auxiliar",
 };
 
 export const TIPOS_AUXILIARES: TipoFoto[] = [

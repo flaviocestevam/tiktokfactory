@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { AlertTriangle, Check, ImagePlus, Users } from "lucide-react";
+import { Check, ImagePlus, Users } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -69,7 +69,7 @@ export function PassoPersonagem({
               ) : (
                 <div className="flex size-full flex-col items-center justify-center gap-2 p-4 text-center text-muted-foreground">
                   <ImagePlus className="size-7" />
-                  <p className="text-xs">Foto canônica ainda não cadastrada</p>
+                  <p className="text-xs">Foto do perfil ainda não cadastrada</p>
                 </div>
               )}
             </div>
@@ -89,11 +89,9 @@ export function PassoPersonagem({
                 {p.tipo_comunicacao || p.personalidade || ""}
               </p>
               {!p.foto_canonica_principal ? (
-                <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3">
-                  <p className="flex items-start gap-1.5 text-xs leading-relaxed">
-                    <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-amber-500" />
-                    Esta personagem ainda não possui foto canônica. Cadastre a imagem antes de gerar o
-                    prompt da foto.
+                <div className="rounded-xl border border-border bg-secondary/40 p-3">
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    Foto do perfil ainda não cadastrada.
                   </p>
                   <Button asChild size="sm" variant="outline" className="mt-2 min-h-11 w-full">
                     <Link to="/personagens/$id" params={{ id: p.id }}>
