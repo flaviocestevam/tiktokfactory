@@ -125,12 +125,15 @@ function Projeto() {
       ) : null}
 
       <Tabs defaultValue="estrategia">
-        <TabsList className="mb-5 flex w-full flex-wrap justify-start">
-          <TabsTrigger value="estrategia">Estratégia</TabsTrigger>
-          <TabsTrigger value="roteiro">Roteiro</TabsTrigger>
-          <TabsTrigger value="imagem">Prompt de imagem</TabsTrigger>
-          <TabsTrigger value="video">Prompt de vídeo</TabsTrigger>
-        </TabsList>
+        {/* Mobile: scroll horizontal controlado; a partir de sm as abas cabem na linha */}
+        <div className="-mx-1 mb-5 overflow-x-auto px-1 no-scrollbar">
+          <TabsList className="inline-flex h-auto w-max min-w-full justify-start gap-1">
+            <TabsTrigger value="estrategia" className="min-h-11 whitespace-nowrap">Estratégia</TabsTrigger>
+            <TabsTrigger value="roteiro" className="min-h-11 whitespace-nowrap">Roteiro</TabsTrigger>
+            <TabsTrigger value="imagem" className="min-h-11 whitespace-nowrap">Prompt de imagem</TabsTrigger>
+            <TabsTrigger value="video" className="min-h-11 whitespace-nowrap">Prompt de vídeo</TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="estrategia" className="space-y-4">
           <Acao
