@@ -164,10 +164,10 @@ export function ProductForm({
         </div>
       </section>
 
-      <section className="rounded-2xl border border-border bg-card p-5">
+      <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
         <h2 className="text-base font-semibold">Imagens do produto</h2>
-        <div className="mt-4 flex items-center gap-3">
-          <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm hover:bg-secondary">
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm hover:bg-secondary">
             {enviando ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
             Enviar imagens
             <input
