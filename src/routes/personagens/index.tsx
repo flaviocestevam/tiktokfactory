@@ -39,12 +39,12 @@ function Personagens() {
           descricao="Os projetos criados agora usam o marcador {{PERSONAGEM_A_SER_DEFINIDA}} e poderão ser atualizados quando as personagens forem adicionadas."
         />
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {data?.map((c) => (
             <div key={c.id} className="rounded-2xl border border-border bg-card p-4">
-              <div className="flex items-start justify-between gap-2">
-                <h3 className="font-semibold">{c.nome_exibicao || c.nome}</h3>
-                <Badge variant="secondary" className="capitalize">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
+                <h3 className="min-w-0 break-words font-semibold">{c.nome_exibicao || c.nome}</h3>
+                <Badge variant="secondary" className="shrink-0 capitalize">
                   {c.status}
                 </Badge>
               </div>
