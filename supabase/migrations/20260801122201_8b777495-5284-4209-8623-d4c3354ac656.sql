@@ -1,0 +1,1 @@
+delete from clips; delete from scripts; delete from image_prompts; delete from video_prompts; delete from version_history; delete from projects; delete from products;
