@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Núcleo do fluxo TikTok Factory (somente servidor).
-import { descreverPersonagem, descreverProduto, type ProjectContext } from "./generation.server";
+import {
+  descreverPersonagem,
+  descreverProduto,
+  REGRAS_FOTO_UNICA_FONTE,
+  type ProjectContext,
+} from "./generation.server";
 
 export { contarPalavras } from "./clipes.server";
 
@@ -19,12 +24,12 @@ function contextoFluxo(ctx: ProjectContext, cta: string) {
     descreverPersonagem(ctx.character),
     "FORMATO: TikTok Shop, vertical 9:16, português do Brasil. NÃO existe duração alvo: escreva o que for necessário para vender bem. O sistema calcula a duração depois e divide o vídeo em clipes.",
     `CTA ESCOLHIDO PELO USUÁRIO (use exatamente esta intenção no fecho): ${cta || "criar um CTA adequado ao produto"}`,
-    p.cenario_texto ? `CENÁRIO: ${p.cenario_texto}` : "",
+    REGRAS_FOTO_UNICA_FONTE,
     p.nivel_energia ? `Nível de energia: ${p.nivel_energia}` : "",
     p.velocidade_fala ? `Velocidade da fala: ${p.velocidade_fala}` : "",
     p.observacoes ? `Observações do usuário: ${p.observacoes}` : "",
-    ctx.project.reference_image_url
-      ? "Já existe uma foto inicial confirmada da personagem segurando o produto; ela será o primeiro frame do vídeo."
+    p.reference_image_url
+      ? "Já existe uma foto inicial confirmada da personagem segurando o produto; ela é o primeiro frame e a única fonte visual do vídeo."
       : "",
   ]
     .filter(Boolean)
@@ -43,11 +48,11 @@ export function promptFotoInicial(ctx: ProjectContext, ajuste?: string) {
       imagemProduto
         ? `IMAGEM PRINCIPAL DO PRODUTO (referência visual obrigatória): ${imagemProduto}\n`
         : ""
-    }${ctx.project.cenario_texto ? `CENÁRIO PEDIDO: ${ctx.project.cenario_texto}\n` : ""}${
+    }${
       ajuste ? `AJUSTE PEDIDO PELO USUÁRIO: ${ajuste}\n` : ""
     }
 Crie o prompt em inglês para gerar UMA única foto vertical 9:16 da personagem segurando exatamente este produto.
-O prompt deve exigir: manter a identidade da personagem (rosto, olhos, pele, cabelo, corpo inalterados); usar as fotos canônicas como referência; reproduzir o produto exatamente como na imagem de referência (embalagem, rótulo, cores, proporção e tamanho reais); não redesenhar o rótulo; não inventar textos; não duplicar o produto; mãos e dedos anatomicamente corretos; produto totalmente visível com o rótulo voltado para a câmera quando fizer sentido; cenário coerente; iluminação realista; enquadramento vertical 9:16; aparência de conteúdo real de TikTok; pele ultrarrealista com poros e textura natural; sem filtro de beleza; sem aparência artificial ou plástica; sem grid, colagem ou múltiplas imagens.`,
+O prompt deve exigir: manter a identidade da personagem (rosto, olhos, pele, cabelo, corpo inalterados); usar as fotos canônicas como referência; reproduzir o produto exatamente como na imagem de referência (embalagem, rótulo, cores, proporção e tamanho reais); não redesenhar o rótulo; não inventar textos; não duplicar o produto; mãos e dedos anatomicamente corretos; produto totalmente visível com o rótulo voltado para a câmera quando fizer sentido; iluminação realista; enquadramento vertical 9:16; aparência de conteúdo real de TikTok; pele ultrarrealista com poros e textura natural; sem filtro de beleza; sem aparência artificial ou plástica; sem grid, colagem ou múltiplas imagens.`,
     shape: `{"prompt":"","prompt_negativo":"","enquadramento":"","iluminacao":"","pose":"","maos_produto":"","expressao":"","continuidade":""}`,
   };
 }
@@ -117,9 +122,11 @@ ${instrucao ? `AJUSTE PEDIDO: ${instrucao}` : ""}`,
 
 /* ─────────── Prompts por clipe (Google Flow / Gemini Omni Flash) ─────────── */
 
-const REGRAS_CONTINUIDADE = `Cada prompt deve preservar rigorosamente: a mesma personagem, o mesmo rosto, a mesma pele, o mesmo cabelo, a mesma roupa, o mesmo cenário, a mesma iluminação, o mesmo produto, a mesma embalagem, a mesma mão segurando o produto, a posição corporal aproximada, a continuidade do movimento, da expressão e da câmera.
-A foto enviada no projeto é apenas o PRIMEIRO FRAME do vídeo: a identidade canônica da personagem (rosto, olhos, pele, cabelo, corpo e proporções) deve continuar baseada nas fotos de referência cadastradas para ela, nunca em outra pessoa.
-Proibido: redesenhar o rótulo, inventar textos, duplicar ou sumir com o produto, deformar mãos e dedos, trocar de roupa, cenário ou enquadramento sem instrução, adicionar pessoas ou objetos.`;
+const REGRAS_CONTINUIDADE = `A foto enviada é a ÚNICA fonte visual do vídeo e o primeiro frame do clipe 1. Cada prompt deve preservar exatamente o conteúdo visual dessa foto: o mesmo fundo, a mesma iluminação, a mesma roupa, o mesmo enquadramento, a mesma posição inicial, a mesma personagem, o mesmo produto, a mesma embalagem e os mesmos objetos já presentes na imagem.
+Não descreva um novo local, não troque o fundo, não mova a personagem para outro espaço, não adicione, remova, substitua ou invente elementos visuais.
+Nos clipes seguintes, mantenha a continuidade visual usando o ÚLTIMO FRAME do clipe anterior como PRIMEIRO FRAME do próximo, descrevendo isso explicitamente.
+A identidade da personagem (rosto, olhos, pele, cabelo, corpo e proporções) deve permanecer idêntica à da foto e às fotos canônicas cadastradas, nunca outra pessoa.
+Proibido: redesenhar o rótulo, inventar textos, duplicar ou sumir com o produto, deformar mãos e dedos, trocar roupa, fundo ou enquadramento, adicionar pessoas ou objetos.`;
 
 const SHAPE_CLIPE = `{"ordem":1,"estado_inicial":"","fala_exata":"","acao":"","gesto":"","expressao":"","posicao_produto":"","camera":"","estado_final":"","ligacao_proximo":"","continuidade":"","restricoes":"","prompt_negativo":"","prompt_flow":""}`;
 

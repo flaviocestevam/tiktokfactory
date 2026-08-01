@@ -5,7 +5,6 @@
 export const TABELAS = [
   "products",
   "characters",
-  "scenarios",
   "projects",
   "templates",
   "strategies",

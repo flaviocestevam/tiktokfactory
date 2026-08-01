@@ -29,9 +29,9 @@ export const Route = createFileRoute("/projetos/novo")({
   head: () => ({
     meta: [
       { title: "Criar novo vídeo | TikTok Factory" },
-      { name: "description", content: "Monte um projeto escolhendo produto, cenário, duração e objetivo." },
+      { name: "description", content: "Monte um projeto escolhendo produto, personagem, duração e objetivo." },
       { property: "og:title", content: "Criar novo vídeo | TikTok Factory" },
-      { property: "og:description", content: "Monte um projeto escolhendo produto, cenário, duração e objetivo." },
+      { property: "og:description", content: "Monte um projeto escolhendo produto, personagem, duração e objetivo." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -44,15 +44,12 @@ function NovoProjeto() {
   const qc = useQueryClient();
   const [salvando, setSalvando] = useState(false);
   const produtos = useQuery({ queryKey: ["products"], queryFn: () => listar("products") });
-  const cenarios = useQuery({ queryKey: ["scenarios"], queryFn: () => listar("scenarios") });
   const personagens = useQuery({ queryKey: ["characters"], queryFn: () => listar("characters") });
 
   const [form, setForm] = useState({
     nome: "",
     product_id: "",
     character_id: "",
-    scenario_id: "",
-    cenario_texto: "",
     duracao: 30,
     formato: "9:16",
     plataforma: "TikTok Shop",
@@ -73,8 +70,6 @@ function NovoProjeto() {
           nome: form.nome.trim(),
           product_id: form.product_id,
           character_id: form.character_id || null,
-          scenario_id: form.scenario_id || null,
-          cenario_texto: form.cenario_texto || null,
           duracao: form.duracao,
           formato: form.formato,
           plataforma: form.plataforma,
@@ -157,35 +152,7 @@ function NovoProjeto() {
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="Cenário">
-              <Select
-                value={form.scenario_id || "nenhum"}
-                onValueChange={(v) => setForm({ ...form, scenario_id: v === "nenhum" ? "" : v })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="nenhum">Descrever manualmente</SelectItem>
-                  {cenarios.data?.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
           </div>
-          {!form.scenario_id ? (
-            <div className="mt-4">
-              <AreaField
-                label="Descrição do cenário"
-                rows={3}
-                value={form.cenario_texto}
-                onChange={(v) => setForm({ ...form, cenario_texto: v })}
-              />
-            </div>
-          ) : null}
         </section>
 
         <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">

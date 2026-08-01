@@ -14,7 +14,6 @@ export const VARIAVEIS = [
   "{{IMAGEM_CANONICA_PRINCIPAL}}",
   "{{IMAGENS_CANONICAS_AUXILIARES}}",
   "{{REGRAS_DE_IDENTIDADE}}",
-  "{{CENARIO}}",
   "{{DURACAO}}",
   "{{OBJETIVO}}",
   "{{ANGULO_DE_VENDA}}",
@@ -102,11 +101,9 @@ export const VARIACOES_ALTERNATIVAS = [
   { id: "ab", label: "Versão para teste A/B" },
 ] as const;
 
-export const AMBIENTES = ["Interno", "Externo"] as const;
 export const HORARIOS = ["Manhã", "Tarde", "Fim de tarde", "Noite"] as const;
 export const ILUMINACOES = ["Natural", "Suave difusa", "Luz de janela", "Ring light", "Quente", "Fria", "Dramática"] as const;
 export const ENQUADRAMENTOS = ["Close", "Meio-primeiro plano", "Plano médio", "Plano americano", "Corpo inteiro"] as const;
-export const ESTILOS_CENARIO = ["Simples", "Doméstico", "Profissional", "Luxuoso", "Espontâneo"] as const;
 
 export const PLACEHOLDER_PERSONAGEM = "{{PERSONAGEM_A_SER_DEFINIDA}}";
 export const AVISO_SEM_PERSONAGEM =

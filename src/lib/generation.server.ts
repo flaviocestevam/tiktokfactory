@@ -9,7 +9,6 @@ export type ProjectContext = {
   project: Record<string, any>;
   product: Record<string, any> | null;
   character: Record<string, any> | null;
-  scenario: Record<string, any> | null;
 };
 
 export async function loadContext(supabase: Client, projectId: string): Promise<ProjectContext> {
@@ -17,19 +16,16 @@ export async function loadContext(supabase: Client, projectId: string): Promise<
   if (error) throw new Error(error.message);
   if (!project) throw new Error("Projeto não encontrado.");
 
-  const [product, character, scenario] = await Promise.all([
+  const [product, character] = await Promise.all([
     project.product_id
       ? supabase.from("products").select("*").eq("id", project.product_id).maybeSingle().then((r) => r.data)
       : Promise.resolve(null),
     project.character_id
       ? supabase.from("characters").select("*").eq("id", project.character_id).maybeSingle().then((r) => r.data)
       : Promise.resolve(null),
-    project.scenario_id
-      ? supabase.from("scenarios").select("*").eq("id", project.scenario_id).maybeSingle().then((r) => r.data)
-      : Promise.resolve(null),
   ]);
 
-  return { project, product, character, scenario };
+  return { project, product, character };
 }
 
 function bloco(titulo: string, valor: unknown): string {
@@ -157,27 +153,9 @@ function descreverFotos(character: any): string {
   return linhas.join(" ");
 }
 
-export function descreverCenario(ctx: ProjectContext): string {
-  const s = ctx.scenario;
-  const texto = ctx.project.cenario_texto;
-  if (!s && !texto) return "CENÁRIO: não definido pelo usuário. Proponha algo simples e coerente, sinalizando que é sugestão.";
-  return (
-    "CENÁRIO:\n" +
-    bloco("Descrição livre", texto) +
-    (s
-      ? bloco("Nome", s.nome) +
-        bloco("Descrição", s.descricao) +
-        bloco("Ambiente", s.ambiente) +
-        bloco("Horário", s.horario) +
-        bloco("Iluminação", s.iluminacao) +
-        bloco("Enquadramento", s.enquadramento) +
-        bloco("Estilo", s.estilo) +
-        bloco("Pessoas ao fundo", s.pessoas_ao_fundo ? "sim" : "não") +
-        bloco("Objetos", s.objetos) +
-        bloco("Regras", s.regras)
-      : "")
-  );
-}
+export const REGRAS_FOTO_UNICA_FONTE = `FONTE VISUAL ÚNICA: a foto enviada pelo usuário é a única referência visual do vídeo. Ela já contém personagem, produto na mão, roupa, posição, iluminação, enquadramento e fundo completos.
+Preserve exatamente: mesmo fundo, mesma iluminação, mesma roupa, mesmo enquadramento, mesma posição inicial, mesma personagem, mesmo produto, mesma embalagem e os mesmos objetos já presentes na imagem.
+Proibido: descrever um novo local, trocar o fundo, adicionar, remover, substituir ou inventar elementos visuais, criar objetos ao redor da personagem ou mover a personagem para outro espaço.`;
 
 export function descreverFormato(project: Record<string, any>): string {
   return (
@@ -198,7 +176,7 @@ export function contextoCompleto(ctx: ProjectContext): string {
   return [
     descreverProduto(ctx.product),
     descreverPersonagem(ctx.character),
-    descreverCenario(ctx),
+    REGRAS_FOTO_UNICA_FONTE,
     descreverFormato(ctx.project),
   ].join("\n\n");
 }
@@ -349,8 +327,8 @@ export function promptImagem(ctx: ProjectContext, roteiro: Record<string, any> |
     system:
       "Você escreve prompts técnicos de geração de imagem em inglês. Falas, textos de tela e informações comerciais permanecem em português do Brasil.",
     prompt: `${contextoCompleto(ctx)}\n\nROTEIRO BASE:\n${JSON.stringify(roteiro ?? {}).slice(0, 6000)}\n\nCrie o prompt em inglês técnico para gerar a FOTO INICIAL da personagem segurando/usando o produto.
-Use as variáveis literais {{NOME_DA_PERSONAGEM}}, {{IMAGEM_CANONICA_PRINCIPAL}}, {{IMAGENS_CANONICAS_AUXILIARES}}, {{DESCRICAO_VISUAL_DA_PERSONAGEM}}, {{REGRAS_DE_IDENTIDADE}}, {{PRODUTO}}, {{IMAGEM_DO_PRODUTO}}, {{CENARIO}} sempre que o dado ainda não existir.
-O prompt deve exigir: imagem canônica como referência visual principal; exatamente a mesma mulher; rosto, tom de pele, cabelo e proporções corporais inalterados; produto reproduzido corretamente com embalagem, logotipo, formato, cor e proporções preservados; mãos e dedos corretos; interação natural; cenário coerente; iluminação realista; aparência de frame real de TikTok; vertical 9:16; textura natural de pele; sem aparência plástica; sem texto aleatório; sem produtos duplicados; sem deformações.`,
+Use as variáveis literais {{NOME_DA_PERSONAGEM}}, {{IMAGEM_CANONICA_PRINCIPAL}}, {{IMAGENS_CANONICAS_AUXILIARES}}, {{DESCRICAO_VISUAL_DA_PERSONAGEM}}, {{REGRAS_DE_IDENTIDADE}}, {{PRODUTO}}, {{IMAGEM_DO_PRODUTO}} sempre que o dado ainda não existir.
+O prompt deve exigir: imagem canônica como referência visual principal; exatamente a mesma mulher; rosto, tom de pele, cabelo e proporções corporais inalterados; produto reproduzido corretamente com embalagem, logotipo, formato, cor e proporções preservados; mãos e dedos corretos; interação natural; iluminação realista; aparência de frame real de TikTok; vertical 9:16; textura natural de pele; sem aparência plástica; sem texto aleatório; sem produtos duplicados; sem deformações. Não descreva um novo local nem invente elementos de fundo.`,
     shape: `{"prompt":"","prompt_negativo":"","enquadramento":"","iluminacao":"","pose":"","maos_produto":"","expressao":"","continuidade":""}`,
   };
 }
@@ -359,8 +337,8 @@ export function promptVideo(ctx: ProjectContext, roteiro: Record<string, any> | 
   return {
     system:
       "Você escreve prompts de vídeo para o Google Flow, partindo de uma foto inicial já criada. Estruture em blocos claros. Diálogos ficam em português do Brasil.",
-    prompt: `${contextoCompleto(ctx)}\n\nROTEIRO BASE:\n${JSON.stringify(roteiro ?? {}).slice(0, 6000)}\n\nCrie o prompt do Google Flow partindo da foto inicial. Inclua duração, vertical 9:16, movimentos, gestos, expressão, contato visual, interação com o produto, câmera, estabilidade da embalagem, sincronização labial, ritmo e pausas da fala, ações por trecho, cenário, iluminação, continuidade e CTA.
-Nas restrições negativas, proíba: mudança de rosto, mudança de roupa na mesma cena, mudança do produto, deformação das mãos, dedos extras, duplicação do produto, alteração de logotipo, produto desaparecendo, troca de cenário sem instrução, movimentos exagerados, gestos robóticos, expressões artificiais, câmera instável sem necessidade, olhar fora da câmera sem motivo, texto visual não autorizado, outras pessoas falando e mudanças bruscas de iluminação.
+    prompt: `${contextoCompleto(ctx)}\n\nROTEIRO BASE:\n${JSON.stringify(roteiro ?? {}).slice(0, 6000)}\n\nCrie o prompt do Google Flow partindo da foto enviada, que é o primeiro frame e a única fonte visual. Inclua duração, vertical 9:16, movimentos, gestos, expressão, contato visual, interação com o produto, câmera, estabilidade da embalagem, sincronização labial, ritmo e pausas da fala, ações por trecho, continuidade e CTA — sempre preservando o mesmo fundo, a mesma iluminação, a mesma roupa e o mesmo enquadramento da foto.
+Nas restrições negativas, proíba: mudança de rosto, mudança de roupa, mudança do produto, deformação das mãos, dedos extras, duplicação do produto, alteração de logotipo, produto desaparecendo, troca ou alteração do fundo, mudança de local, criação de novos objetos, movimentos exagerados, gestos robóticos, expressões artificiais, câmera instável sem necessidade, olhar fora da câmera sem motivo, texto visual não autorizado, outras pessoas falando e mudanças bruscas de iluminação.
 Use variáveis literais quando o dado da personagem ainda não existir.`,
     shape: `{"prompt_flow":"","descricao_cena":"","acoes":"","camera":"","dialogo":"","expressao":"","produto":"","continuidade":"","restricoes":""}`,
   };

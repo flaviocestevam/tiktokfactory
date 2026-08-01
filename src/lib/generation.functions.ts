@@ -192,18 +192,6 @@ export const gerarPromptVideo = createServerFn({ method: "POST" })
     return saved;
   });
 
-export const sugerirCenarios = createServerFn({ method: "POST" })
-  .inputValidator((i: unknown) => z.object({ projectId: z.string().uuid() }).parse(i))
-  .handler(async ({ data }) => {
-    const supabase = await db();
-    const ctx = await loadContext(supabase, data.projectId);
-    return gerarJson<{ cenarios: Array<Record<string, string>> }>({
-      system: "Você sugere cenários de gravação coerentes para vídeos de venda no TikTok Shop.",
-      prompt: `${contextoCompleto(ctx)}\n\nSugira 5 cenários adequados para este produto.`,
-      shape: `{"cenarios":[{"nome":"","descricao":"","ambiente":"","horario":"","iluminacao":"","enquadramento":"","estilo":"","objetos":"","por_que_funciona":""}]}`,
-    });
-  });
-
 export const gerarAlternativas = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) =>
     z
