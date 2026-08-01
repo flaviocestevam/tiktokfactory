@@ -203,8 +203,8 @@ export function ProductForm({
         )}
       </section>
 
-      <div className="flex justify-end gap-2">
-        <Button onClick={onSalvar} disabled={salvando} className="gap-2">
+      <div className="flex justify-stretch gap-2 sm:justify-end">
+        <Button onClick={onSalvar} disabled={salvando} className="h-11 w-full gap-2 sm:w-auto">
           {salvando ? <Loader2 className="size-4 animate-spin" /> : null}
           {rotuloSalvar}
         </Button>
