@@ -180,10 +180,11 @@ export function ProductForm({
           </label>
         </div>
         {valores.imagens?.length ? (
-          <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-5">
+          {/* Grade fluida: colunas nascem conforme a largura, sem breakpoints rígidos */}
+          <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(5.5rem,1fr))] gap-3">
             {valores.imagens.map((url) => (
               <div key={url} className="group relative overflow-hidden rounded-lg border border-border">
-                <img src={url} alt="Imagem do produto" className="aspect-square w-full object-cover" />
+                <img src={url} alt="Imagem do produto" loading="lazy" className="aspect-square w-full object-cover" />
                 <button
                   type="button"
                   aria-label="Remover imagem"
