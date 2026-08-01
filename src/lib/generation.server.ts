@@ -9,7 +9,6 @@ export type ProjectContext = {
   project: Record<string, any>;
   product: Record<string, any> | null;
   character: Record<string, any> | null;
-  scenario: Record<string, any> | null;
 };
 
 export async function loadContext(supabase: Client, projectId: string): Promise<ProjectContext> {
@@ -17,19 +16,16 @@ export async function loadContext(supabase: Client, projectId: string): Promise<
   if (error) throw new Error(error.message);
   if (!project) throw new Error("Projeto não encontrado.");
 
-  const [product, character, scenario] = await Promise.all([
+  const [product, character] = await Promise.all([
     project.product_id
       ? supabase.from("products").select("*").eq("id", project.product_id).maybeSingle().then((r) => r.data)
       : Promise.resolve(null),
     project.character_id
       ? supabase.from("characters").select("*").eq("id", project.character_id).maybeSingle().then((r) => r.data)
       : Promise.resolve(null),
-    project.scenario_id
-      ? supabase.from("scenarios").select("*").eq("id", project.scenario_id).maybeSingle().then((r) => r.data)
-      : Promise.resolve(null),
   ]);
 
-  return { project, product, character, scenario };
+  return { project, product, character };
 }
 
 function bloco(titulo: string, valor: unknown): string {
@@ -157,27 +153,9 @@ function descreverFotos(character: any): string {
   return linhas.join(" ");
 }
 
-export function descreverCenario(ctx: ProjectContext): string {
-  const s = ctx.scenario;
-  const texto = ctx.project.cenario_texto;
-  if (!s && !texto) return "CENÁRIO: não definido pelo usuário. Proponha algo simples e coerente, sinalizando que é sugestão.";
-  return (
-    "CENÁRIO:\n" +
-    bloco("Descrição livre", texto) +
-    (s
-      ? bloco("Nome", s.nome) +
-        bloco("Descrição", s.descricao) +
-        bloco("Ambiente", s.ambiente) +
-        bloco("Horário", s.horario) +
-        bloco("Iluminação", s.iluminacao) +
-        bloco("Enquadramento", s.enquadramento) +
-        bloco("Estilo", s.estilo) +
-        bloco("Pessoas ao fundo", s.pessoas_ao_fundo ? "sim" : "não") +
-        bloco("Objetos", s.objetos) +
-        bloco("Regras", s.regras)
-      : "")
-  );
-}
+export const REGRAS_FOTO_UNICA_FONTE = `FONTE VISUAL ÚNICA: a foto enviada pelo usuário é a única referência visual do vídeo. Ela já contém personagem, produto na mão, roupa, posição, iluminação, enquadramento e fundo completos.
+Preserve exatamente: mesmo fundo, mesma iluminação, mesma roupa, mesmo enquadramento, mesma posição inicial, mesma personagem, mesmo produto, mesma embalagem e os mesmos objetos já presentes na imagem.
+Proibido: descrever um novo local, trocar o fundo, adicionar, remover, substituir ou inventar elementos visuais, criar objetos ao redor da personagem ou mover a personagem para outro espaço.`;
 
 export function descreverFormato(project: Record<string, any>): string {
   return (
@@ -198,7 +176,7 @@ export function contextoCompleto(ctx: ProjectContext): string {
   return [
     descreverProduto(ctx.product),
     descreverPersonagem(ctx.character),
-    descreverCenario(ctx),
+    REGRAS_FOTO_UNICA_FONTE,
     descreverFormato(ctx.project),
   ].join("\n\n");
 }
