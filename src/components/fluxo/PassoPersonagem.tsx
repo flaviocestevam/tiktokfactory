@@ -12,7 +12,7 @@ export function PassoPersonagem({
   onSelecionar,
 }: {
   selecionada: string | null;
-  onSelecionar: (id: string) => void;
+  onSelecionar: (id: string, nome: string) => void;
 }) {
   const { data, isLoading } = useQuery({ queryKey: ["characters"], queryFn: () => listar("characters") });
 
@@ -84,7 +84,7 @@ export function PassoPersonagem({
               <Button
                 className="mt-auto w-full"
                 variant={ativa ? "default" : "outline"}
-                onClick={() => onSelecionar(p.id)}
+                onClick={() => onSelecionar(p.id, p.nome_exibicao || p.nome || "")}
               >
                 {ativa ? "PERSONAGEM SELECIONADA" : "USAR ESTA PERSONAGEM"}
               </Button>
