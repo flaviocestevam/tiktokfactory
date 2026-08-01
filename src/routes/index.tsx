@@ -46,7 +46,7 @@ function CriarVideo() {
 
   const resultados = useQuery({
     queryKey: ["fluxo-resultados", projetoId],
-    enabled: Boolean(projetoId) && etapa === 5,
+    enabled: Boolean(projetoId),
     queryFn: () => listarResultados({ data: { projectId: projetoId! } }),
   });
 
@@ -115,6 +115,9 @@ function CriarVideo() {
       toast.success("Três roteiros prontos.");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Falha ao gerar os roteiros.");
+      // Mostra o que já foi salvo para não perder o trabalho parcial.
+      const parcial = await resultados.refetch();
+      if (Array.isArray(parcial.data) && parcial.data.length > 0) avancar(5);
     } finally {
       setGerando(false);
     }
