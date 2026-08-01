@@ -121,7 +121,7 @@ function NovoProjeto() {
       ) : null}
 
       <div className="space-y-6">
-        <section className="rounded-2xl border border-border bg-card p-5">
+        <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
           <h2 className="mb-4 text-base font-semibold">Base do projeto</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <TextField label="Nome do projeto" value={form.nome} onChange={(v) => setForm({ ...form, nome: v })} />
@@ -188,7 +188,7 @@ function NovoProjeto() {
           ) : null}
         </section>
 
-        <section className="rounded-2xl border border-border bg-card p-5">
+        <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
           <h2 className="mb-4 text-base font-semibold">Configuração do vídeo</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Field label="Duração">
@@ -255,8 +255,8 @@ function NovoProjeto() {
           </div>
         </section>
 
-        <div className="flex justify-end">
-          <Button onClick={salvar} disabled={salvando || semProduto} className="gap-2">
+        <div className="flex justify-stretch sm:justify-end">
+          <Button onClick={salvar} disabled={salvando || semProduto} className="h-11 w-full gap-2 sm:w-auto">
             {salvando ? <Loader2 className="size-4 animate-spin" /> : null}
             Criar projeto
           </Button>

@@ -13,7 +13,7 @@ export function EmptyState({
   acao?: ReactNode;
 }) {
   return (
-    <div className="stagger flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/40 px-8 py-16 text-center backdrop-blur-sm">
+    <div className="stagger flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/40 px-[clamp(1rem,5vw,2rem)] py-[clamp(2.5rem,8vw,4rem)] text-center backdrop-blur-sm">
       <div className="mb-6 flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-secondary to-card text-accent shadow-soft ring-1 ring-border">
         <Icon className="size-6" />
       </div>

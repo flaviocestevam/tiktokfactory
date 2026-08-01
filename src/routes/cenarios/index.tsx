@@ -109,16 +109,16 @@ function Cenarios() {
           acao={<Button onClick={() => setAberto(true)}>Criar cenário</Button>}
         />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {data?.map((c, i) => (
             <div
               key={c.id}
               style={{ animationDelay: `${Math.min(i, 8) * 60}ms` }}
               className="surface stagger interactive p-5 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lift"
             >
-              <div className="flex items-start justify-between gap-2">
-                <h3 className="font-semibold">{c.nome}</h3>
-                <button aria-label="Excluir cenário" onClick={() => excluir(c.id)}>
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
+                <h3 className="min-w-0 break-words font-semibold">{c.nome}</h3>
+                <button aria-label="Excluir cenário" className="touch-target -m-2 shrink-0" onClick={() => excluir(c.id)}>
                   <Trash2 className="size-4 text-destructive" />
                 </button>
               </div>
@@ -134,7 +134,7 @@ function Cenarios() {
       )}
 
       <Dialog open={aberto} onOpenChange={setAberto}>
-        <DialogContent className="max-h-[85vh] overflow-y-auto">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Novo cenário</DialogTitle>
           </DialogHeader>
@@ -187,7 +187,7 @@ function Cenarios() {
               value={form.regras}
               onChange={(v) => setForm({ ...form, regras: v })}
             />
-            <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
+            <div className="flex min-h-11 items-center justify-between gap-3 rounded-lg border border-border px-3 py-2">
               <span className="text-sm">Pessoas ao fundo</span>
               <Switch
                 checked={form.pessoas_ao_fundo}

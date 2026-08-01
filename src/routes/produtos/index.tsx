@@ -58,13 +58,13 @@ function Produtos() {
         }
       />
 
-      <div className="relative mb-5 max-w-sm">
+      <div className="relative mb-5 w-full max-w-sm">
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
           placeholder="Buscar por nome, marca ou categoria"
-          className="pl-9"
+          className="h-11 pl-9"
         />
       </div>
 
@@ -86,7 +86,7 @@ function Produtos() {
           }
         />
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {lista.map((p) => {
             const imagens = Array.isArray(p.imagens) ? (p.imagens as string[]) : [];
             return (
@@ -96,7 +96,8 @@ function Produtos() {
                     <img
                       src={imagens[0]}
                       alt={`Imagem de ${p.nome}`}
-                      className="size-16 shrink-0 rounded-lg border border-border object-cover"
+                      loading="lazy"
+                      className="size-16 shrink-0 rounded-lg border border-border object-cover [aspect-ratio:1]"
                     />
                   ) : (
                     <div className="flex size-16 shrink-0 items-center justify-center rounded-lg bg-secondary">
@@ -111,19 +112,19 @@ function Produtos() {
                     <p className="mt-1 text-sm font-medium text-accent">{p.preco_promocional || p.preco || "—"}</p>
                   </div>
                 </div>
-                <div className="mt-3 flex items-center justify-between">
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
                   <Badge variant="secondary" className="capitalize">
                     {p.status_extracao === "extraido" ? "extraído" : p.status_extracao}
                   </Badge>
                   <span className="text-xs text-muted-foreground">{formatarData(p.updated_at)}</span>
                 </div>
                 <div className="mt-3 flex gap-2">
-                  <Button asChild variant="secondary" size="sm" className="flex-1">
+                  <Button asChild variant="secondary" size="sm" className="h-11 flex-1">
                     <Link to="/produtos/$id" params={{ id: p.id }}>
                       Editar
                     </Link>
                   </Button>
-                  <Button variant="ghost" size="sm" aria-label="Excluir" onClick={() => excluir(p.id)}>
+                  <Button variant="ghost" size="sm" aria-label="Excluir" className="size-11" onClick={() => excluir(p.id)}>
                     <Trash2 className="size-4 text-destructive" />
                   </Button>
                 </div>

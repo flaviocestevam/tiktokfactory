@@ -125,12 +125,15 @@ function Projeto() {
       ) : null}
 
       <Tabs defaultValue="estrategia">
-        <TabsList className="mb-5 flex w-full flex-wrap justify-start">
-          <TabsTrigger value="estrategia">Estratégia</TabsTrigger>
-          <TabsTrigger value="roteiro">Roteiro</TabsTrigger>
-          <TabsTrigger value="imagem">Prompt de imagem</TabsTrigger>
-          <TabsTrigger value="video">Prompt de vídeo</TabsTrigger>
-        </TabsList>
+        {/* Mobile: scroll horizontal controlado; a partir de sm as abas cabem na linha */}
+        <div className="-mx-1 mb-5 overflow-x-auto px-1 no-scrollbar">
+          <TabsList className="inline-flex h-auto w-max min-w-full justify-start gap-1">
+            <TabsTrigger value="estrategia" className="min-h-11 whitespace-nowrap">Estratégia</TabsTrigger>
+            <TabsTrigger value="roteiro" className="min-h-11 whitespace-nowrap">Roteiro</TabsTrigger>
+            <TabsTrigger value="imagem" className="min-h-11 whitespace-nowrap">Prompt de imagem</TabsTrigger>
+            <TabsTrigger value="video" className="min-h-11 whitespace-nowrap">Prompt de vídeo</TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="estrategia" className="space-y-4">
           <Acao
@@ -198,8 +201,8 @@ function Projeto() {
               <h3 className="mb-2 text-sm font-semibold">Alternativas de gancho</h3>
               <ul className="space-y-2">
                 {alternativas.map((a) => (
-                  <li key={a} className="flex items-start justify-between gap-3 text-sm">
-                    <span>{a}</span>
+                  <li key={a} className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 text-sm">
+                    <span className="min-w-0 break-words">{a}</span>
                     <CopyButton value={a} size="icon" />
                   </li>
                 ))}
@@ -308,11 +311,11 @@ function Bloco({ titulo, texto }: { titulo: string; texto?: string | null }) {
   if (!texto) return null;
   return (
     <div className="rounded-2xl border border-border bg-card p-4">
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <h3 className="text-sm font-semibold">{titulo}</h3>
+      <div className="mb-2 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+        <h3 className="min-w-0 truncate text-sm font-semibold">{titulo}</h3>
         <CopyButton value={texto} />
       </div>
-      <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">{texto}</p>
+      <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-muted-foreground">{texto}</p>
     </div>
   );
 }

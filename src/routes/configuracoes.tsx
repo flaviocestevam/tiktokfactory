@@ -46,11 +46,11 @@ function Configuracoes() {
         titulo="Configurações"
         descricao="Ferramenta interna e privada, sem login e com um único espaço de trabalho compartilhado."
       />
-      <div className="grid max-w-2xl gap-3 sm:grid-cols-2">
+      <div className="grid max-w-2xl grid-cols-2 gap-3">
         {itens.map((i) => (
-          <div key={i.rotulo} className="rounded-2xl border border-border bg-card p-5">
-            <p className="text-sm text-muted-foreground">{i.rotulo}</p>
-            <p className="mt-1 text-2xl font-bold">{i.valor}</p>
+          <div key={i.rotulo} className="rounded-2xl border border-border bg-card p-4 sm:p-5">
+            <p className="truncate text-sm text-muted-foreground">{i.rotulo}</p>
+            <p className="mt-1 text-[clamp(1.25rem,1rem+1.2vw,1.75rem)] font-bold tabular-nums">{i.valor}</p>
           </div>
         ))}
       </div>

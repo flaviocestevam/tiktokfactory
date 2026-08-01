@@ -128,6 +128,12 @@
     border-color: var(--color-border);
   }
 
+  html {
+    /* Bloqueia scroll horizontal indesejado em qualquer resolução */
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
@@ -135,6 +141,7 @@
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    overflow-x: hidden;
     background-image:
       radial-gradient(60rem 40rem at 12% -10%, oklch(0.685 0.208 12 / 0.10), transparent 60%),
       radial-gradient(50rem 36rem at 100% 0%, oklch(0.78 0.128 190 / 0.08), transparent 62%);
@@ -153,6 +160,33 @@
 
   ::selection {
     background: oklch(0.685 0.208 12 / 0.3);
+  }
+
+  /* Palavras longas (URLs, prompts) não estouram containers estreitos */
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  li {
+    overflow-wrap: anywhere;
+  }
+
+  img,
+  video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Ergonomia touch: alvo mínimo de 44x44px em dispositivos sem mouse */
+  @media (pointer: coarse) {
+    button,
+    [role="tab"],
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    a[data-touch] {
+      min-height: 2.75rem;
+    }
   }
 
   ::-webkit-scrollbar {
@@ -194,6 +228,24 @@
 
 @utility stagger {
   animation: var(--animate-rise);
+}
+
+/* Alvo de toque acessível (44x44) para botões só de ícone */
+@utility touch-target {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+  border-radius: var(--radius-md);
+}
+
+/* Scroll horizontal controlado (tabs, chips) sem barra visível */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

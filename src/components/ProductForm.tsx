@@ -109,7 +109,7 @@ export function ProductForm({
 
   return (
     <div className="space-y-8">
-      <section className="rounded-2xl border border-border bg-card p-5">
+      <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
         <h2 className="text-base font-semibold">Link da página de vendas</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           A leitura acontece no servidor. Se a página bloquear o acesso, preencha manualmente.
@@ -120,7 +120,7 @@ export function ProductForm({
             onChange={(e) => set("link", e.target.value)}
             placeholder="https://..."
           />
-          <Button type="button" onClick={lerLink} disabled={extraindo} className="gap-2 sm:w-48">
+          <Button type="button" onClick={lerLink} disabled={extraindo} className="h-11 w-full gap-2 sm:w-48">
             {extraindo ? <Loader2 className="size-4 animate-spin" /> : <Link2 className="size-4" />}
             {extraindo ? "Lendo..." : "Extrair informações"}
           </Button>
@@ -132,7 +132,7 @@ export function ProductForm({
         ) : null}
       </section>
 
-      <section className="rounded-2xl border border-border bg-card p-5">
+      <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
         <h2 className="mb-4 text-base font-semibold">Informações do produto</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           {CAMPOS_PRODUTO.filter((c) => !c.area).map((c) => (
@@ -164,10 +164,10 @@ export function ProductForm({
         </div>
       </section>
 
-      <section className="rounded-2xl border border-border bg-card p-5">
+      <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
         <h2 className="text-base font-semibold">Imagens do produto</h2>
-        <div className="mt-4 flex items-center gap-3">
-          <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm hover:bg-secondary">
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm hover:bg-secondary">
             {enviando ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
             Enviar imagens
             <input
@@ -180,17 +180,18 @@ export function ProductForm({
           </label>
         </div>
         {valores.imagens?.length ? (
-          <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-5">
+          // Grade fluida: colunas nascem conforme a largura, sem breakpoints rígidos
+          <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(5.5rem,1fr))] gap-3">
             {valores.imagens.map((url) => (
               <div key={url} className="group relative overflow-hidden rounded-lg border border-border">
-                <img src={url} alt="Imagem do produto" className="aspect-square w-full object-cover" />
+                <img src={url} alt="Imagem do produto" loading="lazy" className="aspect-square w-full object-cover" />
                 <button
                   type="button"
                   aria-label="Remover imagem"
                   onClick={() =>
                     onChange({ ...valores, imagens: (valores.imagens ?? []).filter((u) => u !== url) })
                   }
-                  className="absolute right-1 top-1 rounded-md bg-background/85 p-1 opacity-0 transition-opacity group-hover:opacity-100"
+                  className="absolute right-1 top-1 rounded-md bg-background/85 p-1.5 opacity-100 transition-opacity group-hover:opacity-100 sm:opacity-0"
                 >
                   <Trash2 className="size-3.5 text-destructive" />
                 </button>
@@ -202,8 +203,8 @@ export function ProductForm({
         )}
       </section>
 
-      <div className="flex justify-end gap-2">
-        <Button onClick={onSalvar} disabled={salvando} className="gap-2">
+      <div className="flex justify-stretch gap-2 sm:justify-end">
+        <Button onClick={onSalvar} disabled={salvando} className="h-11 w-full gap-2 sm:w-auto">
           {salvando ? <Loader2 className="size-4 animate-spin" /> : null}
           {rotuloSalvar}
         </Button>

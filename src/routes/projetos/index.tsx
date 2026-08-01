@@ -56,13 +56,13 @@ function Projetos() {
         }
       />
 
-      <div className="relative mb-5 max-w-sm">
+      <div className="relative mb-5 w-full max-w-sm">
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
           placeholder="Buscar projeto"
-          className="pl-9"
+          className="h-11 pl-9"
         />
       </div>
 
@@ -80,18 +80,18 @@ function Projetos() {
           }
         />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {lista.map((p, i) => (
             <div
               key={p.id}
               style={{ animationDelay: `${Math.min(i, 8) * 60}ms` }}
               className="surface stagger interactive p-5 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lift"
             >
-              <div className="flex items-start justify-between gap-2">
-                <Link to="/projetos/$id" params={{ id: p.id }} className="font-semibold hover:text-primary">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
+                <Link to="/projetos/$id" params={{ id: p.id }} className="min-w-0 break-words font-semibold hover:text-primary">
                   {p.nome}
                 </Link>
-                <button aria-label="Excluir projeto" onClick={() => excluir(p.id)}>
+                <button aria-label="Excluir projeto" className="touch-target -m-2 shrink-0" onClick={() => excluir(p.id)}>
                   <Trash2 className="size-4 text-destructive" />
                 </button>
               </div>
