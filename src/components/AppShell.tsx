@@ -17,11 +17,10 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { to: "/", label: "Início", icon: LayoutDashboard },
-  { to: "/projetos/novo", label: "Criar conteúdo", icon: Plus },
-  { to: "/projetos", label: "Projetos", icon: FolderKanban },
-  { to: "/produtos", label: "Produtos", icon: Package },
+  { to: "/", label: "Criar vídeo", icon: Plus },
   { to: "/personagens", label: "Personagens", icon: Users },
+  { to: "/produtos", label: "Produtos", icon: Package },
+  { to: "/projetos", label: "Histórico", icon: FolderKanban },
   { to: "/cenarios", label: "Cenários", icon: Sparkles },
   { to: "/templates", label: "Templates", icon: FileText },
   { to: "/configuracoes", label: "Configurações", icon: Settings },
@@ -117,7 +116,7 @@ function Brand({ compact }: { compact?: boolean }) {
         <Wand2 className="size-4" />
       </span>
       <span className={cn("font-display text-base font-bold tracking-[-0.03em]", compact && "text-sm")}>
-        Studio<span className="text-primary">IA</span>
+        TikTok<span className="text-primary">Factory</span>
       </span>
     </Link>
   );
