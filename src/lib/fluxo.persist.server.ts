@@ -172,13 +172,15 @@ export async function regerarRoteiro(projectId: string, scriptId: string, instru
 
 export async function carregarResultados(projectId: string) {
   const supabase = await db();
-  const [{ data: scripts }, { data: prompts }] = await Promise.all([
+  const [{ data: scripts }, { data: prompts }, { data: projeto }] = await Promise.all([
     supabase.from("scripts").select("*").eq("project_id", projectId).order("variante", { ascending: true }),
     supabase.from("video_prompts").select("*").eq("project_id", projectId),
+    supabase.from("projects").select("duracao").eq("id", projectId).maybeSingle(),
   ]);
+  const alvo = Number(projeto?.duracao ?? 30);
   return (scripts ?? []).map((s: any) => ({
     script: s,
     videoPrompt: (prompts ?? []).find((p: any) => p.script_id === s.id) ?? null,
-    medida: avaliarDuracao(s.dialogo ?? "", s.duracao_estimada ? Number(s.duracao_estimada) : 30),
+    medida: avaliarDuracao(s.dialogo ?? "", alvo),
   }));
 }
