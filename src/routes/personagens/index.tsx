@@ -3,7 +3,6 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ImagePlus, Users } from "lucide-react";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { removerFoto } from "@/lib/fotos";
 import { PageHeader } from "@/components/AppShell";
 import { EmptyState } from "@/components/EmptyState";
@@ -30,7 +29,6 @@ function Personagens() {
   const queryClient = useQueryClient();
   const { data, isLoading } = useQuery({ queryKey: ["characters"], queryFn: () => listar("characters") });
   const [aberta, setAberta] = useState<string | null>(null);
-  const [ampliada, setAmpliada] = useState<string | null>(null);
 
   const remover = useMutation({
     mutationFn: (characterId: string) => removerFoto(characterId, "canonica"),
@@ -83,19 +81,11 @@ function Personagens() {
                 </div>
 
                 {c.foto_canonica_principal ? (
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     <Button asChild size="sm" variant="outline" className="min-h-11">
                       <Link to="/personagens/$id" params={{ id: c.id }}>
                         TROCAR
                       </Link>
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="min-h-11"
-                      onClick={() => setAmpliada(c.foto_canonica_principal)}
-                    >
-                      VER
                     </Button>
                     <Button
                       size="sm"
@@ -169,14 +159,6 @@ function Personagens() {
         </div>
       )}
 
-      <Dialog open={!!ampliada} onOpenChange={(o) => !o && setAmpliada(null)}>
-        <DialogContent className="max-w-3xl">
-          <DialogTitle className="sr-only">Foto da personagem</DialogTitle>
-          {ampliada ? (
-            <img src={ampliada} alt="Foto do perfil ampliada" className="max-h-[80vh] w-full object-contain" />
-          ) : null}
-        </DialogContent>
-      </Dialog>
     </>
   );
 }
