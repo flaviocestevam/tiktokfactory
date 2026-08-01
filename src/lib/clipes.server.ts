@@ -135,9 +135,8 @@ export function planejarClipes(unidades: Unidade[], quantidadeForcada?: number):
   let soma = 0;
 
   for (const u of unidades) {
-    const mudancaDeCena = atual.length > 0 && u.indiceCena !== atual[atual.length - 1].indiceCena;
     const antesDoCta = atual.length > 0 && u.cta && soma > limite * 0.5;
-    if (atual.length && (soma + u.segundos > limite || antesDoCta || (mudancaDeCena && soma > limite * 0.75))) {
+    if (atual.length && (soma + u.segundos > limite || antesDoCta)) {
       grupos.push(atual);
       atual = [];
       soma = 0;
@@ -146,6 +145,15 @@ export function planejarClipes(unidades: Unidade[], quantidadeForcada?: number):
     soma += u.segundos;
   }
   if (atual.length) grupos.push(atual);
+
+  // Evita clipes finais muito curtos quando cabem no clipe anterior.
+  for (let i = grupos.length - 1; i > 0; i--) {
+    const total = (g: Unidade[]) => g.reduce((s, u) => s + u.segundos, 0);
+    if (total(grupos[i]) < 2 && total(grupos[i - 1]) + total(grupos[i]) <= maximo) {
+      grupos[i - 1] = [...grupos[i - 1], ...grupos[i]];
+      grupos.splice(i, 1);
+    }
+  }
 
   return grupos.map((g, i) => {
     const segundos = g.reduce((s, u) => s + u.segundos, 0);
