@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Check, Users } from "lucide-react";
+import { AlertTriangle, Check, ImagePlus, Users } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -58,17 +58,18 @@ export function PassoPersonagem({
                 : "hover:border-primary/40",
             )}
           >
-            <div className="aspect-[4/5] w-full overflow-hidden bg-secondary/60">
+            <div className="aspect-[3/4] w-full overflow-hidden bg-secondary/60">
               {p.foto_canonica_principal ? (
                 <img
                   src={p.foto_canonica_principal}
                   alt={`Foto de ${p.nome_exibicao || p.nome}`}
                   loading="lazy"
-                  className="size-full object-cover"
+                  className="size-full object-contain"
                 />
               ) : (
-                <div className="flex size-full items-center justify-center text-muted-foreground">
-                  <Users className="size-8" />
+                <div className="flex size-full flex-col items-center justify-center gap-2 p-4 text-center text-muted-foreground">
+                  <ImagePlus className="size-7" />
+                  <p className="text-xs">Foto canônica ainda não cadastrada</p>
                 </div>
               )}
             </div>
@@ -87,8 +88,22 @@ export function PassoPersonagem({
               <p className="line-clamp-2 text-xs text-muted-foreground/80">
                 {p.tipo_comunicacao || p.personalidade || ""}
               </p>
+              {!p.foto_canonica_principal ? (
+                <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3">
+                  <p className="flex items-start gap-1.5 text-xs leading-relaxed">
+                    <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-amber-500" />
+                    Esta personagem ainda não possui foto canônica. Cadastre a imagem antes de gerar o
+                    prompt da foto.
+                  </p>
+                  <Button asChild size="sm" variant="outline" className="mt-2 min-h-11 w-full">
+                    <Link to="/personagens/$id" params={{ id: p.id }}>
+                      CADASTRAR FOTO AGORA
+                    </Link>
+                  </Button>
+                </div>
+              ) : null}
               <Button
-                className="mt-auto w-full"
+                className="mt-auto min-h-11 w-full"
                 variant={ativa ? "default" : "outline"}
                 onClick={() => onSelecionar(p.id, p.nome_exibicao || p.nome || "")}
               >

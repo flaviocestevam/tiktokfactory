@@ -124,8 +124,37 @@ export function descreverPersonagem(character: Record<string, any> | null): stri
     bloco("Identidade visual canônica (imutável)", character.identidade_visual_canonica) +
     bloco("Palavras e alegações PROIBIDAS", character.palavras_proibidas) +
     bloco("Prompt mestre de identidade", character.prompt_mestre) +
-    bloco("Prompt negativo", character.prompt_negativo)
+    bloco("Prompt negativo", character.prompt_negativo) +
+    bloco("Referências visuais cadastradas", descreverFotos(character))
   );
+}
+
+function descreverFotos(character: any): string {
+  const aux = Array.isArray(character.fotos_canonicas_auxiliares)
+    ? (character.fotos_canonicas_auxiliares as any[])
+    : [];
+  const linhas: string[] = [];
+  if (character.foto_canonica_principal) {
+    linhas.push(
+      "Existe uma FOTO CANÔNICA PRINCIPAL cadastrada desta personagem. Ela é a referência visual mais importante: rosto, olhos, pele, cabelo, corpo e proporções devem seguir exatamente essa foto.",
+    );
+  } else {
+    linhas.push(
+      "Ainda não há foto canônica principal cadastrada; siga estritamente a descrição física escrita e nunca invente traços novos.",
+    );
+  }
+  if (aux.length) {
+    linhas.push(
+      `Fotos auxiliares cadastradas (${aux.length}): ${aux
+        .map((f) => f?.rotulo || f?.tipo)
+        .filter(Boolean)
+        .join(", ")}. Elas complementam apenas rosto, cabelo, corpo, proporções e expressões.`,
+    );
+  }
+  linhas.push(
+    "Nunca misture características de personagens diferentes. A identidade canônica sempre prevalece sobre qualquer imagem enviada no projeto.",
+  );
+  return linhas.join(" ");
 }
 
 export function descreverCenario(ctx: ProjectContext): string {
