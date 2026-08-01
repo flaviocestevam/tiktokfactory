@@ -15,10 +15,10 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { to: "/", label: "Criar vídeo", icon: Plus },
-  { to: "/personagens", label: "Personagens", icon: Users },
+  { to: "/", label: "Criar conteúdo", icon: Plus },
   { to: "/produtos", label: "Produtos", icon: Package },
-  { to: "/projetos", label: "Histórico", icon: FolderKanban },
+  { to: "/personagens", label: "Personagens", icon: Users },
+  { to: "/producoes", label: "Produções", icon: FolderKanban },
   { to: "/configuracoes", label: "Configurações", icon: Settings },
 ] as const;
 

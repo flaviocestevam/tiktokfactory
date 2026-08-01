@@ -39,7 +39,7 @@ function Configuracoes() {
   const itens = [
     { rotulo: "Produtos", valor: resumo.data?.produtos ?? 0 },
     { rotulo: "Personagens", valor: resumo.data?.personagens ?? 0 },
-    { rotulo: "Projetos", valor: resumo.data?.projetos ?? 0 },
+    { rotulo: "Produções", valor: resumo.data?.projetos ?? 0 },
   ];
 
   return (

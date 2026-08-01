@@ -1,4 +1,4 @@
-import { ETAPAS } from "@/lib/ctas";
+import { ETAPAS } from "@/lib/config";
 import { cn } from "@/lib/utils";
 
 export function Stepper({

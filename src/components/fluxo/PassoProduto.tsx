@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
-import { Loader2, Search, Star, X } from "lucide-react";
+import { ChevronDown, Loader2, Search, Star, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { analisarProdutoTikTok } from "@/lib/fluxo.functions";
 import { atualizar, criar, enviarArquivo } from "@/lib/queries";
 import { cn } from "@/lib/utils";
+import { linkTikTokValido } from "@/lib/config";
 
 const CAMPOS: Array<{ id: string; label: string; longo?: boolean }> = [
   { id: "nome", label: "Nome" },
@@ -69,6 +70,7 @@ export function PassoProduto({
   });
   const [aviso, setAviso] = useState<string | null>(null);
   const [descricaoColada, setDescricaoColada] = useState<string>(produto?.descricao_colada ?? "");
+  const [editando, setEditando] = useState(false);
 
   function montar(p: ProdutoFluxo | null) {
     const v: Record<string, string> = {};
@@ -86,6 +88,9 @@ export function PassoProduto({
 
   async function analisar() {
     if (!link.trim()) return toast.error("Cole o link do produto do TikTok Shop.");
+    if (!linkTikTokValido(link)) {
+      return toast.error("Este link não é do TikTok Shop. Cole o link copiado direto do app.");
+    }
     setAnalisando(true);
     setAviso(null);
     try {
@@ -284,11 +289,24 @@ export function PassoProduto({
       </section>
 
       <section className="surface p-4 sm:p-6">
-        <h2 className="text-lg font-semibold">Conferência dos dados</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Tudo pode ser editado. A etiqueta mostra a origem de cada informação.
-        </p>
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="text-lg font-semibold">{valores.nome?.trim() || "Dados do produto"}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {[valores.marca, valores.categoria, valores.preco].filter(Boolean).join(" · ") ||
+                "Analise o link ou preencha os dados manualmente."}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground/80">
+              {CAMPOS.filter((c) => valores[c.id]?.trim()).length} de {CAMPOS.length} campos
+              preenchidos
+            </p>
+          </div>
+          <Button variant="outline" className="gap-2" onClick={() => setEditando((e) => !e)}>
+            <ChevronDown className={cn("size-4 transition-transform", editando && "rotate-180")} />
+            {editando ? "OCULTAR DADOS" : "EDITAR DADOS DO PRODUTO"}
+          </Button>
+        </div>
+        <div className={cn("mt-5 grid gap-4 sm:grid-cols-2", !editando && "hidden")}>
           {CAMPOS.map((c) => (
             <div key={c.id} className={cn("space-y-1.5", c.longo && "sm:col-span-2")}>
               <div className="flex items-center justify-between gap-2">

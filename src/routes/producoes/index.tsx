@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -10,42 +11,44 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { excluir as excluirRegistro, formatarData, listar } from "@/lib/queries";
+import { ROTULO_STATUS } from "@/lib/config";
 
-export const Route = createFileRoute("/projetos/")({
+const DESCRICAO =
+  "Todas as produções criadas na TikTok Factory, com produto, personagem, foto, roteiro aprovado e clipes.";
+
+export const Route = createFileRoute("/producoes/")({
   head: () => ({
     meta: [
-      { title: "Projetos | TikTok Factory" },
-      {
-        name: "description",
-        content: "Todos os seus vídeos em produção, com estratégia, roteiro e prompts.",
-      },
-      { property: "og:title", content: "Projetos | TikTok Factory" },
-      {
-        property: "og:description",
-        content: "Todos os seus vídeos em produção, com estratégia, roteiro e prompts.",
-      },
+      { title: "Produções | TikTok Factory" },
+      { name: "description", content: DESCRICAO },
+      { property: "og:title", content: "Produções | TikTok Factory" },
+      { property: "og:description", content: DESCRICAO },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Projetos,
+  component: Producoes,
 });
 
-function Projetos() {
+function Producoes() {
   const [busca, setBusca] = useState("");
   const qc = useQueryClient();
   const { data, isLoading } = useQuery({
     queryKey: ["projects"],
-    queryFn: () => listar("projects"),
+    queryFn: () => listar("projects", undefined, { coluna: "updated_at", asc: false }),
   });
 
-  const lista = (data ?? []).filter((p) => p.nome.toLowerCase().includes(busca.toLowerCase()));
+  const lista = (data ?? []).filter((p: any) =>
+    String(p.nome ?? "")
+      .toLowerCase()
+      .includes(busca.toLowerCase()),
+  );
 
   async function excluir(id: string) {
     try {
       await excluirRegistro("projects", id);
       qc.invalidateQueries({ queryKey: ["projects"] });
-      toast.success("Projeto excluído.");
+      toast.success("Produção excluída.");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Falha ao excluir.");
     }
@@ -54,12 +57,12 @@ function Projetos() {
   return (
     <>
       <PageHeader
-        titulo="Projetos"
-        descricao="Cada projeto reúne produto, personagem, foto, estratégia, roteiro e prompts."
+        titulo="Produções"
+        descricao={DESCRICAO}
         acoes={
           <Button asChild className="gap-2">
-            <Link to="/projetos/novo">
-              <Plus className="size-4" /> Criar novo vídeo
+            <Link to="/">
+              <Plus className="size-4" /> Criar conteúdo
             </Link>
           </Button>
         }
@@ -70,7 +73,7 @@ function Projetos() {
         <Input
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
-          placeholder="Buscar projeto"
+          placeholder="Buscar produção"
           className="h-11 pl-9"
         />
       </div>
@@ -80,17 +83,17 @@ function Projetos() {
       ) : lista.length === 0 ? (
         <EmptyState
           icon={FolderKanban}
-          titulo="Nenhum projeto por aqui"
-          descricao="Crie um projeto para gerar a estratégia, o roteiro e os prompts de imagem e vídeo."
+          titulo="Nenhuma produção ainda"
+          descricao="Analise um produto do TikTok Shop para começar a primeira produção."
           acao={
             <Button asChild>
-              <Link to="/projetos/novo">Criar novo vídeo</Link>
+              <Link to="/">Criar conteúdo</Link>
             </Button>
           }
         />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-          {lista.map((p, i) => (
+          {lista.map((p: any, i: number) => (
             <div
               key={p.id}
               style={{ animationDelay: `${Math.min(i, 8) * 60}ms` }}
@@ -98,14 +101,14 @@ function Projetos() {
             >
               <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
                 <Link
-                  to="/projetos/$id"
+                  to="/producoes/$id"
                   params={{ id: p.id }}
                   className="min-w-0 break-words font-semibold hover:text-primary"
                 >
                   {p.nome}
                 </Link>
                 <button
-                  aria-label="Excluir projeto"
+                  aria-label="Excluir produção"
                   className="touch-target -m-2 shrink-0"
                   onClick={() => excluir(p.id)}
                 >
@@ -113,11 +116,10 @@ function Projetos() {
                 </button>
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
-                <Badge variant="secondary" className="capitalize">
-                  {String(p.status).replace("_", " ")}
+                <Badge variant="secondary">
+                  {ROTULO_STATUS[String(p.status)] ?? String(p.status)}
                 </Badge>
-                <Badge variant="outline">{p.duracao}s</Badge>
-                <Badge variant="outline">{p.formato}</Badge>
+                <Badge variant="outline">Etapa {p.etapa ?? 1}</Badge>
               </div>
               <p className="mt-4 text-[11px] uppercase tracking-[0.12em] text-muted-foreground/70">
                 Atualizado em {formatarData(p.updated_at)}

@@ -108,6 +108,7 @@ async function salvarRoteiro(
     duracao_total: plano.duracaoTotal,
     num_clipes: plano.clipes.length,
     plano_clipes: plano.clipes.map((c) => c.unidades) as any,
+    aprovado: false,
   };
 
   const q = scriptIdExistente
@@ -116,10 +117,10 @@ async function salvarRoteiro(
   const { data: script, error } = await q;
   if (error) throw new Error(error.message);
 
-  const clipes = await gerarEGravarClipes(supabase, ctx, script, roteiro, plano.clipes, cta);
+  // Os clipes são preparados só depois da aprovação do roteiro (etapa 5).
   return {
     script,
-    clipes,
+    clipes: [] as any[],
     plano: resumoPlano(plano.clipes, plano),
     medida: resumoPlano(plano.clipes, plano),
   };
@@ -232,7 +233,7 @@ export async function criarTresRoteiros(projectId: string) {
 
   await supabase
     .from("projects")
-    .update({ etapa: 5, status: "finalizado" } as any)
+    .update({ etapa: 4, status: "roteiros_gerados" } as any)
     .eq("id", projectId);
   await registrarHistorico(
     supabase,
@@ -260,6 +261,63 @@ export async function regerarRoteiro(projectId: string, scriptId: string, instru
   const salvo = await salvarRoteiro(supabase, ctx, out, variante, cta, scriptId);
   await registrarHistorico(supabase, projectId, `roteiro:${variante}`, atual, salvo.script);
   return salvo;
+}
+
+/** Marca um roteiro como aprovado (apenas um por produção). */
+export async function aprovarRoteiro(projectId: string, scriptId: string) {
+  const supabase = await db();
+  await supabase
+    .from("scripts")
+    .update({ aprovado: false } as any)
+    .eq("project_id", projectId);
+  const { data: script, error } = await supabase
+    .from("scripts")
+    .update({ aprovado: true } as any)
+    .eq("id", scriptId)
+    .select()
+    .single();
+  if (error) throw new Error(error.message);
+  await supabase
+    .from("projects")
+    .update({ etapa: 5, status: "roteiro_aprovado" } as any)
+    .eq("id", projectId);
+  await registrarHistorico(supabase, projectId, "roteiro_aprovado", null, { scriptId });
+  return script;
+}
+
+/** Etapa 5: divide o roteiro aprovado em clipes de 4/6/8/10s e gera os prompts do Google Flow. */
+export async function prepararClipes(projectId: string, scriptId: string) {
+  const supabase = await db();
+  const ctx = await loadContext(supabase, projectId);
+  const { data: script, error } = await supabase
+    .from("scripts")
+    .select("*")
+    .eq("id", scriptId)
+    .single();
+  if (error) throw new Error(error.message);
+
+  const cta = ctx.project.cta ?? script.cta ?? "";
+  const roteiro = { cenas: script.cenas ?? [], cta: script.cta ?? cta };
+  const grupos = gruposDoScript(script);
+  const planejados = grupos.length
+    ? montarClipes(grupos)
+    : planejarRoteiro(roteiro, ctx.character, cta).clipes;
+
+  const clipes = await gerarEGravarClipes(supabase, ctx, script, roteiro, planejados, cta);
+  await supabase
+    .from("scripts")
+    .update({
+      num_clipes: planejados.length,
+      plano_clipes: planejados.map((c) => c.unidades) as any,
+      clipes_json: clipes as any,
+    })
+    .eq("id", scriptId);
+  await supabase
+    .from("projects")
+    .update({ etapa: 5, status: "clipes_preparados" } as any)
+    .eq("id", projectId);
+  await registrarHistorico(supabase, projectId, "clipes", null, { scriptId, total: clipes.length });
+  return clipes;
 }
 
 export async function carregarResultados(projectId: string) {
