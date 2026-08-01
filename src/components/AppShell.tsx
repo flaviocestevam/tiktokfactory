@@ -93,7 +93,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <div className="lg:pl-64">
         <header className="sticky top-0 z-20 flex min-h-14 items-center gap-3 border-b border-border bg-background/70 px-4 py-2 backdrop-blur-xl lg:hidden">
-          <Button variant="ghost" size="icon" onClick={() => setAberto(true)} aria-label="Abrir menu">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setAberto(true)}
+            aria-label="Abrir menu"
+          >
             <Menu className="size-5" />
           </Button>
           <Brand compact />
@@ -113,7 +118,9 @@ function Brand({ compact }: { compact?: boolean }) {
       <span className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-[0_6px_18px_-8px_var(--color-primary)]">
         <Wand2 className="size-4" />
       </span>
-      <span className={cn("font-display text-base font-bold tracking-[-0.03em]", compact && "text-sm")}>
+      <span
+        className={cn("font-display text-base font-bold tracking-[-0.03em]", compact && "text-sm")}
+      >
         TikTok<span className="text-primary">Factory</span>
       </span>
     </Link>
@@ -137,7 +144,11 @@ export function PageHeader({
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{descricao}</p>
         ) : null}
       </div>
-      {acoes ? <div className="flex w-full flex-wrap gap-2 sm:w-auto [&>*]:min-h-11 [&>*]:flex-1 sm:[&>*]:flex-none">{acoes}</div> : null}
+      {acoes ? (
+        <div className="flex w-full flex-wrap gap-2 sm:w-auto [&>*]:min-h-11 [&>*]:flex-1 sm:[&>*]:flex-none">
+          {acoes}
+        </div>
+      ) : null}
     </div>
   );
 }

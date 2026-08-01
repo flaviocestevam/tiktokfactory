@@ -45,7 +45,10 @@ function NovoProduto() {
 
   return (
     <>
-      <PageHeader titulo="Novo produto" descricao="Cole o link da página de vendas ou preencha manualmente." />
+      <PageHeader
+        titulo="Novo produto"
+        descricao="Cole o link da página de vendas ou preencha manualmente."
+      />
       <ProductForm valores={valores} onChange={setValores} onSalvar={salvar} salvando={salvando} />
     </>
   );

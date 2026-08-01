@@ -27,7 +27,10 @@ export const Route = createFileRoute("/personagens/")({
 
 function Personagens() {
   const queryClient = useQueryClient();
-  const { data, isLoading } = useQuery({ queryKey: ["characters"], queryFn: () => listar("characters") });
+  const { data, isLoading } = useQuery({
+    queryKey: ["characters"],
+    queryFn: () => listar("characters"),
+  });
   const [aberta, setAberta] = useState<string | null>(null);
 
   const remover = useMutation({
@@ -75,7 +78,9 @@ function Personagens() {
                   ) : (
                     <div className="flex aspect-[3/4] w-full flex-col items-center justify-center gap-2 p-6 text-center">
                       <ImagePlus className="size-7 text-muted-foreground" />
-                      <p className="text-xs text-muted-foreground">Foto do perfil ainda não cadastrada</p>
+                      <p className="text-xs text-muted-foreground">
+                        Foto do perfil ainda não cadastrada
+                      </p>
                     </div>
                   )}
                 </div>
@@ -107,9 +112,13 @@ function Personagens() {
 
                 <header className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
                   <div className="min-w-0">
-                    <h2 className="break-words text-lg font-semibold">{c.nome_exibicao || c.nome}</h2>
+                    <h2 className="break-words text-lg font-semibold">
+                      {c.nome_exibicao || c.nome}
+                    </h2>
                     <p className="text-xs text-muted-foreground">
-                      {[c.nicho, c.idade ? `${c.idade} anos` : null, c.cidade_natal].filter(Boolean).join(" · ")}
+                      {[c.nicho, c.idade ? `${c.idade} anos` : null, c.cidade_natal]
+                        .filter(Boolean)
+                        .join(" · ")}
                     </p>
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-1">
@@ -158,7 +167,6 @@ function Personagens() {
           })}
         </div>
       )}
-
     </>
   );
 }
@@ -167,7 +175,9 @@ function Campo({ titulo, texto }: { titulo: string; texto?: string | null }) {
   if (!texto) return null;
   return (
     <div className="space-y-1">
-      <h3 className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">{titulo}</h3>
+      <h3 className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+        {titulo}
+      </h3>
       <p className="text-xs leading-relaxed">{texto}</p>
     </div>
   );

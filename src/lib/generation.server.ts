@@ -12,16 +12,30 @@ export type ProjectContext = {
 };
 
 export async function loadContext(supabase: Client, projectId: string): Promise<ProjectContext> {
-  const { data: project, error } = await supabase.from("projects").select("*").eq("id", projectId).maybeSingle();
+  const { data: project, error } = await supabase
+    .from("projects")
+    .select("*")
+    .eq("id", projectId)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!project) throw new Error("Projeto não encontrado.");
 
   const [product, character] = await Promise.all([
     project.product_id
-      ? supabase.from("products").select("*").eq("id", project.product_id).maybeSingle().then((r) => r.data)
+      ? supabase
+          .from("products")
+          .select("*")
+          .eq("id", project.product_id)
+          .maybeSingle()
+          .then((r) => r.data)
       : Promise.resolve(null),
     project.character_id
-      ? supabase.from("characters").select("*").eq("id", project.character_id).maybeSingle().then((r) => r.data)
+      ? supabase
+          .from("characters")
+          .select("*")
+          .eq("id", project.character_id)
+          .maybeSingle()
+          .then((r) => r.data)
       : Promise.resolve(null),
   ]);
 
@@ -355,7 +369,11 @@ Use variáveis literais quando o dado da personagem ainda não existir.`,
   };
 }
 
-export async function gerarJson<T>(p: { system: string; prompt: string; shape: string }): Promise<T> {
+export async function gerarJson<T>(p: {
+  system: string;
+  prompt: string;
+  shape: string;
+}): Promise<T> {
   return callAIJson<T>(p.system, p.prompt, p.shape);
 }
 

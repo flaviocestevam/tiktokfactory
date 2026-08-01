@@ -161,7 +161,9 @@ function EditarPersonagem() {
             ) : (
               <div className="flex aspect-[3/4] w-full flex-col items-center justify-center gap-2 p-6 text-center">
                 <ImagePlus className="size-8 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">Foto do perfil ainda não cadastrada.</p>
+                <p className="text-sm text-muted-foreground">
+                  Foto do perfil ainda não cadastrada.
+                </p>
               </div>
             )}
           </div>
@@ -178,7 +180,8 @@ function EditarPersonagem() {
                 </>
               ) : (
                 <>
-                  <Upload className="size-4" /> {foto ? "EDITAR FOTO DO PERFIL" : "CADASTRAR FOTO DO PERFIL"}
+                  <Upload className="size-4" />{" "}
+                  {foto ? "EDITAR FOTO DO PERFIL" : "CADASTRAR FOTO DO PERFIL"}
                 </>
               )}
             </Button>
@@ -231,7 +234,11 @@ function EditarPersonagem() {
           disabled={salvarBio.isPending}
           onClick={() => salvarBio.mutate()}
         >
-          {salvarBio.isPending ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+          {salvarBio.isPending ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <Save className="size-4" />
+          )}
           SALVAR TEXTOS
         </Button>
       </section>

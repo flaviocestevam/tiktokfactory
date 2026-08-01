@@ -29,9 +29,15 @@ export const Route = createFileRoute("/projetos/novo")({
   head: () => ({
     meta: [
       { title: "Criar novo vídeo | TikTok Factory" },
-      { name: "description", content: "Monte um projeto escolhendo produto, personagem, duração e objetivo." },
+      {
+        name: "description",
+        content: "Monte um projeto escolhendo produto, personagem, duração e objetivo.",
+      },
       { property: "og:title", content: "Criar novo vídeo | TikTok Factory" },
-      { property: "og:description", content: "Monte um projeto escolhendo produto, personagem, duração e objetivo." },
+      {
+        property: "og:description",
+        content: "Monte um projeto escolhendo produto, personagem, duração e objetivo.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -67,19 +73,19 @@ function NovoProjeto() {
     setSalvando(true);
     try {
       const data = await criar("projects", {
-          nome: form.nome.trim(),
-          product_id: form.product_id,
-          character_id: form.character_id || null,
-          duracao: form.duracao,
-          formato: form.formato,
-          plataforma: form.plataforma,
-          objetivo: form.objetivo,
-          estilo: form.estilo,
-          tom_linguagem: form.tom_linguagem,
-          nivel_energia: form.nivel_energia,
-          velocidade_fala: form.velocidade_fala,
-          observacoes: form.observacoes || null,
-          status: "em_andamento",
+        nome: form.nome.trim(),
+        product_id: form.product_id,
+        character_id: form.character_id || null,
+        duracao: form.duracao,
+        formato: form.formato,
+        plataforma: form.plataforma,
+        objetivo: form.objetivo,
+        estilo: form.estilo,
+        tom_linguagem: form.tom_linguagem,
+        nivel_energia: form.nivel_energia,
+        velocidade_fala: form.velocidade_fala,
+        observacoes: form.observacoes || null,
+        status: "em_andamento",
       });
       qc.invalidateQueries({ queryKey: ["projects"] });
       toast.success("Projeto criado.");
@@ -95,7 +101,10 @@ function NovoProjeto() {
 
   return (
     <>
-      <PageHeader titulo="Criar novo vídeo" descricao="Defina a base do projeto antes de gerar o conteúdo." />
+      <PageHeader
+        titulo="Criar novo vídeo"
+        descricao="Defina a base do projeto antes de gerar o conteúdo."
+      />
 
       {(personagens.data?.length ?? 0) === 0 ? (
         <Alert className="mb-6">
@@ -119,9 +128,16 @@ function NovoProjeto() {
         <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
           <h2 className="mb-4 text-base font-semibold">Base do projeto</h2>
           <div className="grid gap-4 sm:grid-cols-2">
-            <TextField label="Nome do projeto" value={form.nome} onChange={(v) => setForm({ ...form, nome: v })} />
+            <TextField
+              label="Nome do projeto"
+              value={form.nome}
+              onChange={(v) => setForm({ ...form, nome: v })}
+            />
             <Field label="Produto">
-              <Select value={form.product_id} onValueChange={(v) => setForm({ ...form, product_id: v })}>
+              <Select
+                value={form.product_id}
+                onValueChange={(v) => setForm({ ...form, product_id: v })}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione um produto" />
                 </SelectTrigger>
@@ -223,7 +239,11 @@ function NovoProjeto() {
         </section>
 
         <div className="flex justify-stretch sm:justify-end">
-          <Button onClick={salvar} disabled={salvando || semProduto} className="h-11 w-full gap-2 sm:w-auto">
+          <Button
+            onClick={salvar}
+            disabled={salvando || semProduto}
+            className="h-11 w-full gap-2 sm:w-auto"
+          >
             {salvando ? <Loader2 className="size-4 animate-spin" /> : null}
             Criar projeto
           </Button>

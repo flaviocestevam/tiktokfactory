@@ -91,5 +91,9 @@ export function baixarTexto(nomeArquivo: string, conteudo: string) {
 
 export function formatarData(valor?: string | null) {
   if (!valor) return "—";
-  return new Date(valor).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+  return new Date(valor).toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 }

@@ -81,7 +81,12 @@ async function personagem(db: any, id: string) {
 }
 
 async function salvar(db: any, id: string, valores: Record<string, unknown>) {
-  const { data, error } = await db.from("characters").update(valores).eq("id", id).select().single();
+  const { data, error } = await db
+    .from("characters")
+    .update(valores)
+    .eq("id", id)
+    .select()
+    .single();
   if (error) throw new Error(error.message);
   return data as Record<string, any>;
 }
@@ -102,7 +107,8 @@ export async function enviarFoto(input: {
   if (!extensao) throw new Error("Formato não aceito. Envie uma imagem JPG, JPEG, PNG ou WEBP.");
 
   const bytes = decodificar(input.base64);
-  if (bytes.byteLength > MAX_BYTES) throw new Error("Imagem maior que 10 MB. Envie um arquivo menor.");
+  if (bytes.byteLength > MAX_BYTES)
+    throw new Error("Imagem maior que 10 MB. Envie um arquivo menor.");
   if (bytes.byteLength < 100 || !ehImagem(bytes))
     throw new Error("O arquivo enviado não é uma imagem válida.");
 
@@ -147,8 +153,7 @@ export async function enviarFoto(input: {
   };
 
   const campo = CAMPO_POR_TIPO[input.tipo];
-  const anteriorMesmoTipo =
-    campo != null ? lista.find((f) => f?.tipo === input.tipo) : undefined;
+  const anteriorMesmoTipo = campo != null ? lista.find((f) => f?.tipo === input.tipo) : undefined;
   const novaLista = campo
     ? [...lista.filter((f) => f?.tipo !== input.tipo), item]
     : [...lista, item];

@@ -69,7 +69,11 @@ export function PassoCta({
         />
       </div>
 
-      <Button className="mt-6 h-12 w-full text-base sm:w-auto" disabled={gerando} onClick={onContinuar}>
+      <Button
+        className="mt-6 h-12 w-full text-base sm:w-auto"
+        disabled={gerando}
+        onClick={onContinuar}
+      >
         {gerando ? "GERANDO ROTEIROS..." : "GERAR OS 3 ROTEIROS"}
       </Button>
     </section>

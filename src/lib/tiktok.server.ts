@@ -27,7 +27,9 @@ export function validarUrlTikTok(bruto: string): URL {
     throw new Error("Endereço não permitido.");
   }
   if (!HOSTS_PERMITIDOS.has(host)) {
-    throw new Error("Este link não é do TikTok Shop. Use um link de shop.tiktok.com, tiktok.com ou vt.tiktok.com.");
+    throw new Error(
+      "Este link não é do TikTok Shop. Use um link de shop.tiktok.com, tiktok.com ou vt.tiktok.com.",
+    );
   }
   return url;
 }
@@ -85,7 +87,8 @@ export function extrairRegiao(url: URL): string | null {
   return (
     url.searchParams.get("region") ??
     url.searchParams.get("locale") ??
-    (url.pathname.match(/^\/([a-z]{2}-[A-Z]{2})\//)?.[1] ?? null)
+    url.pathname.match(/^\/([a-z]{2}-[A-Z]{2})\//)?.[1] ??
+    null
   );
 }
 
@@ -261,7 +264,10 @@ export async function analisarProdutoTikTokShop(linkOriginal: string): Promise<R
   const url = validarUrlTikTok(linkOriginal);
   const resolvido = ehLinkCurto(url) ? await resolverUrl(url) : url;
 
-  const base: Omit<ResultadoAnalise, "ok" | "mensagem" | "detalhe" | "fonte" | "dados" | "origem" | "imagens"> = {
+  const base: Omit<
+    ResultadoAnalise,
+    "ok" | "mensagem" | "detalhe" | "fonte" | "dados" | "origem" | "imagens"
+  > = {
     original_tiktok_url: linkOriginal.trim(),
     resolved_tiktok_url: resolvido.toString(),
     tiktok_product_id: extrairProductId(resolvido) ?? extrairProductId(url),

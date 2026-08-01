@@ -78,7 +78,10 @@ export function PassoProduto({
 
   function alterar(id: string, valor: string) {
     setValores((v) => ({ ...v, [id]: valor }));
-    setOrigem((o) => ({ ...o, [id]: valor.trim() ? (o[id] === "tiktok_shop" ? "manual" : o[id] || "manual") : "" }));
+    setOrigem((o) => ({
+      ...o,
+      [id]: valor.trim() ? (o[id] === "tiktok_shop" ? "manual" : o[id] || "manual") : "",
+    }));
   }
 
   async function analisar() {
@@ -173,7 +176,11 @@ export function PassoProduto({
             className="h-11"
           />
           <Button onClick={analisar} disabled={analisando} className="h-11 shrink-0 gap-2">
-            {analisando ? <Loader2 className="size-4 animate-spin" /> : <Search className="size-4" />}
+            {analisando ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Search className="size-4" />
+            )}
             ANALISAR PRODUTO
           </Button>
         </div>
@@ -193,8 +200,15 @@ export function PassoProduto({
               rows={5}
             />
             <div>
-              <p className="mb-2 text-xs text-muted-foreground">Envie até 10 capturas ou imagens do produto</p>
-              <Input type="file" accept="image/*" multiple onChange={(e) => subirImagens(e.target.files)} />
+              <p className="mb-2 text-xs text-muted-foreground">
+                Envie até 10 capturas ou imagens do produto
+              </p>
+              <Input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(e) => subirImagens(e.target.files)}
+              />
             </div>
           </div>
         ) : null}
@@ -221,7 +235,12 @@ export function PassoProduto({
                   principal === url ? "border-primary ring-1 ring-primary/40" : "border-border",
                 )}
               >
-                <img src={url} alt="Imagem do produto" loading="lazy" className="aspect-square w-full object-cover" />
+                <img
+                  src={url}
+                  alt="Imagem do produto"
+                  loading="lazy"
+                  className="aspect-square w-full object-cover"
+                />
                 <div className="absolute inset-x-0 bottom-0 flex justify-between gap-1 bg-background/80 p-1">
                   <button
                     type="button"
@@ -229,7 +248,12 @@ export function PassoProduto({
                     onClick={() => setPrincipal(url)}
                     className="flex-1 rounded-md p-1 text-[10px] font-medium hover:bg-secondary"
                   >
-                    <Star className={cn("mx-auto size-3.5", principal === url && "fill-primary text-primary")} />
+                    <Star
+                      className={cn(
+                        "mx-auto size-3.5",
+                        principal === url && "fill-primary text-primary",
+                      )}
+                    />
                   </button>
                   <button
                     type="button"
@@ -253,7 +277,8 @@ export function PassoProduto({
         )}
         {imagens.length ? (
           <p className="mt-3 text-xs text-muted-foreground">
-            Use a estrela para escolher a imagem que será a referência principal da foto da personagem.
+            Use a estrela para escolher a imagem que será a referência principal da foto da
+            personagem.
           </p>
         ) : null}
       </section>
@@ -272,19 +297,35 @@ export function PassoProduto({
                 </label>
                 {valores[c.id]?.trim() ? (
                   <Badge variant="secondary" className="text-[10px]">
-                    {origem[c.id] === "tiktok_shop" ? "TikTok Shop" : origem[c.id] === "ia" ? "Interpretação da IA" : "Manual"}
+                    {origem[c.id] === "tiktok_shop"
+                      ? "TikTok Shop"
+                      : origem[c.id] === "ia"
+                        ? "Interpretação da IA"
+                        : "Manual"}
                   </Badge>
                 ) : null}
               </div>
               {c.longo ? (
-                <Textarea value={valores[c.id] ?? ""} onChange={(e) => alterar(c.id, e.target.value)} rows={3} />
+                <Textarea
+                  value={valores[c.id] ?? ""}
+                  onChange={(e) => alterar(c.id, e.target.value)}
+                  rows={3}
+                />
               ) : (
-                <Input value={valores[c.id] ?? ""} onChange={(e) => alterar(c.id, e.target.value)} className="h-11" />
+                <Input
+                  value={valores[c.id] ?? ""}
+                  onChange={(e) => alterar(c.id, e.target.value)}
+                  className="h-11"
+                />
               )}
             </div>
           ))}
         </div>
-        <Button onClick={confirmar} disabled={salvando} className="mt-6 h-12 w-full gap-2 text-base sm:w-auto">
+        <Button
+          onClick={confirmar}
+          disabled={salvando}
+          className="mt-6 h-12 w-full gap-2 text-base sm:w-auto"
+        >
           {salvando ? <Loader2 className="size-4 animate-spin" /> : null}
           CONFIRMAR PRODUTO E CONTINUAR
         </Button>

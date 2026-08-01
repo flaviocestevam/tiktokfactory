@@ -11,7 +11,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export type ProductDraft = { imagens?: string[]; [key: string]: string | string[] | undefined };
 
-export const CAMPOS_PRODUTO: Array<{ chave: string; label: string; area?: boolean; rows?: number }> = [
+export const CAMPOS_PRODUTO: Array<{
+  chave: string;
+  label: string;
+  area?: boolean;
+  rows?: number;
+}> = [
   { chave: "nome", label: "Nome do produto" },
   { chave: "marca", label: "Marca" },
   { chave: "categoria", label: "Categoria" },
@@ -82,7 +87,9 @@ export function ProductForm({
       else toast.warning(res.mensagem);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Falha ao ler a página.";
-      setAviso("Não foi possível ler todas as informações desta página. Complete ou cole os dados manualmente.");
+      setAviso(
+        "Não foi possível ler todas as informações desta página. Complete ou cole os dados manualmente.",
+      );
       toast.error(msg);
     } finally {
       setExtraindo(false);
@@ -120,7 +127,12 @@ export function ProductForm({
             onChange={(e) => set("link", e.target.value)}
             placeholder="https://..."
           />
-          <Button type="button" onClick={lerLink} disabled={extraindo} className="h-11 w-full gap-2 sm:w-48">
+          <Button
+            type="button"
+            onClick={lerLink}
+            disabled={extraindo}
+            className="h-11 w-full gap-2 sm:w-48"
+          >
             {extraindo ? <Loader2 className="size-4 animate-spin" /> : <Link2 className="size-4" />}
             {extraindo ? "Lendo..." : "Extrair informações"}
           </Button>
@@ -183,13 +195,24 @@ export function ProductForm({
           // Grade fluida: colunas nascem conforme a largura, sem breakpoints rígidos
           <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(5.5rem,1fr))] gap-3">
             {valores.imagens.map((url) => (
-              <div key={url} className="group relative overflow-hidden rounded-lg border border-border">
-                <img src={url} alt="Imagem do produto" loading="lazy" className="aspect-square w-full object-cover" />
+              <div
+                key={url}
+                className="group relative overflow-hidden rounded-lg border border-border"
+              >
+                <img
+                  src={url}
+                  alt="Imagem do produto"
+                  loading="lazy"
+                  className="aspect-square w-full object-cover"
+                />
                 <button
                   type="button"
                   aria-label="Remover imagem"
                   onClick={() =>
-                    onChange({ ...valores, imagens: (valores.imagens ?? []).filter((u) => u !== url) })
+                    onChange({
+                      ...valores,
+                      imagens: (valores.imagens ?? []).filter((u) => u !== url),
+                    })
                   }
                   className="absolute right-1 top-1 rounded-md bg-background/85 p-1.5 opacity-100 transition-opacity group-hover:opacity-100 sm:opacity-0"
                 >

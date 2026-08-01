@@ -11,7 +11,13 @@ import { AreaField, TextField } from "@/components/Field";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { VARIAVEIS } from "@/lib/variables";
 import { criar, excluir as excluirRegistro, listar } from "@/lib/queries";
 
@@ -21,7 +27,10 @@ export const Route = createFileRoute("/templates/")({
       { title: "Templates | TikTok Factory" },
       { name: "description", content: "Modelos reutilizáveis de ganchos, roteiros e prompts." },
       { property: "og:title", content: "Templates | TikTok Factory" },
-      { property: "og:description", content: "Modelos reutilizáveis de ganchos, roteiros e prompts." },
+      {
+        property: "og:description",
+        content: "Modelos reutilizáveis de ganchos, roteiros e prompts.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -33,7 +42,10 @@ function Templates() {
   const qc = useQueryClient();
   const [aberto, setAberto] = useState(false);
   const [form, setForm] = useState({ nome: "", tipo: "roteiro", categoria: "", conteudo: "" });
-  const { data, isLoading } = useQuery({ queryKey: ["templates"], queryFn: () => listar("templates") });
+  const { data, isLoading } = useQuery({
+    queryKey: ["templates"],
+    queryFn: () => listar("templates"),
+  });
 
   async function salvar() {
     if (!form.nome.trim()) return toast.error("Dê um nome ao template.");
@@ -102,7 +114,11 @@ function Templates() {
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
                   <CopyButton value={t.conteudo} size="icon" />
-                  <button aria-label="Excluir template" className="touch-target" onClick={() => excluir(t.id)}>
+                  <button
+                    aria-label="Excluir template"
+                    className="touch-target"
+                    onClick={() => excluir(t.id)}
+                  >
                     <Trash2 className="size-4 text-destructive" />
                   </button>
                 </div>
@@ -121,8 +137,16 @@ function Templates() {
             <DialogTitle>Novo template</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4">
-            <TextField label="Nome" value={form.nome} onChange={(v) => setForm({ ...form, nome: v })} />
-            <TextField label="Tipo" value={form.tipo} onChange={(v) => setForm({ ...form, tipo: v })} />
+            <TextField
+              label="Nome"
+              value={form.nome}
+              onChange={(v) => setForm({ ...form, nome: v })}
+            />
+            <TextField
+              label="Tipo"
+              value={form.tipo}
+              onChange={(v) => setForm({ ...form, tipo: v })}
+            />
             <TextField
               label="Categoria"
               value={form.categoria}

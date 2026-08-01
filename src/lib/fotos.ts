@@ -4,7 +4,8 @@ import {
   removerFotoPersonagem,
 } from "./personagens.functions";
 
-export type TipoFoto = "canonica" | "rosto" | "tres_quartos" | "corpo_inteiro" | "expressao" | "referencia";
+export type TipoFoto =
+  "canonica" | "rosto" | "tres_quartos" | "corpo_inteiro" | "expressao" | "referencia";
 
 export const ROTULOS_FOTO: Record<TipoFoto, string> = {
   canonica: "Foto do perfil",
