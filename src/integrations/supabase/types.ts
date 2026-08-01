@@ -21,11 +21,14 @@ export type Database = {
           aparencia_fisica: string | null
           arquetipo: string | null
           arquivos_referencia: Json
+          ativo: boolean
           biografia: string | null
+          biografia_interna: string | null
           bordoes: string | null
           caracteristicas_fixas: string | null
           caracteristicas_variaveis: string | null
           categorias_permitidas: string | null
+          categorias_prioritarias: string | null
           categorias_proibidas: string | null
           cidade_atual: string | null
           cidade_natal: string | null
@@ -35,21 +38,28 @@ export type Database = {
           descricao_olhos: string | null
           descricao_pele: string | null
           descricao_rosto: string | null
+          desejos_publico: string | null
+          dores_publico: string | null
           estilo_humor: string | null
+          estilo_interpretacao: string | null
           estilo_roupas: string | null
           estilo_venda: string | null
           expressoes_permitidas: string | null
           expressoes_proibidas: string | null
           forma_demonstrar: string | null
+          formatos_roteiro: string | null
           foto_canonica_principal: string | null
           foto_corpo_inteiro: string | null
           foto_expressao: string | null
           foto_rosto: string | null
           foto_tres_quartos: string | null
           fotos_canonicas_auxiliares: Json
+          gatilhos_persuasao: string | null
           historia_pessoal: string | null
           id: string
           idade: number | null
+          identidade_visual_canonica: string | null
+          identity_version: string
           maquiagem: string | null
           missao: string | null
           nicho: string | null
@@ -60,7 +70,10 @@ export type Database = {
           objecoes_comuns: string | null
           palavras_proibidas: string | null
           personalidade: string | null
+          pilares_conteudo: string | null
+          posicionamento: string | null
           profissao: string | null
+          promessa_central: string | null
           prompt_mestre: string | null
           prompt_negativo: string | null
           publico_principal: string | null
@@ -68,6 +81,7 @@ export type Database = {
           regras_flow: string | null
           regras_imagem: string | null
           regras_video: string | null
+          slug: string | null
           status: string
           tipo_comunicacao: string | null
           tipos_cta: string | null
@@ -82,11 +96,14 @@ export type Database = {
           aparencia_fisica?: string | null
           arquetipo?: string | null
           arquivos_referencia?: Json
+          ativo?: boolean
           biografia?: string | null
+          biografia_interna?: string | null
           bordoes?: string | null
           caracteristicas_fixas?: string | null
           caracteristicas_variaveis?: string | null
           categorias_permitidas?: string | null
+          categorias_prioritarias?: string | null
           categorias_proibidas?: string | null
           cidade_atual?: string | null
           cidade_natal?: string | null
@@ -96,21 +113,28 @@ export type Database = {
           descricao_olhos?: string | null
           descricao_pele?: string | null
           descricao_rosto?: string | null
+          desejos_publico?: string | null
+          dores_publico?: string | null
           estilo_humor?: string | null
+          estilo_interpretacao?: string | null
           estilo_roupas?: string | null
           estilo_venda?: string | null
           expressoes_permitidas?: string | null
           expressoes_proibidas?: string | null
           forma_demonstrar?: string | null
+          formatos_roteiro?: string | null
           foto_canonica_principal?: string | null
           foto_corpo_inteiro?: string | null
           foto_expressao?: string | null
           foto_rosto?: string | null
           foto_tres_quartos?: string | null
           fotos_canonicas_auxiliares?: Json
+          gatilhos_persuasao?: string | null
           historia_pessoal?: string | null
           id?: string
           idade?: number | null
+          identidade_visual_canonica?: string | null
+          identity_version?: string
           maquiagem?: string | null
           missao?: string | null
           nicho?: string | null
@@ -121,7 +145,10 @@ export type Database = {
           objecoes_comuns?: string | null
           palavras_proibidas?: string | null
           personalidade?: string | null
+          pilares_conteudo?: string | null
+          posicionamento?: string | null
           profissao?: string | null
+          promessa_central?: string | null
           prompt_mestre?: string | null
           prompt_negativo?: string | null
           publico_principal?: string | null
@@ -129,6 +156,7 @@ export type Database = {
           regras_flow?: string | null
           regras_imagem?: string | null
           regras_video?: string | null
+          slug?: string | null
           status?: string
           tipo_comunicacao?: string | null
           tipos_cta?: string | null
@@ -143,11 +171,14 @@ export type Database = {
           aparencia_fisica?: string | null
           arquetipo?: string | null
           arquivos_referencia?: Json
+          ativo?: boolean
           biografia?: string | null
+          biografia_interna?: string | null
           bordoes?: string | null
           caracteristicas_fixas?: string | null
           caracteristicas_variaveis?: string | null
           categorias_permitidas?: string | null
+          categorias_prioritarias?: string | null
           categorias_proibidas?: string | null
           cidade_atual?: string | null
           cidade_natal?: string | null
@@ -157,21 +188,28 @@ export type Database = {
           descricao_olhos?: string | null
           descricao_pele?: string | null
           descricao_rosto?: string | null
+          desejos_publico?: string | null
+          dores_publico?: string | null
           estilo_humor?: string | null
+          estilo_interpretacao?: string | null
           estilo_roupas?: string | null
           estilo_venda?: string | null
           expressoes_permitidas?: string | null
           expressoes_proibidas?: string | null
           forma_demonstrar?: string | null
+          formatos_roteiro?: string | null
           foto_canonica_principal?: string | null
           foto_corpo_inteiro?: string | null
           foto_expressao?: string | null
           foto_rosto?: string | null
           foto_tres_quartos?: string | null
           fotos_canonicas_auxiliares?: Json
+          gatilhos_persuasao?: string | null
           historia_pessoal?: string | null
           id?: string
           idade?: number | null
+          identidade_visual_canonica?: string | null
+          identity_version?: string
           maquiagem?: string | null
           missao?: string | null
           nicho?: string | null
@@ -182,7 +220,10 @@ export type Database = {
           objecoes_comuns?: string | null
           palavras_proibidas?: string | null
           personalidade?: string | null
+          pilares_conteudo?: string | null
+          posicionamento?: string | null
           profissao?: string | null
+          promessa_central?: string | null
           prompt_mestre?: string | null
           prompt_negativo?: string | null
           publico_principal?: string | null
@@ -190,6 +231,7 @@ export type Database = {
           regras_flow?: string | null
           regras_imagem?: string | null
           regras_video?: string | null
+          slug?: string | null
           status?: string
           tipo_comunicacao?: string | null
           tipos_cta?: string | null

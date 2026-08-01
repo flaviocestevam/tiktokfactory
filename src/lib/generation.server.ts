@@ -111,6 +111,18 @@ export function descreverPersonagem(character: Record<string, any> | null): stri
     bloco("Características fixas", character.caracteristicas_fixas) +
     bloco("Características variáveis", character.caracteristicas_variaveis) +
     bloco("Regras de consistência", character.regras_consistencia) +
+    bloco("Posicionamento", character.posicionamento) +
+    bloco("Promessa central", character.promessa_central) +
+    bloco("Direção estratégica interna", character.biografia_interna) +
+    bloco("Dores do público", character.dores_publico) +
+    bloco("Desejos do público", character.desejos_publico) +
+    bloco("Categorias prioritárias", character.categorias_prioritarias) +
+    bloco("Pilares de conteúdo", character.pilares_conteudo) +
+    bloco("Gatilhos de persuasão", character.gatilhos_persuasao) +
+    bloco("Formatos de roteiro ideais", character.formatos_roteiro) +
+    bloco("Estilo de interpretação em vídeo", character.estilo_interpretacao) +
+    bloco("Identidade visual canônica (imutável)", character.identidade_visual_canonica) +
+    bloco("Palavras e alegações PROIBIDAS", character.palavras_proibidas) +
     bloco("Prompt mestre de identidade", character.prompt_mestre) +
     bloco("Prompt negativo", character.prompt_negativo)
   );
