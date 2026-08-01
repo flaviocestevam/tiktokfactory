@@ -84,7 +84,7 @@ function Personagens() {
                   <div className="grid grid-cols-2 gap-2">
                     <Button asChild size="sm" variant="outline" className="min-h-11">
                       <Link to="/personagens/$id" params={{ id: c.id }}>
-                        TROCAR
+                        EDITAR
                       </Link>
                     </Button>
                     <Button
