@@ -10,9 +10,9 @@ import { criar } from "@/lib/queries";
 export const Route = createFileRoute("/produtos/novo")({
   head: () => ({
     meta: [
-      { title: "Novo produto | StudioIA" },
+      { title: "Novo produto | TikTok Factory" },
       { name: "description", content: "Cadastre um produto por link ou manualmente." },
-      { property: "og:title", content: "Novo produto | StudioIA" },
+      { property: "og:title", content: "Novo produto | TikTok Factory" },
       { property: "og:description", content: "Cadastre um produto por link ou manualmente." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

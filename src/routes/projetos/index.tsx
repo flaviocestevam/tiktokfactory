@@ -14,9 +14,9 @@ import { excluir as excluirRegistro, formatarData, listar } from "@/lib/queries"
 export const Route = createFileRoute("/projetos/")({
   head: () => ({
     meta: [
-      { title: "Projetos | StudioIA" },
+      { title: "Projetos | TikTok Factory" },
       { name: "description", content: "Todos os seus vídeos em produção, com estratégia, roteiro e prompts." },
-      { property: "og:title", content: "Projetos | StudioIA" },
+      { property: "og:title", content: "Projetos | TikTok Factory" },
       { property: "og:description", content: "Todos os seus vídeos em produção, com estratégia, roteiro e prompts." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

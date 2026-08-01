@@ -30,9 +30,9 @@ import { criar, excluir as excluirRegistro, listar } from "@/lib/queries";
 export const Route = createFileRoute("/cenarios/")({
   head: () => ({
     meta: [
-      { title: "Cenários | StudioIA" },
+      { title: "Cenários | TikTok Factory" },
       { name: "description", content: "Cadastre ambientes, luz e enquadramento para as gravações." },
-      { property: "og:title", content: "Cenários | StudioIA" },
+      { property: "og:title", content: "Cenários | TikTok Factory" },
       { property: "og:description", content: "Cadastre ambientes, luz e enquadramento para as gravações." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

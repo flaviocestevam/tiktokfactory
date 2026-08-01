@@ -18,9 +18,9 @@ import { criar, excluir as excluirRegistro, listar } from "@/lib/queries";
 export const Route = createFileRoute("/templates/")({
   head: () => ({
     meta: [
-      { title: "Templates | StudioIA" },
+      { title: "Templates | TikTok Factory" },
       { name: "description", content: "Modelos reutilizáveis de ganchos, roteiros e prompts." },
-      { property: "og:title", content: "Templates | StudioIA" },
+      { property: "og:title", content: "Templates | TikTok Factory" },
       { property: "og:description", content: "Modelos reutilizáveis de ganchos, roteiros e prompts." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

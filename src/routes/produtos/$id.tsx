@@ -11,9 +11,9 @@ import { atualizar, obter } from "@/lib/queries";
 export const Route = createFileRoute("/produtos/$id")({
   head: () => ({
     meta: [
-      { title: "Editar produto | StudioIA" },
+      { title: "Editar produto | TikTok Factory" },
       { name: "description", content: "Revise e complete as informações do produto." },
-      { property: "og:title", content: "Editar produto | StudioIA" },
+      { property: "og:title", content: "Editar produto | TikTok Factory" },
       { property: "og:description", content: "Revise e complete as informações do produto." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

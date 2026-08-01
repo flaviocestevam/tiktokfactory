@@ -3,7 +3,6 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import {
   FileText,
   FolderKanban,
-  LayoutDashboard,
   Menu,
   Package,
   Plus,
