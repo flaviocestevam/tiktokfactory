@@ -133,14 +133,14 @@ export function PageHeader({
   acoes?: ReactNode;
 }) {
   return (
-    <div className="mb-8 flex flex-col gap-4 stagger sm:flex-row sm:items-end sm:justify-between">
-      <div className="max-w-2xl">
-        <h1 className="text-[clamp(1.75rem,1.2rem+2vw,2.5rem)] font-bold">{titulo}</h1>
+    <div className="mb-[clamp(1.5rem,4vw,2rem)] flex flex-col gap-4 stagger sm:flex-row sm:items-end sm:justify-between">
+      <div className="min-w-0 max-w-2xl">
+        <h1 className="text-[clamp(1.5rem,1.1rem+2vw,2.5rem)] font-bold">{titulo}</h1>
         {descricao ? (
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{descricao}</p>
         ) : null}
       </div>
-      {acoes ? <div className="flex flex-wrap gap-2">{acoes}</div> : null}
+      {acoes ? <div className="flex w-full flex-wrap gap-2 sm:w-auto [&>*]:min-h-11 [&>*]:flex-1 sm:[&>*]:flex-none">{acoes}</div> : null}
     </div>
   );
 }
