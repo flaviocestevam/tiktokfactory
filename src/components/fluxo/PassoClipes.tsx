@@ -6,7 +6,12 @@ import { CopyButton } from "@/components/CopyButton";
 import { CardClipe } from "@/components/fluxo/CardClipe";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { gerarClipesDoRoteiro, regerarClipeFlow, reorganizarClipes } from "@/lib/fluxo.functions";
+import {
+  editarClipeTexto,
+  gerarClipesDoRoteiro,
+  regerarClipeFlow,
+  reorganizarClipes,
+} from "@/lib/fluxo.functions";
 import { FLOW_CLIP_DURATIONS } from "@/lib/config";
 
 export function PassoClipes({
@@ -144,6 +149,16 @@ export function PassoClipes({
                 "Falha ao separar.",
               )
             }
+            onSalvar={async (campos) => {
+              try {
+                await editarClipeTexto({ data: { projectId, clipId: c.id, campos } });
+                onAtualizar();
+                toast.success("Clipe salvo.");
+              } catch (e) {
+                toast.error(e instanceof Error ? e.message : "Falha ao salvar o clipe.");
+                throw e;
+              }
+            }}
           />
         ))}
       </div>

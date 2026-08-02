@@ -1,8 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Loader2, RefreshCw, Scissors } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Loader2, Pencil, RefreshCw, Save, Scissors, X } from "lucide-react";
 import { CopyButton } from "@/components/CopyButton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+
+const CAMPOS_CLIPE: { chave: string; rotulo: string }[] = [
+  { chave: "fala", rotulo: "Fala" },
+  { chave: "acao", rotulo: "Ação" },
+  { chave: "gesto", rotulo: "Gesto" },
+  { chave: "expressao", rotulo: "Expressão" },
+  { chave: "posicao_produto", rotulo: "Produto" },
+  { chave: "camera", rotulo: "Câmera" },
+  { chave: "estado_inicial", rotulo: "Estado inicial" },
+  { chave: "estado_final", rotulo: "Estado final" },
+  { chave: "ligacao_proximo", rotulo: "Ligação com o próximo" },
+  { chave: "prompt_flow", rotulo: "Prompt para o Flow" },
+];
 
 export const AVISO_CONTINUIDADE =
   "Depois de gerar o clipe anterior no Google Flow, salve o último frame e use-o como primeiro frame do próximo clipe.";
@@ -24,6 +39,7 @@ export function CardClipe({
   onRegerar,
   onUnir,
   onSeparar,
+  onSalvar,
 }: {
   clipe: any;
   total: number;
@@ -31,7 +47,30 @@ export function CardClipe({
   onRegerar: (instrucao?: string) => void;
   onUnir: () => void;
   onSeparar: () => void;
+  onSalvar?: (campos: Record<string, string>) => Promise<void> | void;
 }) {
+  const [editando, setEditando] = useState(false);
+  const [salvando, setSalvando] = useState(false);
+  const [rascunho, setRascunho] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (!editando) return;
+    setRascunho(
+      Object.fromEntries(CAMPOS_CLIPE.map((c) => [c.chave, String(clipe[c.chave] ?? "")])),
+    );
+  }, [editando, clipe]);
+
+  async function salvar() {
+    if (!onSalvar) return;
+    setSalvando(true);
+    try {
+      await onSalvar(rascunho);
+      setEditando(false);
+    } finally {
+      setSalvando(false);
+    }
+  }
+
   return (
     <article className="rounded-xl border border-border bg-secondary/30 p-3">
       <header className="flex items-center justify-between gap-2">
@@ -43,6 +82,37 @@ export function CardClipe({
         </Badge>
       </header>
 
+      {editando ? (
+        <div className="mt-3 space-y-3">
+          {CAMPOS_CLIPE.map((c) => (
+            <div key={c.chave} className="space-y-1">
+              <label className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                {c.rotulo}
+              </label>
+              <Textarea
+                value={rascunho[c.chave] ?? ""}
+                onChange={(e) => setRascunho((r) => ({ ...r, [c.chave]: e.target.value }))}
+                rows={c.chave === "prompt_flow" ? 6 : 2}
+                className="text-xs"
+              />
+            </div>
+          ))}
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" disabled={salvando} onClick={salvar}>
+              {salvando ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <Save className="size-3.5" />
+              )}
+              SALVAR EDIÇÃO
+            </Button>
+            <Button size="sm" variant="ghost" disabled={salvando} onClick={() => setEditando(false)}>
+              <X className="size-3.5" /> CANCELAR
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <>
       <div className="mt-2 space-y-1">
         <Linha rotulo="Fala" valor={clipe.fala} />
         <Linha rotulo="Ação" valor={clipe.acao} />
@@ -80,6 +150,11 @@ export function CardClipe({
       ) : null}
 
       <div className="mt-3 flex flex-wrap gap-2">
+        {onSalvar ? (
+          <Button size="sm" variant="secondary" onClick={() => setEditando(true)}>
+            <Pencil className="size-3.5" /> EDITAR CLIPE
+          </Button>
+        ) : null}
         <Button size="sm" variant="outline" disabled={carregando} onClick={() => onRegerar()}>
           {carregando ? (
             <Loader2 className="size-3.5 animate-spin" />
@@ -112,6 +187,8 @@ export function CardClipe({
           </Button>
         ) : null}
       </div>
+        </>
+      )}
     </article>
   );
 }

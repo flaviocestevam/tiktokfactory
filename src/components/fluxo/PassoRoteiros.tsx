@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
-import { Check, Clock, Film, Loader2, RefreshCw } from "lucide-react";
+import { Check, Clock, Film, Loader2, Pencil, RefreshCw, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { CopyButton } from "@/components/CopyButton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { regerarRoteiroVariante } from "@/lib/fluxo.functions";
+import { Textarea } from "@/components/ui/textarea";
+import { editarRoteiroTexto, regerarRoteiroVariante } from "@/lib/fluxo.functions";
 
 const AJUSTES = [
   { label: "MAIS CURTO", instrucao: "Reduza a fala para caber com folga na duração alvo." },
@@ -83,6 +84,9 @@ function CardRoteiro({
 }) {
   const [carregando, setCarregando] = useState(false);
   const [instrucao, setInstrucao] = useState("");
+  const [editando, setEditando] = useState(false);
+  const [salvando, setSalvando] = useState(false);
+  const [rascunho, setRascunho] = useState({ roteiro_completo: "", dialogo: "" });
   const s = item.script;
   const medida = item.medida ?? {};
 
@@ -99,6 +103,28 @@ function CardRoteiro({
       toast.error(e instanceof Error ? e.message : "Falha ao regerar o roteiro.");
     } finally {
       setCarregando(false);
+    }
+  }
+
+  function abrirEdicao() {
+    setRascunho({
+      roteiro_completo: String(s.roteiro_completo ?? ""),
+      dialogo: String(s.dialogo ?? ""),
+    });
+    setEditando(true);
+  }
+
+  async function salvarEdicao() {
+    setSalvando(true);
+    try {
+      await editarRoteiroTexto({ data: { projectId, scriptId: s.id, campos: rascunho } });
+      setEditando(false);
+      onAtualizar();
+      toast.success("Roteiro salvo.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha ao salvar o roteiro.");
+    } finally {
+      setSalvando(false);
     }
   }
 
@@ -125,8 +151,50 @@ function CardRoteiro({
         </div>
       </header>
 
-      <Bloco titulo="Roteiro" texto={s.roteiro_completo} />
-      <Bloco titulo="Fala exata" texto={s.dialogo} />
+      {editando ? (
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <label className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+              Roteiro
+            </label>
+            <Textarea
+              rows={10}
+              className="text-xs"
+              value={rascunho.roteiro_completo}
+              onChange={(e) => setRascunho((r) => ({ ...r, roteiro_completo: e.target.value }))}
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+              Fala exata
+            </label>
+            <Textarea
+              rows={6}
+              className="text-xs"
+              value={rascunho.dialogo}
+              onChange={(e) => setRascunho((r) => ({ ...r, dialogo: e.target.value }))}
+            />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" disabled={salvando} onClick={salvarEdicao}>
+              {salvando ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <Save className="size-3.5" />
+              )}
+              SALVAR EDIÇÃO
+            </Button>
+            <Button size="sm" variant="ghost" disabled={salvando} onClick={() => setEditando(false)}>
+              <X className="size-3.5" /> CANCELAR
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <Bloco titulo="Roteiro" texto={s.roteiro_completo} />
+          <Bloco titulo="Fala exata" texto={s.dialogo} />
+        </>
+      )}
 
       <div className="mt-auto space-y-3">
         <Button
@@ -139,6 +207,9 @@ function CardRoteiro({
           {s.aprovado ? "ROTEIRO APROVADO" : "APROVAR ESTE ROTEIRO"}
         </Button>
         <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="secondary" disabled={carregando} onClick={abrirEdicao}>
+            <Pencil className="size-3.5" /> EDITAR TEXTO
+          </Button>
           {AJUSTES.map((a) => (
             <Button
               key={a.label}
