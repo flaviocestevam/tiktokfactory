@@ -79,7 +79,7 @@ jobs:
     needs: build
     if: always()
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 8
     continue-on-error: true
 
     steps:
@@ -93,8 +93,8 @@ jobs:
           URL="https://tiktokfactory.lovable.app/api/public/tiktok-diagnostic"
           rm -f diagnostic.json
 
-          for attempt in $(seq 1 24); do
-            echo "Tentativa ${attempt}/24"
+          for attempt in $(seq 1 2); do
+            echo "Tentativa ${attempt}/2"
             http_code=$(curl \
               --silent \
               --show-error \
@@ -130,10 +130,10 @@ jobs:
               exit $?
             fi
 
-            sleep 25
+            sleep 10
           done
 
-          echo "O endpoint de diagnóstico não ficou disponível dentro do prazo."
+          echo "O endpoint de diagnóstico não respondeu dentro da janela curta."
           exit 1
 
       - name: Record diagnostic result
