@@ -13,6 +13,7 @@ export function descreverProdutoParaRoteiro(product: Record<string, any> | null)
   if (!product) return "PRODUTO: nenhum produto vinculado. Não invente informações de produto.";
   return (
     "PRODUTO (única fonte de verdade — nunca invente nada além do que está aqui):\n" +
+    "REGRA DE APRESENTAÇÃO: o produto pode ser de qualquer categoria e não precisa ser um objeto segurado na mão. Ele pode estar vestido, aplicado, sendo usado, testado, montado, instalado, apoiado, movimentado ou demonstrado de outra forma coerente. Roupas, maquiagem, perfumes, brinquedos e utensílios de cozinha são apenas exemplos, não uma lista limitada. Defina a demonstração pela categoria, pelo modo de uso e pela foto da produção; nunca presuma automaticamente que existe uma embalagem na mão.\n" +
     bloco("Nome", product.nome) +
     bloco("Marca", product.marca) +
     bloco("Categoria", product.categoria) +
@@ -89,13 +90,20 @@ export function descreverPersonagemParaRoteiro(character: Record<string, any> | 
 /** Contexto visual: a foto enviada na produção é a única fonte de imagem. */
 export const descreverFotoDoProjeto = (project: Record<string, any>) =>
   `FONTE VISUAL ÚNICA: a foto enviada nesta produção é a única referência visual do vídeo e o primeiro frame do primeiro clipe.
-Ela já contém a pessoa, o produto, a roupa, a posição, a iluminação, o enquadramento e o fundo definitivos.
-Preserve exatamente: mesmo rosto, mesmo cabelo, mesma roupa, mesmo produto, mesma embalagem, mesmo fundo, mesma iluminação e mesmo enquadramento.
-Não existe imagem separada do produto: nunca peça, cite ou use imagens da página de vendas como referência visual.
-Proibido: reconstruir a pessoa a partir de descrição textual, trocar o fundo, mudar de local, adicionar, remover ou inventar objetos e pessoas, redesenhar o rótulo ou duplicar o produto.
+Ela já contém a pessoa e o produto na forma visual definitiva. O produto pode estar vestido, aplicado, em uso, sendo demonstrado, manuseado, instalado, apoiado, montado ou apenas visível; não presuma que esteja em uma mão. A foto também define roupa, posição, iluminação, enquadramento e fundo.
+Preserve exatamente: mesmo rosto, mesmo cabelo, mesma roupa, mesmo produto, mesma aparência do produto, mesmo modo de interação, mesmo estado inicial, mesmo fundo, mesma iluminação e mesmo enquadramento.
+Não existe imagem separada do produto para o vídeo: nunca peça, cite ou use imagens da página de vendas como referência visual.
+Proibido: reconstruir a pessoa a partir de descrição textual, transformar o produto em outro tipo de item, forçar embalagem ou rótulo quando não existirem, trocar o fundo, mudar de local, adicionar, remover ou inventar objetos e pessoas, redesenhar marcas ou duplicar o produto.
 ${project.reference_image_url ? "A foto já foi enviada e confirmada nesta produção." : "ATENÇÃO: a foto ainda não foi enviada."}
 
 ${descreverAnaliseVisual(project)}`;
+
+function primeiroValor(...valores: unknown[]) {
+  for (const valor of valores) {
+    if (valor !== null && valor !== undefined && String(valor).trim()) return valor;
+  }
+  return "";
+}
 
 /**
  * Estado visual inicial lido automaticamente da foto da produção.
@@ -104,9 +112,17 @@ ${descreverAnaliseVisual(project)}`;
 export function descreverAnaliseVisual(project: Record<string, any>): string {
   const a = project?.project_image_analysis as Record<string, any> | null;
   if (!a || typeof a !== "object") {
-    return "ANÁLISE VISUAL DA FOTO: ainda não disponível. Não deduza pose, mãos ou posição do produto.";
+    return "ANÁLISE VISUAL DA FOTO: ainda não disponível. Não deduza pose, modo de interação, mãos ou estado do produto.";
   }
   const lista = (v: unknown) => (Array.isArray(v) && v.length ? v.join("; ") : "");
+  const modoLegado = a.product_hand ? `segurado em ${a.product_hand}` : "";
+  const maosLegado = [
+    a.product_hand ? `mão do produto: ${a.product_hand}` : "",
+    a.free_hand ? `mão livre: ${a.free_hand}` : "",
+  ]
+    .filter(Boolean)
+    .join("; ");
+
   return (
     "ANÁLISE VISUAL DA FOTO (estado inicial real — orienta ações e continuidade, nunca dados comerciais):\n" +
     bloco("Enquadramento", a.framing) +
@@ -116,16 +132,24 @@ export function descreverAnaliseVisual(project: Record<string, any>): string {
     bloco("Pose inicial", a.initial_pose) +
     bloco("Expressão inicial", a.initial_expression) +
     bloco("Direção do olhar", a.gaze_direction) +
-    bloco("Mão que segura o produto", a.product_hand) +
-    bloco("Mão livre", a.free_hand) +
-    bloco("Posição do produto", a.product_position) +
+    bloco("Modo de interação com o produto", primeiroValor(a.product_interaction_mode, modoLegado)) +
+    bloco("Estado inicial do produto", a.product_state) +
+    bloco("Localização do produto", primeiroValor(a.product_location, a.product_position)) +
+    bloco("Relação do produto com corpo ou superfície", a.body_contact) +
+    bloco("Estado das mãos", primeiroValor(a.hands_state, maosLegado)) +
+    bloco("Partes do corpo ativas na demonstração", lista(a.active_body_parts)) +
     bloco("Orientação do produto", a.product_orientation) +
     bloco("Tamanho aparente do produto", a.product_apparent_size) +
-    bloco("Visibilidade do rótulo", a.label_visibility) +
+    bloco(
+      "Visibilidade de embalagem, marca ou rótulo",
+      primeiroValor(a.packaging_or_brand_visibility, a.label_visibility),
+    ) +
     bloco("Iluminação", a.lighting) +
     bloco("Elementos visíveis", lista(a.visible_elements)) +
     bloco("Movimentos seguros", lista(a.safe_movements)) +
     bloco("Riscos de continuidade", lista(a.continuity_risks)) +
+    "O produto não é necessariamente portátil ou segurado. Preserve a forma real observada: vestido, aplicado, em uso, apoiado, montado, instalado, manuseado ou outra forma visível.\n" +
+    "Roupas, maquiagem, perfume, brinquedos e utensílios de cozinha são somente exemplos; aceite qualquer categoria e qualquer forma coerente de demonstração.\n" +
     "Use estas informações apenas para escolher ações, gestos e câmera compatíveis com a imagem inicial.\n" +
     "Nunca use a análise visual para afirmar benefícios, características, ingredientes ou qualquer alegação comercial.\n"
   );
@@ -149,10 +173,6 @@ export function descreverPreferencias(project: Record<string, any>): string {
 }
 
 /**
- * Descrição textual da aparência da personagem — usada APENAS no prompt da foto
- * inicial, quando ainda não existe imagem da produção.
- */
-/**
  * Identidade FIXA da personagem para a foto inicial.
  * Só traços imutáveis: nada de roupa, acessórios, maquiagem, ambiente,
  * pose, expressão, iluminação ou enquadramento (variam a cada produção).
@@ -174,17 +194,17 @@ export function descreverIdentidadeFixaParaFoto(character: Record<string, any> |
   );
 }
 
-/** Produto para a foto: apenas identificação. A aparência vem da imagem do produto. */
+/** Produto para a foto: identificação e forma de uso; aparência vem da imagem do produto. */
 export function descreverProdutoParaFoto(product: Record<string, any> | null): string {
   if (!product) return "PRODUTO: nenhum produto vinculado.";
   return (
-    "PRODUTO (somente identificação e uso — a APARÊNCIA vem exclusivamente da imagem do produto):\n" +
+    "PRODUTO (identificação e forma de uso — a APARÊNCIA vem exclusivamente da imagem do produto):\n" +
     bloco("Nome", product.nome) +
     bloco("Marca", product.marca) +
     bloco("Categoria", product.categoria) +
     bloco("Tamanho", product.tamanho) +
     bloco("Modo de uso", product.modo_de_uso) +
-    "\nPROIBIDO transformar dados comerciais (benefícios, ingredientes, preço, avaliações, oferta, garantias, dúvidas) em texto visual na embalagem ou em elementos da imagem.\n"
+    "\nO produto pode ser qualquer item e não precisa estar segurado. Determine a interação apropriada pela categoria e pelo modo de uso: pode estar vestido, aplicado, usado, testado, montado, instalado, apoiado ou demonstrado de outra forma natural. Roupas, maquiagem, perfume, brinquedos e utensílios de cozinha são apenas exemplos, não limites.\n" +
+    "PROIBIDO transformar dados comerciais (benefícios, ingredientes, preço, avaliações, oferta, garantias, dúvidas) em texto visual no produto, na embalagem ou em elementos da imagem.\n"
   );
 }
-
