@@ -1,5 +1,7 @@
 import { analisarProdutoTikTokShop } from "../src/lib/tiktok/product-analyzer.server";
 import { normalizarLinkTikTokShop } from "../src/lib/tiktok/normalize-url.server";
+import { lerPagina } from "../src/lib/tiktok/browser-reader.server";
+import { extrairConteudo } from "../src/lib/tiktok/structured-extractor.server";
 
 const URL_TESTE =
   process.env.AUDIT_PRODUCT_URL ||
@@ -25,7 +27,38 @@ async function main() {
 
   console.log("✓ Link normalizado corretamente.");
 
-  console.log("\n2. EXTRAÇÃO REAL");
+  console.log("\n2. DIAGNÓSTICO DO LEITOR");
+  const leitura = await lerPagina(link.fetch_url, {
+    locale: "pt-BR",
+    country: "BR",
+    timezone: "America/Sao_Paulo",
+    productId: link.product_id,
+    rolar: true,
+    esperaMs: 3000,
+    timeoutMs: 120000,
+  });
+  const conteudo = extrairConteudo(leitura, link.product_id);
+  console.log(
+    JSON.stringify(
+      {
+        motor: leitura.motor,
+        status: leitura.status,
+        final_url: leitura.final_url,
+        html_length: leitura.html.length,
+        network_responses: leitura.rede.length,
+        bloqueio: conteudo.bloqueio,
+        meta: conteudo.meta,
+        jsonld_count: conteudo.jsonld.length,
+        hydration_count: conteudo.hidratacao.length,
+        text_excerpt: conteudo.texto.slice(0, 3000),
+        raw_excerpt: conteudo.bruto.slice(0, 5000),
+      },
+      null,
+      2,
+    ),
+  );
+
+  console.log("\n3. EXTRAÇÃO REAL");
   const resultado = await analisarProdutoTikTokShop(URL_TESTE);
   console.log(
     JSON.stringify(
