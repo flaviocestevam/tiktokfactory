@@ -70,13 +70,23 @@ function planoDeTentativas(link: LinkNormalizado): Tentativa[] {
       return link.canonical_url;
     }
   })();
-  return [
+  const candidatas: Tentativa[] = [
     { url: link.original_url, espera: 1500, timeout: 90_000 },
     { url: link.fetch_url, espera: 2500, timeout: 90_000 },
     { url: canonicaSemParametros, espera: 4000, timeout: 120_000 },
     { url: link.fetch_url, rolar: true, espera: 3000, timeout: 120_000 },
     { url: link.redirected_url, rolar: true, espera: 3000, timeout: 120_000 },
-  ].slice(0, MAX_EXTRACTION_ATTEMPTS);
+  ];
+
+  const vistas = new Set<string>();
+  return candidatas
+    .filter((t) => {
+      const chave = `${t.url}|${t.rolar ? "scroll" : "top"}`;
+      if (vistas.has(chave)) return false;
+      vistas.add(chave);
+      return true;
+    })
+    .slice(0, MAX_EXTRACTION_ATTEMPTS);
 }
 
 function resultadoBase(link: LinkNormalizado): ResultadoAnalise {
@@ -125,6 +135,13 @@ function doCache(link: LinkNormalizado, registro: any): ResultadoAnalise {
   };
 }
 
+function qualidade(resultado: ResultadoAnalise | null) {
+  if (!resultado) return -1;
+  const campos = Object.values(resultado.dados).filter((v) => String(v ?? "").trim()).length;
+  const oferta = Object.values(resultado.oferta).filter((v) => String(v ?? "").trim()).length;
+  return campos * 2 + oferta + (resultado.dados.nome ? 5 : 0);
+}
+
 /** Função pública única: cole qualquer link do TikTok Shop e receba o produto. */
 export async function analisarProdutoTikTokShop(entrada: string): Promise<ResultadoAnalise> {
   const inicio = Date.now();
@@ -159,14 +176,24 @@ export async function analisarProdutoTikTokShop(entrada: string): Promise<Result
   for (let i = 0; i < tentativas.length; i++) {
     const t = tentativas[i];
     const { locale, timezone } = localizacaoDoMercado(link);
-    const leitura = await lerPagina(t.url, {
-      locale,
-      country: link.country_code,
-      timezone,
-      rolar: t.rolar,
-      esperaMs: t.espera,
-      timeoutMs: t.timeout,
-    });
+
+    let leitura;
+    try {
+      leitura = await lerPagina(t.url, {
+        locale,
+        country: link.country_code,
+        timezone,
+        productId: link.product_id,
+        rolar: t.rolar,
+        esperaMs: t.espera,
+        timeoutMs: t.timeout,
+      });
+    } catch (e) {
+      ultimoDetalhe = e instanceof Error ? e.message : "Falha ao abrir a página.";
+      ultimoStatus = "failed";
+      continue;
+    }
+
     ultimoDetalhe = leitura.erro;
 
     if (!leitura.html && !leitura.rede.length) {
@@ -175,6 +202,10 @@ export async function analisarProdutoTikTokShop(entrada: string): Promise<Result
     }
 
     const conteudo = extrairConteudo(leitura, link.product_id);
+    if (!conteudo.bruto.trim()) {
+      ultimoStatus = "failed";
+      continue;
+    }
 
     // Descobre ID e mercado quando ainda não vieram da URL.
     if (!link.product_id) {
@@ -198,21 +229,28 @@ export async function analisarProdutoTikTokShop(entrada: string): Promise<Result
     }
 
     if (conteudo.bloqueio) {
-      ultimoStatus =
-        conteudo.bloqueio === "unavailable"
-          ? "unavailable"
-          : conteudo.bloqueio === "region_not_supported"
-            ? "blocked"
-            : "blocked";
-      console.warn("[tiktok] bloqueio detectado", { tentativa: i + 1, tipo: conteudo.bloqueio });
+      ultimoStatus = conteudo.bloqueio === "unavailable" ? "unavailable" : "blocked";
+      console.warn("[tiktok] bloqueio detectado", {
+        tentativa: i + 1,
+        motor: leitura.motor,
+        tipo: conteudo.bloqueio,
+      });
       continue;
     }
 
-    const normalizado = await normalizarProduto(conteudo, {
-      url: leitura.final_url,
-      product_id: link.product_id,
-      country_code: link.country_code,
-    });
+    let normalizado;
+    try {
+      normalizado = await normalizarProduto(conteudo, {
+        url: leitura.final_url,
+        product_id: link.product_id,
+        country_code: link.country_code,
+      });
+    } catch (e) {
+      ultimoDetalhe = e instanceof Error ? e.message : "Falha ao organizar os dados.";
+      ultimoStatus = "partial";
+      console.error("[tiktok] normalização falhou", ultimoDetalhe);
+      continue;
+    }
 
     if (!normalizado.pagina_de_produto) {
       ultimoStatus = "invalid_product";
@@ -236,7 +274,6 @@ export async function analisarProdutoTikTokShop(entrada: string): Promise<Result
       source_language: link.source_language ?? normalizado.source_language,
     };
 
-    // A página de vendas fornece apenas dados textuais: nenhuma imagem é baixada ou salva.
     const validacao = validarExtracao(normalizado.dados, normalizado.oferta);
     const traduzidos = await traduzirParaPtBr(normalizado.dados, link.source_language);
     const origem: Record<string, string> = {};
@@ -269,7 +306,8 @@ export async function analisarProdutoTikTokShop(entrada: string): Promise<Result
       });
       return resultado;
     }
-    melhor = melhor && melhor.origem ? melhor : resultado;
+
+    if (qualidade(resultado) > qualidade(melhor)) melhor = resultado;
     ultimoStatus = "partial";
   }
 
@@ -278,6 +316,7 @@ export async function analisarProdutoTikTokShop(entrada: string): Promise<Result
   console.warn("[tiktok] análise falhou", {
     status: ultimoStatus,
     tentativas: tentativas.length,
+    campos_parciais: melhor ? Object.keys(melhor.origem).length : 0,
     ms: Date.now() - inicio,
   });
 
