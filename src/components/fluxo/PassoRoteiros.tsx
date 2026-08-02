@@ -184,7 +184,12 @@ function CardRoteiro({
               )}
               SALVAR EDIÇÃO
             </Button>
-            <Button size="sm" variant="ghost" disabled={salvando} onClick={() => setEditando(false)}>
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={salvando}
+              onClick={() => setEditando(false)}
+            >
               <X className="size-3.5" /> CANCELAR
             </Button>
           </div>

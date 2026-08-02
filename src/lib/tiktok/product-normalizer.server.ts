@@ -53,11 +53,15 @@ ${conteudo.bruto}`,
     oferta,
     pagina_de_produto: out?.pagina_de_produto !== false,
     product_id: String(out?.product_id ?? "").trim() || null,
-    country_code: String(out?.country_code ?? "")
-      .trim()
-      .toUpperCase()
-      .slice(0, 2) || null,
-    source_language: String(out?.source_language ?? "").trim().toLowerCase() || null,
+    country_code:
+      String(out?.country_code ?? "")
+        .trim()
+        .toUpperCase()
+        .slice(0, 2) || null,
+    source_language:
+      String(out?.source_language ?? "")
+        .trim()
+        .toLowerCase() || null,
   };
 }
 

@@ -63,7 +63,10 @@ function limpar(bruto: any): AnaliseVisual {
   }
   for (const lista of ["visible_elements", "safe_movements", "continuity_risks"] as const) {
     saida[lista] = Array.isArray(bruto?.[lista])
-      ? bruto[lista].map((i: any) => String(i).trim()).filter(Boolean).slice(0, 12)
+      ? bruto[lista]
+          .map((i: any) => String(i).trim())
+          .filter(Boolean)
+          .slice(0, 12)
       : [];
   }
   return saida as AnaliseVisual;

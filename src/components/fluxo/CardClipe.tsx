@@ -106,87 +106,92 @@ export function CardClipe({
               )}
               SALVAR EDIÇÃO
             </Button>
-            <Button size="sm" variant="ghost" disabled={salvando} onClick={() => setEditando(false)}>
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={salvando}
+              onClick={() => setEditando(false)}
+            >
               <X className="size-3.5" /> CANCELAR
             </Button>
           </div>
         </div>
       ) : (
         <>
-      <div className="mt-2 space-y-1">
-        <Linha rotulo="Fala" valor={clipe.fala} />
-        <Linha rotulo="Ação" valor={clipe.acao} />
-        <Linha rotulo="Gesto" valor={clipe.gesto} />
-        <Linha rotulo="Expressão" valor={clipe.expressao} />
-        <Linha rotulo="Produto" valor={clipe.posicao_produto} />
-        <Linha rotulo="Câmera" valor={clipe.camera} />
-        <Linha rotulo="Estado inicial" valor={clipe.estado_inicial} />
-        <Linha rotulo="Estado final" valor={clipe.estado_final} />
-        <Linha rotulo="Ligação com o próximo" valor={clipe.ligacao_proximo} />
-      </div>
-
-      {clipe.ordem > 1 ? (
-        <p className="mt-2 rounded-lg bg-primary/10 p-2 text-[11px] text-primary">
-          {AVISO_CONTINUIDADE}
-        </p>
-      ) : (
-        <p className="mt-2 rounded-lg bg-secondary/60 p-2 text-[11px] text-muted-foreground">
-          Use a foto enviada como primeiro frame deste clipe.
-        </p>
-      )}
-
-      {clipe.prompt_flow ? (
-        <div className="mt-3 space-y-2">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-              Prompt para o Flow
-            </span>
-            <CopyButton value={clipe.prompt_flow} label="Copiar prompt" />
+          <div className="mt-2 space-y-1">
+            <Linha rotulo="Fala" valor={clipe.fala} />
+            <Linha rotulo="Ação" valor={clipe.acao} />
+            <Linha rotulo="Gesto" valor={clipe.gesto} />
+            <Linha rotulo="Expressão" valor={clipe.expressao} />
+            <Linha rotulo="Produto" valor={clipe.posicao_produto} />
+            <Linha rotulo="Câmera" valor={clipe.camera} />
+            <Linha rotulo="Estado inicial" valor={clipe.estado_inicial} />
+            <Linha rotulo="Estado final" valor={clipe.estado_final} />
+            <Linha rotulo="Ligação com o próximo" valor={clipe.ligacao_proximo} />
           </div>
-          <pre className="max-h-56 overflow-y-auto whitespace-pre-wrap break-words rounded-lg border border-border bg-background/60 p-3 text-[11px] leading-relaxed">
-            {clipe.prompt_flow}
-          </pre>
-        </div>
-      ) : null}
 
-      <div className="mt-3 flex flex-wrap gap-2">
-        {onSalvar ? (
-          <Button size="sm" variant="secondary" onClick={() => setEditando(true)}>
-            <Pencil className="size-3.5" /> EDITAR CLIPE
-          </Button>
-        ) : null}
-        <Button size="sm" variant="outline" disabled={carregando} onClick={() => onRegerar()}>
-          {carregando ? (
-            <Loader2 className="size-3.5 animate-spin" />
+          {clipe.ordem > 1 ? (
+            <p className="mt-2 rounded-lg bg-primary/10 p-2 text-[11px] text-primary">
+              {AVISO_CONTINUIDADE}
+            </p>
           ) : (
-            <RefreshCw className="size-3.5" />
+            <p className="mt-2 rounded-lg bg-secondary/60 p-2 text-[11px] text-muted-foreground">
+              Use a foto enviada como primeiro frame deste clipe.
+            </p>
           )}
-          REGENERAR CLIPE
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          disabled={carregando}
-          onClick={() =>
-            onRegerar(
-              "Encurte a fala deste clipe mantendo o sentido, para caber com folga na duração.",
-            )
-          }
-        >
-          ENCURTAR FALA
-        </Button>
-        {clipe.ordem > 1 ? (
-          <Button size="sm" variant="ghost" disabled={carregando} onClick={onUnir}>
-            UNIR COM O ANTERIOR
-          </Button>
-        ) : null}
-        {total >= 1 ? (
-          <Button size="sm" variant="ghost" disabled={carregando} onClick={onSeparar}>
-            <Scissors className="size-3.5" />
-            SEPARAR EM MAIS CLIPES
-          </Button>
-        ) : null}
-      </div>
+
+          {clipe.prompt_flow ? (
+            <div className="mt-3 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                  Prompt para o Flow
+                </span>
+                <CopyButton value={clipe.prompt_flow} label="Copiar prompt" />
+              </div>
+              <pre className="max-h-56 overflow-y-auto whitespace-pre-wrap break-words rounded-lg border border-border bg-background/60 p-3 text-[11px] leading-relaxed">
+                {clipe.prompt_flow}
+              </pre>
+            </div>
+          ) : null}
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            {onSalvar ? (
+              <Button size="sm" variant="secondary" onClick={() => setEditando(true)}>
+                <Pencil className="size-3.5" /> EDITAR CLIPE
+              </Button>
+            ) : null}
+            <Button size="sm" variant="outline" disabled={carregando} onClick={() => onRegerar()}>
+              {carregando ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <RefreshCw className="size-3.5" />
+              )}
+              REGENERAR CLIPE
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={carregando}
+              onClick={() =>
+                onRegerar(
+                  "Encurte a fala deste clipe mantendo o sentido, para caber com folga na duração.",
+                )
+              }
+            >
+              ENCURTAR FALA
+            </Button>
+            {clipe.ordem > 1 ? (
+              <Button size="sm" variant="ghost" disabled={carregando} onClick={onUnir}>
+                UNIR COM O ANTERIOR
+              </Button>
+            ) : null}
+            {total >= 1 ? (
+              <Button size="sm" variant="ghost" disabled={carregando} onClick={onSeparar}>
+                <Scissors className="size-3.5" />
+                SEPARAR EM MAIS CLIPES
+              </Button>
+            ) : null}
+          </div>
         </>
       )}
     </article>

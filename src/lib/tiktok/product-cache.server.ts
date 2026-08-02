@@ -70,7 +70,11 @@ export async function gravarNoCache(link: LinkNormalizado, resultado: ResultadoA
       .single();
     return data;
   }
-  const { data, error } = await supabaseAdmin.from("products").insert(payload as never).select().single();
+  const { data, error } = await supabaseAdmin
+    .from("products")
+    .insert(payload as never)
+    .select()
+    .single();
   if (error) {
     console.error("[tiktok] falha ao gravar cache:", error.message);
     return null;

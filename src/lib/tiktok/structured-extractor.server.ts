@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // Camadas 1 a 5: rede, JSON-LD, hidratação, metadados e DOM renderizado.
 import type { BloqueioDetectado, LeituraPagina, RespostaRede } from "./types";
 import { selecionarRespostas } from "./network-capture.server";
@@ -126,11 +125,20 @@ export function htmlParaTexto(html: string) {
 }
 
 const SINAIS_BLOQUEIO: Array<[BloqueioDetectado, RegExp]> = [
-  ["captcha", /captcha|verify (that )?you are human|verifique que você não é um rob|slide to verify/i],
+  [
+    "captcha",
+    /captcha|verify (that )?you are human|verifique que você não é um rob|slide to verify/i,
+  ],
   ["login_required", /log ?in to continue|faça login para continuar|sign up to continue/i],
   ["access_denied", /access denied|acesso negado|403 forbidden|blocked by/i],
-  ["region_not_supported", /not available in your (region|country)|região não suportada|region not supported/i],
-  ["unavailable", /product (is )?(unavailable|removed|not found)|produto (indisponível|removido)|page not found|404/i],
+  [
+    "region_not_supported",
+    /not available in your (region|country)|região não suportada|region not supported/i,
+  ],
+  [
+    "unavailable",
+    /product (is )?(unavailable|removed|not found)|produto (indisponível|removido)|page not found|404/i,
+  ],
 ];
 
 export function detectarBloqueio(texto: string, html: string): BloqueioDetectado {
@@ -139,7 +147,10 @@ export function detectarBloqueio(texto: string, html: string): BloqueioDetectado
   return null;
 }
 
-export function extrairConteudo(leitura: LeituraPagina, productId: string | null): ConteudoExtraido {
+export function extrairConteudo(
+  leitura: LeituraPagina,
+  productId: string | null,
+): ConteudoExtraido {
   const html = leitura.html;
   const meta = coletarMeta(html);
   const jsonld = coletarJsonLd(html);
@@ -150,7 +161,9 @@ export function extrairConteudo(leitura: LeituraPagina, productId: string | null
     html,
     leitura.final_url,
     meta,
-    rede.flatMap((r) => [...r.corpo.matchAll(/"(https:\/\/[^"]+\.(?:jpe?g|png|webp)[^"]*)"/gi)].map((m) => m[1])),
+    rede.flatMap((r) =>
+      [...r.corpo.matchAll(/"(https:\/\/[^"]+\.(?:jpe?g|png|webp)[^"]*)"/gi)].map((m) => m[1]),
+    ),
   );
   const bloqueio = detectarBloqueio(texto, html);
 
