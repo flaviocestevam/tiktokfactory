@@ -58,10 +58,6 @@ export function PassoProduto({
   const [salvando, setSalvando] = useState(false);
   const [valores, setValores] = useState<Record<string, string>>(() => montar(produto));
   const [origem, setOrigem] = useState<Record<string, string>>(produto?.origem_dados ?? {});
-  const [imagens, setImagens] = useState<string[]>(
-    Array.isArray(produto?.imagens) ? (produto?.imagens as string[]) : [],
-  );
-  const [principal, setPrincipal] = useState<string>(produto?.imagem_principal ?? "");
   const [meta, setMeta] = useState({
     original_tiktok_url: produto?.original_tiktok_url ?? "",
     resolved_tiktok_url: produto?.resolved_tiktok_url ?? "",
@@ -109,10 +105,6 @@ export function PassoProduto({
         return novo;
       });
       setOrigem((o) => ({ ...o, ...res.origem }));
-      if (res.imagens.length) {
-        setImagens((antigas) => [...new Set([...antigas, ...res.imagens])]);
-        setPrincipal((p) => p || res.imagens[0]);
-      }
       if (!res.ok) setAviso(res.mensagem);
       toast[res.ok ? "success" : "warning"](res.mensagem);
     } catch (e) {
@@ -136,8 +128,6 @@ export function PassoProduto({
         tiktok_product_id: meta.tiktok_product_id || null,
         tiktok_region: meta.tiktok_region || null,
         last_analyzed_at: new Date().toISOString(),
-        imagens,
-        imagem_principal: principal || imagens[0] || null,
         origem_dados: origem,
         status_extracao: aviso ? "parcial" : "tiktok_shop",
       };
@@ -183,66 +173,6 @@ export function PassoProduto({
         {aviso ? (
           <p className="mt-4 rounded-xl border border-border bg-secondary/40 p-4 text-sm text-muted-foreground">
             {aviso}
-          </p>
-        ) : null}
-      </section>
-
-      <section className="surface p-4 sm:p-6">
-        <h2 className="text-lg font-semibold">Imagens do produto</h2>
-        {imagens.length ? (
-          <div className="mt-4 grid grid-cols-2 gap-3 min-[420px]:grid-cols-3 sm:grid-cols-5">
-            {imagens.map((url) => (
-              <div
-                key={url}
-                className={cn(
-                  "group relative overflow-hidden rounded-xl border",
-                  principal === url ? "border-primary ring-1 ring-primary/40" : "border-border",
-                )}
-              >
-                <img
-                  src={url}
-                  alt="Imagem do produto"
-                  loading="lazy"
-                  className="aspect-square w-full object-cover"
-                />
-                <div className="absolute inset-x-0 bottom-0 flex justify-between gap-1 bg-background/80 p-1">
-                  <button
-                    type="button"
-                    title="Usar como referência principal"
-                    onClick={() => setPrincipal(url)}
-                    className="flex-1 rounded-md p-1 text-[10px] font-medium hover:bg-secondary"
-                  >
-                    <Star
-                      className={cn(
-                        "mx-auto size-3.5",
-                        principal === url && "fill-primary text-primary",
-                      )}
-                    />
-                  </button>
-                  <button
-                    type="button"
-                    title="Remover imagem"
-                    onClick={() => {
-                      setImagens((a) => a.filter((i) => i !== url));
-                      setPrincipal((p) => (p === url ? "" : p));
-                    }}
-                    className="rounded-md p-1 hover:bg-secondary"
-                  >
-                    <X className="size-3.5" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="mt-3 text-sm text-muted-foreground">
-            Nenhuma imagem ainda. Analise o link do produto.
-          </p>
-        )}
-        {imagens.length ? (
-          <p className="mt-3 text-xs text-muted-foreground">
-            Use a estrela para escolher a imagem que será a referência principal da foto da
-            personagem.
           </p>
         ) : null}
       </section>
