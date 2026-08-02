@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { analisarProdutoTikTokShop as analisarComMotorLegado } from "./product-analyzer.server";
-import { apifyProdutoDisponivel, lerProdutoComApify } from "./apify-product.server";
+import { apifyProdutoDisponivel, lerProdutoComApify } from "./apify-product-async.server";
 import { normalizarLinkTikTokShop } from "./normalize-url.server";
 import { traduzirParaPtBr } from "./product-translator.server";
 import { validarExtracao } from "./product-normalizer.server";
