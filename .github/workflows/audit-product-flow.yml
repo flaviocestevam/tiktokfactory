@@ -70,3 +70,71 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: npx --yes tsx scripts/audit-product-flow.ts
+
+  production-diagnostic:
+    name: Diagnóstico produção Lovable
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    continue-on-error: true
+
+    steps:
+      - name: Wait for Lovable sync and test Apify
+        shell: bash
+        run: |
+          set -u
+          URL="https://tiktokfactory.lovable.app/api/public/tiktok-diagnostic"
+          rm -f diagnostic.json
+
+          for attempt in $(seq 1 24); do
+            echo "Tentativa ${attempt}/24"
+            http_code=$(curl \
+              --silent \
+              --show-error \
+              --location \
+              --max-time 190 \
+              --output diagnostic.json \
+              --write-out "%{http_code}" \
+              "$URL" || true)
+
+            echo "HTTP ${http_code}"
+            if [ -f diagnostic.json ]; then
+              cat diagnostic.json
+              echo
+            fi
+
+            if [ "$http_code" = "200" ]; then
+              node - <<'NODE'
+          const fs = require('fs');
+          const data = JSON.parse(fs.readFileSync('diagnostic.json', 'utf8'));
+          console.log('RESUMO_DIAGNOSTICO=' + JSON.stringify({
+            ambiente: data.ambiente,
+            ok: data.resultado?.ok,
+            status: data.resultado?.status,
+            fonte: data.resultado?.fonte,
+            product_id: data.resultado?.product_id,
+            region: data.resultado?.region,
+            nome: data.resultado?.nome,
+            preco: data.resultado?.preco,
+            campos_preenchidos: data.resultado?.campos_preenchidos,
+          }));
+          process.exit(data.resultado?.ok === true ? 0 : 2);
+          NODE
+              exit $?
+            fi
+
+            sleep 25
+          done
+
+          echo "O endpoint de diagnóstico não ficou disponível dentro do prazo."
+          exit 1
+
+      - name: Upload diagnostic response
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tiktok-production-diagnostic
+          path: diagnostic.json
+          if-no-files-found: ignore
+          retention-days: 3
