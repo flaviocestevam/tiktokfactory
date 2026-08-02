@@ -19,6 +19,9 @@ on:
       - ".github/workflows/audit-product-flow.yml"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build obrigatório
@@ -80,6 +83,9 @@ jobs:
     continue-on-error: true
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Wait for Lovable sync and test Apify
         shell: bash
         run: |
@@ -129,6 +135,32 @@ jobs:
 
           echo "O endpoint de diagnóstico não ficou disponível dentro do prazo."
           exit 1
+
+      - name: Record diagnostic result
+        if: always()
+        shell: bash
+        run: |
+          if [ ! -s diagnostic.json ]; then
+            printf '{"diagnostico":"tiktok_shop_apify","resultado":{"ok":false,"status":"endpoint_indisponivel"},"registrado_em":"%s"}\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > diagnostic.json
+          fi
+
+          cp diagnostic.json /tmp/tiktok-production-diagnostic.json
+          git fetch origin main
+          git checkout -B main origin/main
+          mkdir -p docs
+          cp /tmp/tiktok-production-diagnostic.json docs/last-production-diagnostic.json
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/last-production-diagnostic.json
+
+          if git diff --cached --quiet; then
+            echo "Diagnóstico sem alterações."
+            exit 0
+          fi
+
+          git commit -m "chore: record production diagnostic [skip ci]"
+          git push origin main
 
       - name: Upload diagnostic response
         if: always()
