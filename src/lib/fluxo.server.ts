@@ -38,18 +38,12 @@ function contextoFluxo(ctx: ProjectContext, cta: string) {
 /* ─────────── Prompt da foto inicial ─────────── */
 
 export function promptFotoInicial(ctx: ProjectContext, ajuste?: string) {
-  const imagemProduto =
-    ctx.project.imagem_produto_referencia || ctx.product?.imagem_principal || "";
   return {
     system:
       "Você escreve prompts técnicos de geração de imagem em inglês, para o GPT criar uma foto realista de influenciadora segurando um produto. Nomes próprios e textos de embalagem permanecem como estão.",
-    prompt: `${descreverProdutoParaRoteiro(ctx.product)}\n\n${descreverAparenciaParaFoto(ctx.character)}\n\n${
-      imagemProduto
-        ? `IMAGEM PRINCIPAL DO PRODUTO (referência visual obrigatória): ${imagemProduto}\n`
-        : ""
-    }${ajuste ? `AJUSTE PEDIDO PELO USUÁRIO: ${ajuste}\n` : ""}
+    prompt: `${descreverProdutoParaRoteiro(ctx.product)}\n\n${descreverAparenciaParaFoto(ctx.character)}\n\n${ajuste ? `AJUSTE PEDIDO PELO USUÁRIO: ${ajuste}\n` : ""}
 Crie o prompt em inglês para gerar UMA única foto vertical 9:16 da personagem segurando exatamente este produto.
-O prompt deve exigir: seguir exatamente a descrição textual cadastrada da personagem (rosto, olhos, pele, cabelo, corpo conforme o texto); reproduzir o produto exatamente como na imagem de referência (embalagem, rótulo, cores, proporção e tamanho reais); não redesenhar o rótulo; não inventar textos; não duplicar o produto; mãos e dedos anatomicamente corretos; produto totalmente visível com o rótulo voltado para a câmera quando fizer sentido; iluminação realista; enquadramento vertical 9:16; aparência de conteúdo real de TikTok; pele ultrarrealista com poros e textura natural; sem filtro de beleza; sem aparência artificial ou plástica; sem grid, colagem ou múltiplas imagens.`,
+O prompt deve exigir: seguir exatamente a descrição textual cadastrada da personagem (rosto, olhos, pele, cabelo, corpo conforme o texto); reproduzir o produto exatamente como descrito nos dados da página de vendas (nome, marca, categoria e variações), sem inventar embalagem, rótulo ou textos; não redesenhar o rótulo; não inventar textos; não duplicar o produto; mãos e dedos anatomicamente corretos; produto totalmente visível com o rótulo voltado para a câmera quando fizer sentido; iluminação realista; enquadramento vertical 9:16; aparência de conteúdo real de TikTok; pele ultrarrealista com poros e textura natural; sem filtro de beleza; sem aparência artificial ou plástica; sem grid, colagem ou múltiplas imagens.`,
     shape: `{"prompt":"","prompt_negativo":"","enquadramento":"","iluminacao":"","pose":"","maos_produto":"","expressao":"","continuidade":""}`,
   };
 }
@@ -125,7 +119,10 @@ Nos clipes seguintes, mantenha a continuidade visual usando o ÚLTIMO FRAME do c
 A foto enviada neste projeto é a única fonte visual do vídeo. Use essa imagem como primeiro frame e preserve exatamente a pessoa, o produto e todos os elementos já presentes nela.
 Rosto, cabelo, roupa e produto devem permanecer exatamente como aparecem na foto do projeto. Não reconstrua a pessoa a partir de descrição textual, não compare com nenhuma outra imagem e não misture referências diferentes.
 Nos clipes seguintes, use o último frame do clipe anterior como primeiro frame e preserve a continuidade do próprio vídeo.
-Proibido: redesenhar o rótulo, inventar textos, duplicar ou sumir com o produto, deformar mãos e dedos, trocar roupa, fundo ou enquadramento, adicionar pessoas ou objetos.`;
+O clipe 1 começa exatamente no estado visual descrito na análise da foto: mesma pose, mesma expressão, mesma mão segurando o produto, mesma posição e orientação do produto.
+Use a mão livre indicada na análise para gestos. Não reposicione o produto bruscamente e não troque a mão que o segura sem uma transição visível descrita no prompt.
+Não peça nenhuma imagem separada do produto e não use imagens da página de vendas como referência.
+Proibido: redesenhar o rótulo, inventar textos, duplicar ou sumir com o produto, deformar mãos e dedos, trocar roupa, fundo, iluminação ou enquadramento, adicionar pessoas ou objetos.`;
 
 const SHAPE_CLIPE = `{"ordem":1,"estado_inicial":"","fala_exata":"","acao":"","gesto":"","expressao":"","posicao_produto":"","camera":"","estado_final":"","ligacao_proximo":"","continuidade":"","restricoes":"","prompt_negativo":"","prompt_flow":""}`;
 

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Geração + persistência do fluxo (somente servidor).
 import { callAIJson } from "./ai.server";
+import { analisarFotoDaProducao } from "./analise-imagem.server";
 import { db, loadContext, registrarHistorico, type ProjectContext } from "./generation.server";
 import {
   ANGULOS,
@@ -212,6 +213,12 @@ export async function criarTresRoteiros(projectId: string) {
   if (!ctx.product) throw new Error("Confirme o produto.");
   if (!ctx.project.image_confirmed)
     throw new Error("Confirme a foto inicial antes de criar os roteiros.");
+
+  // Garante o estado visual inicial da foto antes de escrever qualquer roteiro.
+  if (!ctx.project.project_image_analysis) {
+    const analise = await analisarFotoDaProducao(projectId);
+    if (analise.ok) ctx.project.project_image_analysis = analise.analise as any;
+  }
 
   const cta = ctx.project.cta ?? "";
   const out = await gerar<{ roteiros: any[] }>(promptTresRoteiros(ctx, cta));

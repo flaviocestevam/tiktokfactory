@@ -94,22 +94,12 @@ function Produtos() {
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {lista.map((p) => {
-            const imagens = Array.isArray(p.imagens) ? (p.imagens as string[]) : [];
             return (
               <div key={p.id} className="group rounded-2xl border border-border bg-card p-4">
                 <div className="flex gap-3">
-                  {imagens[0] ? (
-                    <img
-                      src={imagens[0]}
-                      alt={`Imagem de ${p.nome}`}
-                      loading="lazy"
-                      className="size-16 shrink-0 rounded-lg border border-border object-cover [aspect-ratio:1]"
-                    />
-                  ) : (
-                    <div className="flex size-16 shrink-0 items-center justify-center rounded-lg bg-secondary">
-                      <Package className="size-5 text-muted-foreground" />
-                    </div>
-                  )}
+                  <div className="flex size-16 shrink-0 items-center justify-center rounded-lg bg-secondary">
+                    <Package className="size-5 text-muted-foreground" />
+                  </div>
                   <div className="min-w-0 flex-1">
                     <h3 className="truncate font-semibold">{p.nome}</h3>
                     <p className="truncate text-xs text-muted-foreground">

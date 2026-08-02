@@ -610,6 +610,8 @@ export type Database = {
           etapa: number
           formato: string
           id: string
+          image_analysis_at: string | null
+          image_analysis_status: string | null
           image_confirmed: boolean
           image_prompt_used: string | null
           imagem_produto_referencia: string | null
@@ -620,6 +622,7 @@ export type Database = {
           personagem_motivo: string | null
           plataforma: string
           product_id: string | null
+          project_image_analysis: Json | null
           reference_image_path: string | null
           reference_image_uploaded_at: string | null
           reference_image_url: string | null
@@ -640,6 +643,8 @@ export type Database = {
           etapa?: number
           formato?: string
           id?: string
+          image_analysis_at?: string | null
+          image_analysis_status?: string | null
           image_confirmed?: boolean
           image_prompt_used?: string | null
           imagem_produto_referencia?: string | null
@@ -650,6 +655,7 @@ export type Database = {
           personagem_motivo?: string | null
           plataforma?: string
           product_id?: string | null
+          project_image_analysis?: Json | null
           reference_image_path?: string | null
           reference_image_uploaded_at?: string | null
           reference_image_url?: string | null
@@ -670,6 +676,8 @@ export type Database = {
           etapa?: number
           formato?: string
           id?: string
+          image_analysis_at?: string | null
+          image_analysis_status?: string | null
           image_confirmed?: boolean
           image_prompt_used?: string | null
           imagem_produto_referencia?: string | null
@@ -680,6 +688,7 @@ export type Database = {
           personagem_motivo?: string | null
           plataforma?: string
           product_id?: string | null
+          project_image_analysis?: Json | null
           reference_image_path?: string | null
           reference_image_uploaded_at?: string | null
           reference_image_url?: string | null

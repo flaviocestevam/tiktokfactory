@@ -5,9 +5,9 @@ import { toast } from "sonner";
 import { CopyButton } from "@/components/CopyButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { gerarPromptFoto } from "@/lib/fluxo.functions";
+import { analisarFotoProjeto, gerarPromptFoto } from "@/lib/fluxo.functions";
 import { validarImagem } from "@/lib/fotos";
-import { enviarArquivo } from "@/lib/queries";
+import { atualizar, enviarArquivo } from "@/lib/queries";
 
 const AJUSTES = [
   {
@@ -45,6 +45,9 @@ export function PassoFoto({
 }) {
   const [gerando, setGerando] = useState(false);
   const [enviando, setEnviando] = useState(false);
+  const [analise, setAnalise] = useState<"ocioso" | "analisando" | "ok" | "falhou">(
+    fotoUrl ? "ok" : "ocioso",
+  );
   const entrada = useRef<HTMLInputElement>(null);
 
   async function gerar(ajuste?: string) {
@@ -78,6 +81,15 @@ export function PassoFoto({
       const url = await enviarArquivo("produtos", file);
       onFoto(url);
       toast.success("Foto enviada.");
+      // A foto é a única fonte visual: lemos o estado inicial automaticamente.
+      setAnalise("analisando");
+      await atualizar("projects", projectId, {
+        reference_image_url: url,
+        reference_image_uploaded_at: new Date().toISOString(),
+      });
+      const res: any = await analisarFotoProjeto({ data: { projectId } });
+      setAnalise(res?.ok ? "ok" : "falhou");
+      if (!res?.ok) toast.warning("A foto foi enviada, mas a leitura automática falhou.");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Falha ao enviar a foto.");
     } finally {
@@ -173,8 +185,26 @@ export function PassoFoto({
               }}
             />
             <p className="text-xs text-muted-foreground">
-              Envie a imagem vertical criada no GPT. Ela será o primeiro frame do vídeo.
+              Envie a imagem vertical criada no GPT. Ela será o primeiro frame do vídeo e a única
+              referência visual da produção.
             </p>
+            {analise === "analisando" ? (
+              <p className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Loader2 className="size-3.5 animate-spin" /> Lendo a foto para manter a
+                continuidade do vídeo...
+              </p>
+            ) : null}
+            {analise === "ok" && fotoUrl ? (
+              <p className="text-xs text-muted-foreground">
+                Foto lida: pose, mãos e posição do produto serão respeitadas nos prompts.
+              </p>
+            ) : null}
+            {analise === "falhou" ? (
+              <p className="text-xs text-destructive">
+                Não foi possível ler a foto automaticamente. Ela será analisada de novo ao gerar os
+                roteiros.
+              </p>
+            ) : null}
             {fotoUrl ? (
               <Button
                 variant="ghost"
@@ -182,6 +212,7 @@ export function PassoFoto({
                 className="gap-2"
                 onClick={() => {
                   onFoto("");
+                  setAnalise("ocioso");
                   if (entrada.current) entrada.current.value = "";
                 }}
               >
@@ -190,7 +221,7 @@ export function PassoFoto({
             ) : null}
             <Button
               className="h-12 w-full gap-2 text-base"
-              disabled={!fotoUrl}
+              disabled={!fotoUrl || analise === "analisando"}
               onClick={onConfirmar}
             >
               CONFIRMAR FOTO E CONTINUAR

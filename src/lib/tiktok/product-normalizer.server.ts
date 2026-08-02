@@ -4,7 +4,7 @@ import { callAIJson } from "../ai.server";
 import { CAMPOS_PRODUTO, OFERTA_VAZIA, type DadosProduto, type Oferta } from "./types";
 import type { ConteudoExtraido } from "./structured-extractor.server";
 
-const SHAPE = `{"produto":{${CAMPOS_PRODUTO.map((c) => `"${c}":""`).join(",")}},"oferta":{"current_price_value":"","current_price_formatted":"","original_price_value":"","original_price_formatted":"","currency_code":"","currency_symbol":"","discount_text":""},"pagina_de_produto":true,"product_id":"","country_code":"","source_language":"","imagens_do_produto":[]}`;
+const SHAPE = `{"produto":{${CAMPOS_PRODUTO.map((c) => `"${c}":""`).join(",")}},"oferta":{"current_price_value":"","current_price_formatted":"","original_price_value":"","original_price_formatted":"","currency_code":"","currency_symbol":"","discount_text":""},"pagina_de_produto":true,"product_id":"","country_code":"","source_language":""}`;
 
 const SISTEMA = `Você organiza dados já capturados de uma página de produto do TikTok Shop, em qualquer idioma.
 - Só preencha um campo se a informação estiver realmente presente no conteúdo fornecido.
@@ -21,7 +21,6 @@ export type SaidaNormalizada = {
   product_id: string | null;
   country_code: string | null;
   source_language: string | null;
-  imagens: string[];
 };
 
 export async function normalizarProduto(
@@ -49,21 +48,20 @@ ${conteudo.bruto}`,
   for (const chave of Object.keys(OFERTA_VAZIA) as Array<keyof Oferta>) {
     oferta[chave] = String(out?.oferta?.[chave] ?? "").trim();
   }
-  const imagens = Array.isArray(out?.imagens_do_produto)
-    ? out.imagens_do_produto.filter((i: any) => typeof i === "string" && i.startsWith("https://"))
-    : [];
-
   return {
     dados: produto,
     oferta,
     pagina_de_produto: out?.pagina_de_produto !== false,
     product_id: String(out?.product_id ?? "").trim() || null,
-    country_code: String(out?.country_code ?? "")
-      .trim()
-      .toUpperCase()
-      .slice(0, 2) || null,
-    source_language: String(out?.source_language ?? "").trim().toLowerCase() || null,
-    imagens,
+    country_code:
+      String(out?.country_code ?? "")
+        .trim()
+        .toUpperCase()
+        .slice(0, 2) || null,
+    source_language:
+      String(out?.source_language ?? "")
+        .trim()
+        .toLowerCase() || null,
   };
 }
 
@@ -77,15 +75,14 @@ const CAMPOS_COMERCIAIS = [
   "variacoes",
 ] as const;
 
-/** Critério mínimo de sucesso: nome + imagem + dois campos comerciais reais. */
+/** Critério mínimo de sucesso: nome + dois campos comerciais reais (nenhuma imagem envolvida). */
 export function validarExtracao(
   dados: DadosProduto,
   oferta: Oferta,
-  imagens: string[],
 ): { ok: boolean; comerciais: number } {
   const comerciais =
     CAMPOS_COMERCIAIS.filter((c) => String(dados[c] ?? "").trim().length > 2).length +
     (oferta.current_price_formatted || oferta.current_price_value ? 1 : 0);
-  const ok = Boolean(String(dados.nome ?? "").trim()) && imagens.length > 0 && comerciais >= 2;
+  const ok = Boolean(String(dados.nome ?? "").trim()) && comerciais >= 2;
   return { ok, comerciais };
 }

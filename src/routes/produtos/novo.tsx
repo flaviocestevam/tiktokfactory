@@ -22,7 +22,7 @@ export const Route = createFileRoute("/produtos/novo")({
 });
 
 function NovoProduto() {
-  const [valores, setValores] = useState<ProductDraft>({ imagens: [] });
+  const [valores, setValores] = useState<ProductDraft>({});
   const [salvando, setSalvando] = useState(false);
   const navigate = useNavigate();
   const qc = useQueryClient();

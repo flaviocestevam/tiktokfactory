@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-export type ProductDraft = { imagens?: string[]; [key: string]: string | string[] | undefined };
+export type ProductDraft = { [key: string]: string | undefined };
 
 export const CAMPOS_PRODUTO: Array<{
   chave: string;
@@ -77,9 +77,6 @@ export function ProductForm({
         const atual = typeof novos[k] === "string" ? (novos[k] as string) : "";
         if (String(v ?? "").trim() && !atual.trim()) novos[k] = String(v);
       });
-      if (res.imagens?.length) {
-        novos.imagens = [...new Set([...(valores.imagens ?? []), ...res.imagens])].slice(0, 12);
-      }
       novos.status_extracao = res.ok ? "extraido" : "falhou";
       onChange(novos);
       setAviso(res.mensagem);
@@ -93,24 +90,6 @@ export function ProductForm({
       toast.error(msg);
     } finally {
       setExtraindo(false);
-    }
-  }
-
-  async function enviarImagens(files: FileList | null) {
-    if (!files?.length) return;
-    setEnviando(true);
-    try {
-      const urls: string[] = [];
-      for (const file of Array.from(files).slice(0, 8)) {
-        const url = await enviarArquivo("produtos", file);
-        if (url) urls.push(url);
-      }
-      onChange({ ...valores, imagens: [...(valores.imagens ?? []), ...urls] });
-      toast.success("Imagens enviadas.");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Falha ao enviar imagens.");
-    } finally {
-      setEnviando(false);
     }
   }
 
@@ -174,56 +153,6 @@ export function ProductForm({
             onChange={(v) => set("dados_adicionais", v)}
           />
         </div>
-      </section>
-
-      <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
-        <h2 className="text-base font-semibold">Imagens do produto</h2>
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm hover:bg-secondary">
-            {enviando ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
-            Enviar imagens
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={(e) => enviarImagens(e.target.files)}
-            />
-          </label>
-        </div>
-        {valores.imagens?.length ? (
-          // Grade fluida: colunas nascem conforme a largura, sem breakpoints rígidos
-          <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(5.5rem,1fr))] gap-3">
-            {valores.imagens.map((url) => (
-              <div
-                key={url}
-                className="group relative overflow-hidden rounded-lg border border-border"
-              >
-                <img
-                  src={url}
-                  alt="Imagem do produto"
-                  loading="lazy"
-                  className="aspect-square w-full object-cover"
-                />
-                <button
-                  type="button"
-                  aria-label="Remover imagem"
-                  onClick={() =>
-                    onChange({
-                      ...valores,
-                      imagens: (valores.imagens ?? []).filter((u) => u !== url),
-                    })
-                  }
-                  className="absolute right-1 top-1 rounded-md bg-background/85 p-1.5 opacity-100 transition-opacity group-hover:opacity-100 sm:opacity-0"
-                >
-                  <Trash2 className="size-3.5 text-destructive" />
-                </button>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="mt-3 text-sm text-muted-foreground">Nenhuma imagem enviada ainda.</p>
-        )}
       </section>
 
       <div className="flex justify-stretch gap-2 sm:justify-end">

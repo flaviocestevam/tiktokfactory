@@ -11,7 +11,6 @@ import { lerPagina } from "./browser-reader.server";
 import { extrairConteudo } from "./structured-extractor.server";
 import { normalizarProduto, validarExtracao } from "./product-normalizer.server";
 import { traduzirParaPtBr } from "./product-translator.server";
-import { salvarImagensDoProduto } from "./product-images.server";
 import { buscarNoCache, gravarNoCache } from "./product-cache.server";
 import {
   CAMPOS_PRODUTO,
@@ -120,7 +119,7 @@ function doCache(link: LinkNormalizado, registro: any): ResultadoAnalise {
     dados_originais: (registro.original_product_data ?? {}) as any,
     oferta: { ...OFERTA_VAZIA, ...(normalizados.oferta ?? {}) },
     origem: (registro.origem_dados ?? {}) as any,
-    imagens: Array.isArray(registro.imagens) ? (registro.imagens as string[]) : [],
+    imagens: [],
     tiktok_product_id: registro.tiktok_product_id ?? link.product_id,
     tiktok_region: registro.tiktok_country_code ?? link.country_code,
   };
@@ -237,13 +236,8 @@ export async function analisarProdutoTikTokShop(entrada: string): Promise<Result
       source_language: link.source_language ?? normalizado.source_language,
     };
 
-    const candidatas = [...new Set([...normalizado.imagens, ...conteudo.imagens])];
-    const imagens = await salvarImagensDoProduto(candidatas, {
-      country_code: link.country_code,
-      product_id: link.product_id,
-    });
-
-    const validacao = validarExtracao(normalizado.dados, normalizado.oferta, imagens);
+    // A página de vendas fornece apenas dados textuais: nenhuma imagem é baixada ou salva.
+    const validacao = validarExtracao(normalizado.dados, normalizado.oferta);
     const traduzidos = await traduzirParaPtBr(normalizado.dados, link.source_language);
     const origem: Record<string, string> = {};
     for (const campo of CAMPOS_PRODUTO) {
@@ -262,7 +256,7 @@ export async function analisarProdutoTikTokShop(entrada: string): Promise<Result
       dados_originais: normalizado.dados,
       oferta: normalizado.oferta,
       origem,
-      imagens,
+      imagens: [],
     };
 
     if (validacao.ok) {
@@ -271,7 +265,6 @@ export async function analisarProdutoTikTokShop(entrada: string): Promise<Result
         motor: leitura.motor,
         tentativas: i + 1,
         campos: Object.keys(origem).length,
-        imagens: imagens.length,
         ms: Date.now() - inicio,
       });
       return resultado;
