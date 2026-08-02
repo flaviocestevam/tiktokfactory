@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// Camada 6: a IA apenas organiza e normaliza o que foi capturado. Nunca inventa.
+// Organiza o conteúdo capturado. A extração determinística funciona mesmo se a IA falhar.
 import { callAIJson } from "../ai.server";
 import { CAMPOS_PRODUTO, OFERTA_VAZIA, type DadosProduto, type Oferta } from "./types";
 import type { ConteudoExtraido } from "./structured-extractor.server";
@@ -23,45 +23,245 @@ export type SaidaNormalizada = {
   source_language: string | null;
 };
 
+function texto(valor: unknown): string {
+  if (typeof valor === "string") return valor.trim();
+  if (typeof valor === "number") return String(valor);
+  return "";
+}
+
+function primeiro<T>(valor: T | T[] | null | undefined): T | null {
+  if (Array.isArray(valor)) return valor[0] ?? null;
+  return valor ?? null;
+}
+
+function tipoProduto(obj: any) {
+  const tipo = obj?.["@type"];
+  return Array.isArray(tipo)
+    ? tipo.some((v) => String(v).toLowerCase() === "product")
+    : String(tipo ?? "").toLowerCase() === "product";
+}
+
+function procurarProdutoJson(valor: any, profundidade = 0): any | null {
+  if (!valor || profundidade > 8) return null;
+  if (Array.isArray(valor)) {
+    for (const item of valor) {
+      const achado = procurarProdutoJson(item, profundidade + 1);
+      if (achado) return achado;
+    }
+    return null;
+  }
+  if (typeof valor !== "object") return null;
+  if (tipoProduto(valor)) return valor;
+  for (const item of Object.values(valor)) {
+    const achado = procurarProdutoJson(item, profundidade + 1);
+    if (achado) return achado;
+  }
+  return null;
+}
+
+function lerProdutoJsonLd(blocos: string[]) {
+  for (const bloco of blocos) {
+    try {
+      const parsed = JSON.parse(bloco);
+      const produto = procurarProdutoJson(parsed);
+      if (produto) return produto;
+    } catch {
+      // Alguns blocos não são JSON válido; a camada de IA ainda poderá usar o texto bruto.
+    }
+  }
+  return null;
+}
+
+function nomeMarca(brand: any) {
+  if (typeof brand === "string") return brand.trim();
+  return texto(brand?.name);
+}
+
+function nomeVendedor(seller: any) {
+  if (typeof seller === "string") return seller.trim();
+  return texto(seller?.name ?? seller?.legalName);
+}
+
+function limparTitulo(titulo: string) {
+  return titulo
+    .replace(/\s*[|–—-]\s*TikTok Shop.*$/i, "")
+    .replace(/^TikTok Shop\s*[|–—-]\s*/i, "")
+    .trim();
+}
+
+function regexValor(bruto: string, chaves: string[]): string {
+  for (const chave of chaves) {
+    const re = new RegExp(`"${chave}"\\s*:\\s*"((?:\\\\.|[^"\\\\]){2,2000})"`, "i");
+    const match = bruto.match(re)?.[1];
+    if (!match) continue;
+    try {
+      return JSON.parse(`"${match}"`).trim();
+    } catch {
+      return match.replace(/\\u002F/gi, "/").replace(/\\n/g, " ").trim();
+    }
+  }
+  return "";
+}
+
+function moedaSimbolo(codigo: string) {
+  const mapa: Record<string, string> = {
+    BRL: "R$",
+    USD: "$",
+    GBP: "£",
+    EUR: "€",
+    THB: "฿",
+    IDR: "Rp",
+    JPY: "¥",
+    MYR: "RM",
+    SGD: "S$",
+    PHP: "₱",
+    VND: "₫",
+    MXN: "$",
+  };
+  return mapa[codigo.toUpperCase()] ?? "";
+}
+
+function extrairDeterministicamente(
+  conteudo: ConteudoExtraido,
+  contexto: { url: string; product_id: string | null; country_code: string | null },
+): SaidaNormalizada {
+  const produtoLd = lerProdutoJsonLd(conteudo.jsonld);
+  const ofertaLd = primeiro<any>(produtoLd?.offers);
+  const rating = produtoLd?.aggregateRating;
+  const meta = conteudo.meta;
+  const bruto = conteudo.bruto;
+
+  const dados: DadosProduto = {};
+  const nome =
+    texto(produtoLd?.name) ||
+    limparTitulo(texto(meta["og:title"] ?? meta["twitter:title"] ?? meta.title)) ||
+    regexValor(bruto, ["product_name", "productName", "product_title", "title"]);
+  if (nome) dados.nome = nome;
+
+  const marca = nomeMarca(produtoLd?.brand) || regexValor(bruto, ["brand_name", "brandName"]);
+  if (marca) dados.marca = marca;
+
+  const vendedor =
+    nomeVendedor(ofertaLd?.seller ?? produtoLd?.seller) ||
+    regexValor(bruto, ["shop_name", "seller_name", "sellerName", "merchant_name"]);
+  if (vendedor) dados.vendedor = vendedor;
+
+  const descricao =
+    texto(produtoLd?.description) ||
+    texto(meta["og:description"] ?? meta.description ?? meta["twitter:description"]) ||
+    regexValor(bruto, ["product_description", "description"]);
+  if (descricao) dados.descricao = descricao;
+
+  const categoria = texto(produtoLd?.category) || regexValor(bruto, ["category_name", "categoryName"]);
+  if (categoria) dados.categoria = categoria;
+
+  const sku = texto(produtoLd?.sku ?? produtoLd?.mpn);
+  if (sku) dados.informacoes_tecnicas = `SKU: ${sku}`;
+
+  const nota = texto(rating?.ratingValue);
+  if (nota) dados.avaliacoes = nota;
+  const numeroAvaliacoes = texto(rating?.reviewCount ?? rating?.ratingCount);
+  if (numeroAvaliacoes) dados.numero_avaliacoes = numeroAvaliacoes;
+
+  const oferta: Oferta = { ...OFERTA_VAZIA };
+  const precoAtual =
+    texto(ofertaLd?.price ?? ofertaLd?.lowPrice) ||
+    texto(meta["product:price:amount"] ?? meta["og:price:amount"]);
+  const moeda =
+    texto(ofertaLd?.priceCurrency) ||
+    texto(meta["product:price:currency"] ?? meta["og:price:currency"]).toUpperCase();
+  if (precoAtual) {
+    oferta.current_price_value = precoAtual;
+    oferta.current_price_formatted = [moedaSimbolo(moeda), precoAtual].filter(Boolean).join(" ");
+    dados.preco = oferta.current_price_formatted || precoAtual;
+  }
+  if (moeda) {
+    oferta.currency_code = moeda;
+    oferta.currency_symbol = moedaSimbolo(moeda);
+  }
+
+  const temSinalProduto = Boolean(
+    produtoLd ||
+      (contexto.product_id && bruto.includes(contexto.product_id)) ||
+      /"product_id"\s*:|"productId"\s*:|\/pdp\/\d{6,}/i.test(bruto) ||
+      (nome && (precoAtual || descricao || vendedor)),
+  );
+
+  return {
+    dados,
+    oferta,
+    pagina_de_produto: temSinalProduto,
+    product_id: contexto.product_id,
+    country_code: contexto.country_code,
+    source_language: null,
+  };
+}
+
+function mesclarDados(base: DadosProduto, adicional: DadosProduto): DadosProduto {
+  const saida: DadosProduto = { ...base };
+  for (const campo of CAMPOS_PRODUTO) {
+    const valor = texto(adicional[campo]);
+    if (valor) saida[campo] = valor;
+  }
+  return saida;
+}
+
 export async function normalizarProduto(
   conteudo: ConteudoExtraido,
   contexto: { url: string; product_id: string | null; country_code: string | null },
 ): Promise<SaidaNormalizada> {
-  const out = await callAIJson<any>(
-    SISTEMA,
-    `Organize os dados deste produto do TikTok Shop.
+  const deterministico = extrairDeterministicamente(conteudo, contexto);
+
+  let out: any = null;
+  try {
+    out = await callAIJson<any>(
+      SISTEMA,
+      `Organize os dados deste produto do TikTok Shop.
 URL final: ${contexto.url}
 ID esperado do produto: ${contexto.product_id ?? "desconhecido"}
 País detectado: ${contexto.country_code ?? "desconhecido"}
 
 CONTEÚDO CAPTURADO:
 ${conteudo.bruto}`,
-    SHAPE,
-  );
+      SHAPE,
+    );
+  } catch (e) {
+    console.error(
+      "[tiktok] normalização por IA falhou; usando extração determinística:",
+      e instanceof Error ? e.message : e,
+    );
+  }
 
-  const produto: DadosProduto = {};
+  const produtoIa: DadosProduto = {};
   for (const campo of CAMPOS_PRODUTO) {
-    const valor = String(out?.produto?.[campo] ?? "").trim();
-    if (valor && !/^(undefined|null|n\/a|-)$/i.test(valor)) produto[campo] = valor;
+    const valor = texto(out?.produto?.[campo]);
+    if (valor && !/^(undefined|null|n\/a|-)$/i.test(valor)) produtoIa[campo] = valor;
   }
-  const oferta: Oferta = { ...OFERTA_VAZIA };
+
+  const ofertaIa: Oferta = { ...OFERTA_VAZIA };
   for (const chave of Object.keys(OFERTA_VAZIA) as Array<keyof Oferta>) {
-    oferta[chave] = String(out?.oferta?.[chave] ?? "").trim();
+    ofertaIa[chave] = texto(out?.oferta?.[chave]);
   }
+
+  const oferta: Oferta = { ...deterministico.oferta };
+  for (const chave of Object.keys(OFERTA_VAZIA) as Array<keyof Oferta>) {
+    if (ofertaIa[chave]) oferta[chave] = ofertaIa[chave];
+  }
+
+  const dados = mesclarDados(deterministico.dados, produtoIa);
+  if (!dados.preco && (oferta.current_price_formatted || oferta.current_price_value)) {
+    dados.preco = oferta.current_price_formatted || oferta.current_price_value;
+  }
+
   return {
-    dados: produto,
+    dados,
     oferta,
-    pagina_de_produto: out?.pagina_de_produto !== false,
-    product_id: String(out?.product_id ?? "").trim() || null,
+    pagina_de_produto:
+      deterministico.pagina_de_produto && (out?.pagina_de_produto !== false || !out),
+    product_id: texto(out?.product_id) || deterministico.product_id,
     country_code:
-      String(out?.country_code ?? "")
-        .trim()
-        .toUpperCase()
-        .slice(0, 2) || null,
-    source_language:
-      String(out?.source_language ?? "")
-        .trim()
-        .toLowerCase() || null,
+      texto(out?.country_code).toUpperCase().slice(0, 2) || deterministico.country_code,
+    source_language: texto(out?.source_language).toLowerCase() || null,
   };
 }
 
@@ -75,14 +275,14 @@ const CAMPOS_COMERCIAIS = [
   "variacoes",
 ] as const;
 
-/** Critério mínimo de sucesso: nome + dois campos comerciais reais (nenhuma imagem envolvida). */
+/** Critério prático: nome + pelo menos um campo comercial real. */
 export function validarExtracao(
   dados: DadosProduto,
   oferta: Oferta,
 ): { ok: boolean; comerciais: number } {
   const comerciais =
-    CAMPOS_COMERCIAIS.filter((c) => String(dados[c] ?? "").trim().length > 2).length +
+    CAMPOS_COMERCIAIS.filter((c) => texto(dados[c]).length > 2).length +
     (oferta.current_price_formatted || oferta.current_price_value ? 1 : 0);
-  const ok = Boolean(String(dados.nome ?? "").trim()) && comerciais >= 2;
+  const ok = Boolean(texto(dados.nome)) && comerciais >= 1;
   return { ok, comerciais };
 }
