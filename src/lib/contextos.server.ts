@@ -160,8 +160,7 @@ export function descreverPreferencias(project: Record<string, any>): string {
 export function descreverIdentidadeFixaParaFoto(character: Record<string, any> | null): string {
   if (!character) return `IDENTIDADE: ${PLACEHOLDER_PERSONAGEM}. Não invente identidade.`;
   return (
-    "IDENTIDADE FIXA DA PERSONAGEM (apenas traços permanentes — a imagem principal da personagem é a referência final):
-" +
+    "IDENTIDADE FIXA DA PERSONAGEM (apenas traços permanentes — a imagem principal da personagem é a referência final):\n" +
     bloco("Nome", character.nome_exibicao || character.nome) +
     bloco("Idade adulta", character.idade) +
     bloco("Rosto", character.descricao_rosto) +
