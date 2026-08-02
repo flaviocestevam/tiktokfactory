@@ -91,8 +91,45 @@ export const descreverFotoDoProjeto = (project: Record<string, any>) =>
   `FONTE VISUAL ÚNICA: a foto enviada nesta produção é a única referência visual do vídeo e o primeiro frame do primeiro clipe.
 Ela já contém a pessoa, o produto, a roupa, a posição, a iluminação, o enquadramento e o fundo definitivos.
 Preserve exatamente: mesmo rosto, mesmo cabelo, mesma roupa, mesmo produto, mesma embalagem, mesmo fundo, mesma iluminação e mesmo enquadramento.
+Não existe imagem separada do produto: nunca peça, cite ou use imagens da página de vendas como referência visual.
 Proibido: reconstruir a pessoa a partir de descrição textual, trocar o fundo, mudar de local, adicionar, remover ou inventar objetos e pessoas, redesenhar o rótulo ou duplicar o produto.
-${project.reference_image_url ? "A foto já foi enviada e confirmada nesta produção." : "ATENÇÃO: a foto ainda não foi enviada."}`;
+${project.reference_image_url ? "A foto já foi enviada e confirmada nesta produção." : "ATENÇÃO: a foto ainda não foi enviada."}
+
+${descreverAnaliseVisual(project)}`;
+
+/**
+ * Estado visual inicial lido automaticamente da foto da produção.
+ * Orienta apenas ações, gestos e continuidade — nunca dados comerciais.
+ */
+export function descreverAnaliseVisual(project: Record<string, any>): string {
+  const a = project?.project_image_analysis as Record<string, any> | null;
+  if (!a || typeof a !== "object") {
+    return "ANÁLISE VISUAL DA FOTO: ainda não disponível. Não deduza pose, mãos ou posição do produto.";
+  }
+  const lista = (v: unknown) => (Array.isArray(v) && v.length ? v.join("; ") : "");
+  return (
+    "ANÁLISE VISUAL DA FOTO (estado inicial real — orienta ações e continuidade, nunca dados comerciais):\n" +
+    bloco("Enquadramento", a.framing) +
+    bloco("Posição da câmera", a.camera_position) +
+    bloco("Distância da câmera", a.camera_distance) +
+    bloco("Posição do corpo", a.body_position) +
+    bloco("Pose inicial", a.initial_pose) +
+    bloco("Expressão inicial", a.initial_expression) +
+    bloco("Direção do olhar", a.gaze_direction) +
+    bloco("Mão que segura o produto", a.product_hand) +
+    bloco("Mão livre", a.free_hand) +
+    bloco("Posição do produto", a.product_position) +
+    bloco("Orientação do produto", a.product_orientation) +
+    bloco("Tamanho aparente do produto", a.product_apparent_size) +
+    bloco("Visibilidade do rótulo", a.label_visibility) +
+    bloco("Iluminação", a.lighting) +
+    bloco("Elementos visíveis", lista(a.visible_elements)) +
+    bloco("Movimentos seguros", lista(a.safe_movements)) +
+    bloco("Riscos de continuidade", lista(a.continuity_risks)) +
+    "Use estas informações apenas para escolher ações, gestos e câmera compatíveis com a imagem inicial.\n" +
+    "Nunca use a análise visual para afirmar benefícios, características, ingredientes ou qualquer alegação comercial.\n"
+  );
+}
 
 /** Regras comerciais e de honestidade aplicadas a todo texto gerado. */
 export const REGRAS_COMERCIAIS = `REGRAS COMERCIAIS OBRIGATÓRIAS:
