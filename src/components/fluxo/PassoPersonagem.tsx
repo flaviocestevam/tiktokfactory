@@ -73,7 +73,12 @@ export function PassoPersonagem({
             {selecionada === recomendada.id ? "PERSONAGEM SELECIONADA" : "USAR A RECOMENDADA"}
           </Button>
         </section>
-      ) : null}
+      ) : (
+        <section className="surface p-4 sm:p-5">
+          <p className="font-semibold">Escolha manualmente uma personagem</p>
+          <p className="mt-1 text-sm text-muted-foreground">{motivo}</p>
+        </section>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {data.map((p) => {
