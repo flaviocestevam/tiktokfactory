@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { analisarProdutoTikTokShop as analisarComMotorLegado } from "./product-analyzer.server";
-import { apifyProdutoDisponivel, lerProdutoComApify } from "./apify-product-async.server";
+import { apifyProdutoDisponivel, lerProdutoComApify } from "./apify-product-final.server";
 import { normalizarLinkTikTokShop } from "./normalize-url.server";
 import { traduzirParaPtBr } from "./product-translator.server";
 import { validarExtracao } from "./product-normalizer.server";
@@ -69,47 +69,71 @@ function lerRegistro(leitura: { rede: Array<{ corpo: string }> }) {
   return null;
 }
 
-/**
- * Rota principal simples e previsível:
- * 1. normaliza URL/ID/país;
- * 2. consulta um scraper de produto com proxy residencial e solução de CAPTCHA;
- * 3. converte o JSON diretamente para o formato interno;
- * 4. usa o motor anterior apenas como contingência.
- */
+function falhaApify(link: any, detalhe: string | null = null): ResultadoAnalise {
+  return {
+    ok: false,
+    status: "blocked",
+    mensagem: "O produto não pôde ser lido automaticamente neste momento.",
+    detalhe,
+    fonte: "apify",
+    tentativas: 2,
+    do_cache: false,
+    dados: {},
+    dados_originais: {},
+    oferta: { ...OFERTA_VAZIA },
+    origem: {},
+    imagens: [],
+    link,
+    original_tiktok_url: link.original_url,
+    resolved_tiktok_url: link.redirected_url,
+    tiktok_product_id: link.product_id,
+    tiktok_region: link.country_code,
+  };
+}
+
 export async function analisarProdutoTikTokShop(entrada: string): Promise<ResultadoAnalise> {
   if (!apifyProdutoDisponivel()) return analisarComMotorLegado(entrada);
 
+  let link: Awaited<ReturnType<typeof normalizarLinkTikTokShop>>;
   try {
-    const link = await normalizarLinkTikTokShop(entrada);
+    link = await normalizarLinkTikTokShop(entrada);
+  } catch (erro) {
+    console.error(
+      "[tiktok] normalização do link falhou:",
+      erro instanceof Error ? erro.message : erro,
+    );
+    return analisarComMotorLegado(entrada);
+  }
+
+  try {
     const leitura = await lerProdutoComApify(link.fetch_url || link.canonical_url, {
       productId: link.product_id,
       country: link.country_code,
-      timeoutMs: 150_000,
+      timeoutMs: 65_000,
     });
-    if (!leitura) return analisarComMotorLegado(entrada);
+    if (!leitura) return falhaApify(link, "Os Actors concluíram sem retornar dados válidos do produto.");
 
     const registro = lerRegistro(leitura);
-    if (!registro) return analisarComMotorLegado(entrada);
+    if (!registro) return falhaApify(link, "A Apify respondeu sem um registro estruturado.");
 
     const idRetornado = String(
       registro.__tiktok_factory_product_id ?? registro.product_id ?? registro.productId ?? "",
     ).trim();
     if (link.product_id && idRetornado && idRetornado !== link.product_id) {
-      console.error("[tiktok] scraper retornou um produto diferente do solicitado", {
-        esperado: link.product_id,
-        recebido: idRetornado,
-      });
-      return analisarComMotorLegado(entrada);
+      return falhaApify(
+        link,
+        `A Apify retornou o produto ${idRetornado}, diferente do solicitado ${link.product_id}.`,
+      );
     }
 
     const dadosOriginais = limparDados(registro.__tiktok_factory_normalized);
     const oferta = limparOferta(registro.__tiktok_factory_offer);
     const validacao = validarExtracao(dadosOriginais, oferta);
     if (!validacao.ok) {
-      console.error("[tiktok] scraper retornou dados insuficientes", {
-        campos: Object.keys(dadosOriginais),
-      });
-      return analisarComMotorLegado(entrada);
+      return falhaApify(
+        link,
+        `A resposta não contém dados comerciais suficientes. Campos: ${Object.keys(dadosOriginais).join(", ") || "nenhum"}.`,
+      );
     }
 
     const pais = String(
@@ -152,11 +176,11 @@ export async function analisarProdutoTikTokShop(entrada: string): Promise<Result
       tiktok_product_id: productIdFinal,
       tiktok_region: countryFinal,
     };
-  } catch (e) {
+  } catch (erro) {
     console.error(
-      "[tiktok] rota estruturada falhou; usando contingência:",
-      e instanceof Error ? e.message : e,
+      "[tiktok] execução Apify falhou:",
+      erro instanceof Error ? erro.message : erro,
     );
-    return analisarComMotorLegado(entrada);
+    return falhaApify(link, erro instanceof Error ? erro.message : String(erro));
   }
 }
