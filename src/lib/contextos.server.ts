@@ -152,6 +152,43 @@ export function descreverPreferencias(project: Record<string, any>): string {
  * Descrição textual da aparência da personagem — usada APENAS no prompt da foto
  * inicial, quando ainda não existe imagem da produção.
  */
+/**
+ * Identidade FIXA da personagem para a foto inicial.
+ * Só traços imutáveis: nada de roupa, acessórios, maquiagem, ambiente,
+ * pose, expressão, iluminação ou enquadramento (variam a cada produção).
+ */
+export function descreverIdentidadeFixaParaFoto(character: Record<string, any> | null): string {
+  if (!character) return `IDENTIDADE: ${PLACEHOLDER_PERSONAGEM}. Não invente identidade.`;
+  return (
+    "IDENTIDADE FIXA DA PERSONAGEM (apenas traços permanentes — a imagem principal da personagem é a referência final):
+" +
+    bloco("Nome", character.nome_exibicao || character.nome) +
+    bloco("Idade adulta", character.idade) +
+    bloco("Rosto", character.descricao_rosto) +
+    bloco("Olhos", character.descricao_olhos) +
+    bloco("Pele", character.descricao_pele) +
+    bloco("Cabelo (cor e textura básica)", character.descricao_cabelo) +
+    bloco("Proporções corporais", character.descricao_corpo) +
+    bloco("Altura", character.altura) +
+    bloco("Características únicas permanentes", character.caracteristicas_fixas) +
+    "\nIGNORE qualquer menção a roupa, acessórios, joias, maquiagem, ambiente, local, fundo, pose, expressão, iluminação, enquadramento ou estilo fotográfico que apareça nos textos acima: esses elementos variam em cada produção e NÃO podem entrar no prompt.\n"
+  );
+}
+
+/** Produto para a foto: apenas identificação. A aparência vem da imagem do produto. */
+export function descreverProdutoParaFoto(product: Record<string, any> | null): string {
+  if (!product) return "PRODUTO: nenhum produto vinculado.";
+  return (
+    "PRODUTO (somente identificação e uso — a APARÊNCIA vem exclusivamente da imagem do produto):\n" +
+    bloco("Nome", product.nome) +
+    bloco("Marca", product.marca) +
+    bloco("Categoria", product.categoria) +
+    bloco("Tamanho", product.tamanho) +
+    bloco("Modo de uso", product.modo_de_uso) +
+    "\nPROIBIDO transformar dados comerciais (benefícios, ingredientes, preço, avaliações, oferta, garantias, dúvidas) em texto visual na embalagem ou em elementos da imagem.\n"
+  );
+}
+
 export function descreverAparenciaParaFoto(character: Record<string, any> | null): string {
   if (!character) return `APARÊNCIA: ${PLACEHOLDER_PERSONAGEM}. Não invente identidade.`;
   return (

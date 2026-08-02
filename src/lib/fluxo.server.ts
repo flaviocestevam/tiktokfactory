@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Núcleo do fluxo TikTok Factory (somente servidor).
 import {
-  descreverAparenciaParaFoto,
+  descreverIdentidadeFixaParaFoto,
+  descreverProdutoParaFoto,
   descreverFotoDoProjeto,
   descreverPersonagemParaRoteiro,
   descreverPreferencias,
@@ -40,10 +41,26 @@ function contextoFluxo(ctx: ProjectContext, cta: string) {
 export function promptFotoInicial(ctx: ProjectContext, ajuste?: string) {
   return {
     system:
-      "Você escreve prompts técnicos de geração de imagem em inglês, para o GPT criar uma foto realista de influenciadora segurando um produto. Nomes próprios e textos de embalagem permanecem como estão.",
-    prompt: `${descreverProdutoParaRoteiro(ctx.product)}\n\n${descreverAparenciaParaFoto(ctx.character)}\n\n${ajuste ? `AJUSTE PEDIDO PELO USUÁRIO: ${ajuste}\n` : ""}
-Crie o prompt em inglês para gerar UMA única foto vertical 9:16 da personagem segurando exatamente este produto.
-O prompt deve exigir: seguir exatamente a descrição textual cadastrada da personagem (rosto, olhos, pele, cabelo, corpo conforme o texto); reproduzir o produto exatamente como descrito nos dados da página de vendas (nome, marca, categoria e variações), sem inventar embalagem, rótulo ou textos; não redesenhar o rótulo; não inventar textos; não duplicar o produto; mãos e dedos anatomicamente corretos; produto totalmente visível com o rótulo voltado para a câmera quando fizer sentido; iluminação realista; enquadramento vertical 9:16; aparência de conteúdo real de TikTok; pele ultrarrealista com poros e textura natural; sem filtro de beleza; sem aparência artificial ou plástica; sem grid, colagem ou múltiplas imagens.`,
+      "Você escreve prompts técnicos de geração de imagem em inglês para um modelo multimodal que recebe DUAS imagens de referência: (1) imagem principal da personagem, usada só para identidade física; (2) imagem do produto, usada só para a aparência exata do produto. Nunca descreva roupa, acessórios, maquiagem, local, fundo, iluminação ou enquadramento específicos vindos de cadastro.",
+    prompt: `${descreverProdutoParaFoto(ctx.product)}\n\n${descreverIdentidadeFixaParaFoto(ctx.character)}\n\n${ajuste ? `INSTRUÇÃO ESPECÍFICA DESTA PRODUÇÃO (só isto pode definir roupa, ambiente, pose, expressão ou iluminação): ${ajuste}\n\n` : "NENHUMA instrução específica desta produção: não defina roupa, ambiente, pose, expressão nem iluminação.\n\n"}
+Escreva o prompt final em inglês, em texto corrido, seguindo exatamente esta lógica e ordem:
+
+1) "Create one single photorealistic vertical 9:16 TikTok-style image."
+2) "Use the provided main character image as the sole identity reference. Create exactly the same woman, preserving her facial identity, face shape, eyes, nose, lips, eyebrows, skin tone, natural skin texture, hair identity, body proportions and unique permanent traits."
+3) "Identity fidelity does not mean copying the clothing, accessories, makeup, pose, expression, gesture, hand position, objects, background, location, decoration, lighting or framing from the character reference image. These elements may naturally vary in this new production and must not be predefined unless explicitly requested."
+4) "Use the provided product image as the sole product appearance reference. Reproduce exactly the same product, preserving its original packaging, label, visible text, brand, colors, shape, cap, proportions and real apparent size."
+5) "The character holds exactly one product naturally. Keep the product visible and orient the label toward the camera when physically appropriate. Do not redesign, reinterpret, translate, correct, enhance, duplicate, resize or invent any packaging detail."
+6) "Natural human anatomy, realistic hands and fingers, authentic skin texture with pores, no beauty filter, no plastic look, vertical 9:16 composition, realistic TikTok content appearance, one single image, no grid and no collage."
+
+REGRAS OBRIGATÓRIAS:
+- PROIBIDO citar cor, peça ou estilo de roupa (blusa preta, blazer branco, camisa jeans, regata, etc.).
+- PROIBIDO citar joias, brincos, argolas, maquiagem específica ou penteado montado.
+- PROIBIDO citar local específico (banheiro, quarto, estúdio, sala, cozinha, penteadeira, etc.), fundo específico, decoração ou esquema de iluminação específico.
+- Use apenas linguagem adaptativa quando precisar: roupa natural e coerente com o conteúdo, composição realista, aparência de conteúdo verdadeiro de TikTok.
+- Só inclua roupa, ambiente, pose, expressão ou iluminação se houver instrução específica desta produção acima.
+- Prioridade visual: 1) imagem principal da personagem (identidade); 2) imagem do produto (aparência do produto); 3) instrução específica desta produção; 4) liberdade visual apenas no que não foi definido.
+- Nenhuma descrição textual pode prevalecer sobre as duas imagens de referência.
+Em "enquadramento", "iluminacao", "pose" e "expressao" escreva "livre" quando não houver instrução específica desta produção.`,
     shape: `{"prompt":"","prompt_negativo":"","enquadramento":"","iluminacao":"","pose":"","maos_produto":"","expressao":"","continuidade":""}`,
   };
 }
