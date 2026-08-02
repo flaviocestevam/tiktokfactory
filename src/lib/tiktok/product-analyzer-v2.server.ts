@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { analisarProdutoTikTokShop as analisarComMotorLegado } from "./product-analyzer.server";
-import { lerProdutoComApify } from "./apify-product.server";
+import { apifyProdutoDisponivel, lerProdutoComApify } from "./apify-product.server";
 import { normalizarLinkTikTokShop } from "./normalize-url.server";
 import { traduzirParaPtBr } from "./product-translator.server";
 import { validarExtracao } from "./product-normalizer.server";
@@ -77,7 +77,7 @@ function lerRegistro(leitura: { rede: Array<{ corpo: string }> }) {
  * 4. usa o motor anterior apenas como contingência.
  */
 export async function analisarProdutoTikTokShop(entrada: string): Promise<ResultadoAnalise> {
-  if (!process.env["APIFY_TOKEN"]) return analisarComMotorLegado(entrada);
+  if (!apifyProdutoDisponivel()) return analisarComMotorLegado(entrada);
 
   try {
     const link = await normalizarLinkTikTokShop(entrada);

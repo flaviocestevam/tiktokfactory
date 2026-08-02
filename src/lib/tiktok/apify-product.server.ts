@@ -7,7 +7,20 @@ export type OpcoesApifyProduto = {
   timeoutMs?: number;
 };
 
+type CredenciaisApify =
+  | {
+      modo: "gateway";
+      connectionKey: string;
+      lovableKey: string;
+    }
+  | {
+      modo: "token";
+      token: string;
+    };
+
 const LIMITE_CORPO = 120_000;
+const APIFY_API_BASE = "https://api.apify.com";
+const APIFY_GATEWAY_BASE = "https://connector-gateway.lovable.dev/apify";
 const ATOR_PRIMARIO = "jungle_synthesizer~tiktok-shop-product-detail-scraper";
 const ATOR_FALLBACK = "herus13~tiktok-shop-scraper";
 
@@ -43,6 +56,27 @@ function primeiro(...valores: unknown[]) {
     if (t) return t;
   }
   return "";
+}
+
+function obterCredenciaisApify(): CredenciaisApify | null {
+  const connectionKey = primeiro(
+    process.env["APIFY_API_KEY"],
+    process.env["APIFY_CONNECTION_API_KEY"],
+  );
+  const lovableKey = primeiro(process.env["LOVABLE_API_KEY"]);
+
+  if (connectionKey && lovableKey) {
+    return { modo: "gateway", connectionKey, lovableKey };
+  }
+
+  const token = primeiro(process.env["APIFY_TOKEN"]);
+  if (token) return { modo: "token", token };
+
+  return null;
+}
+
+export function apifyProdutoDisponivel() {
+  return Boolean(obterCredenciaisApify());
 }
 
 function caminhoCategoria(valor: unknown): string {
@@ -238,28 +272,50 @@ function registroValido(item: any, productId: string | null) {
   return Boolean(id || nome) && Boolean(nome || preco || descricao);
 }
 
+function montarEndpointAtor(actor: string, credenciais: CredenciaisApify) {
+  const base = credenciais.modo === "gateway" ? APIFY_GATEWAY_BASE : APIFY_API_BASE;
+  const endpoint = new URL(
+    `${base}/v2/acts/${encodeURIComponent(actor)}/run-sync-get-dataset-items`,
+  );
+  endpoint.searchParams.set("clean", "true");
+  endpoint.searchParams.set("timeout", "120");
+  return endpoint;
+}
+
+function montarHeadersApify(credenciais: CredenciaisApify): Record<string, string> {
+  if (credenciais.modo === "gateway") {
+    return {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${credenciais.lovableKey}`,
+      "Lovable-API-Key": credenciais.lovableKey,
+      "X-Connection-Api-Key": credenciais.connectionKey,
+    };
+  }
+
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${credenciais.token}`,
+  };
+}
+
 async function executarAtor(
-  token: string,
+  credenciais: CredenciaisApify,
   actor: string,
   input: Record<string, unknown>,
   op: OpcoesApifyProduto,
 ) {
-  const endpoint = new URL(
-    `https://api.apify.com/v2/acts/${encodeURIComponent(actor)}/run-sync-get-dataset-items`,
-  );
-  endpoint.searchParams.set("token", token);
-  endpoint.searchParams.set("clean", "true");
-  endpoint.searchParams.set("timeout", "120");
-
+  const endpoint = montarEndpointAtor(actor, credenciais);
   const res = await fetch(endpoint.toString(), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: montarHeadersApify(credenciais),
     body: JSON.stringify(input),
     signal: AbortSignal.timeout(Math.max(op.timeoutMs ?? 120_000, 135_000)),
   });
   const bruto = await res.text();
   if (!res.ok) {
-    console.error(`[tiktok] ator ${actor} falhou [${res.status}]: ${bruto.slice(0, 500)}`);
+    console.error(
+      `[tiktok] ator ${actor} via ${credenciais.modo} falhou [${res.status}]: ${bruto.slice(0, 500)}`,
+    );
     return null;
   }
 
@@ -277,15 +333,15 @@ async function executarAtor(
     return null;
   }
 
-  return { actor, item };
+  return { actor, item, modo: credenciais.modo };
 }
 
 export async function lerProdutoComApify(
   url: string,
   op: OpcoesApifyProduto,
 ): Promise<LeituraPagina | null> {
-  const token = process.env["APIFY_TOKEN"];
-  if (!token) return null;
+  const credenciais = obterCredenciaisApify();
+  if (!credenciais) return null;
 
   const countryUpper = (op.country ?? "BR").toUpperCase();
   const countryLower = countryUpper.toLowerCase();
@@ -297,7 +353,7 @@ export async function lerProdutoComApify(
       input: { items: [itemOuUrl], country: countryLower, maxItems: 1 },
     },
     {
-      actor: ATOR_FALLBACK,
+      actor: process.env["APIFY_TIKTOK_FALLBACK_ACTOR_ID"] || ATOR_FALLBACK,
       input: {
         product_urls: [url],
         region: countryUpper,
@@ -309,7 +365,12 @@ export async function lerProdutoComApify(
 
   for (const tentativa of tentativas) {
     try {
-      const resposta = await executarAtor(token, tentativa.actor, tentativa.input, op);
+      const resposta = await executarAtor(
+        credenciais,
+        tentativa.actor,
+        tentativa.input,
+        op,
+      );
       if (!resposta) continue;
       const normalizado = normalizarRegistro(
         resposta.item,
@@ -322,7 +383,7 @@ export async function lerProdutoComApify(
         final_url: primeiro(normalizado.product_url, url),
         status: 200,
         html: `<body><pre>${corpo.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre></body>`,
-        rede: [{ url: `apify://${resposta.actor}`, corpo }],
+        rede: [{ url: `apify-${resposta.modo}://${resposta.actor}`, corpo }],
         erro: null,
       };
     } catch (e) {
