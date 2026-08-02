@@ -67,13 +67,13 @@ export async function gravarNoCache(link: LinkNormalizado, resultado: ResultadoA
   if (existente?.registro?.id) {
     const { data } = await supabaseAdmin
       .from("products")
-      .update(payload)
+      .update(payload as never)
       .eq("id", existente.registro.id)
       .select()
       .single();
     return data;
   }
-  const { data, error } = await supabaseAdmin.from("products").insert(payload).select().single();
+  const { data, error } = await supabaseAdmin.from("products").insert(payload as never).select().single();
   if (error) {
     console.error("[tiktok] falha ao gravar cache:", error.message);
     return null;

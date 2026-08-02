@@ -55,7 +55,7 @@ export function ProductForm({
   salvando: boolean;
   rotuloSalvar?: string;
 }) {
-  const extrair = useServerFn(extrairProduto);
+  const extrair = useServerFn(analisarProduto);
   const [extraindo, setExtraindo] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
