@@ -484,3 +484,43 @@ export async function ajustarClipes(
   });
   return clipes;
 }
+
+/** Edição manual do texto de um roteiro. */
+export async function editarRoteiroManual(
+  projectId: string,
+  scriptId: string,
+  campos: Record<string, string>,
+) {
+  const supabase = await db();
+  const { data: atual } = await supabase.from("scripts").select("*").eq("id", scriptId).single();
+  const { data: salvo, error } = await supabase
+    .from("scripts")
+    .update({ ...campos, updated_at: new Date().toISOString() } as any)
+    .eq("id", scriptId)
+    .eq("project_id", projectId)
+    .select()
+    .single();
+  if (error) throw new Error(error.message);
+  await registrarHistorico(supabase, projectId, "roteiro:edicao_manual", atual, salvo);
+  return salvo;
+}
+
+/** Edição manual dos campos de um clipe. */
+export async function editarClipeManual(
+  projectId: string,
+  clipId: string,
+  campos: Record<string, string>,
+) {
+  const supabase = await db();
+  const { data: atual } = await supabase.from("clips").select("*").eq("id", clipId).single();
+  const { data: salvo, error } = await supabase
+    .from("clips")
+    .update({ ...campos, updated_at: new Date().toISOString() } as any)
+    .eq("id", clipId)
+    .eq("project_id", projectId)
+    .select()
+    .single();
+  if (error) throw new Error(error.message);
+  await registrarHistorico(supabase, projectId, "clipe:edicao_manual", atual, salvo);
+  return salvo;
+}
