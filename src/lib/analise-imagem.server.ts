@@ -15,12 +15,15 @@ export type AnaliseVisual = {
   initial_pose: string;
   initial_expression: string;
   gaze_direction: string;
-  product_hand: string;
-  free_hand: string;
-  product_position: string;
+  product_interaction_mode: string;
+  product_state: string;
+  product_location: string;
+  body_contact: string;
+  hands_state: string;
+  active_body_parts: string[];
   product_orientation: string;
   product_apparent_size: string;
-  label_visibility: string;
+  packaging_or_brand_visibility: string;
   lighting: string;
   visible_elements: string[];
   safe_movements: string[];
@@ -35,24 +38,36 @@ const CAMPOS_TEXTO: Array<keyof AnaliseVisual> = [
   "initial_pose",
   "initial_expression",
   "gaze_direction",
-  "product_hand",
-  "free_hand",
-  "product_position",
+  "product_interaction_mode",
+  "product_state",
+  "product_location",
+  "body_contact",
+  "hands_state",
   "product_orientation",
   "product_apparent_size",
-  "label_visibility",
+  "packaging_or_brand_visibility",
   "lighting",
 ];
 
-const SHAPE = `{"framing":"","camera_position":"","camera_distance":"","body_position":"","initial_pose":"","initial_expression":"","gaze_direction":"","product_hand":"","free_hand":"","product_position":"","product_orientation":"","product_apparent_size":"","label_visibility":"","lighting":"","visible_elements":[],"safe_movements":[],"continuity_risks":[]}`;
+const SHAPE = `{"framing":"","camera_position":"","camera_distance":"","body_position":"","initial_pose":"","initial_expression":"","gaze_direction":"","product_interaction_mode":"","product_state":"","product_location":"","body_contact":"","hands_state":"","active_body_parts":[],"product_orientation":"","product_apparent_size":"","packaging_or_brand_visibility":"","lighting":"","visible_elements":[],"safe_movements":[],"continuity_risks":[]}`;
 
-const SISTEMA = `Você descreve APENAS o que está objetivamente visível em uma foto de influenciadora segurando um produto.
-- Descreva somente o estado visual: enquadramento, câmera, corpo, pose, expressão, olhar, mãos, produto, iluminação e elementos presentes.
+const SISTEMA = `Você descreve APENAS o que está objetivamente visível em uma foto de uma influenciadora apresentando ou demonstrando um produto.
+
+REGRA CENTRAL: não presuma que o produto seja um objeto portátil ou que esteja em uma mão. Ele pode estar vestido, aplicado no rosto/corpo/cabelo, sendo usado, testado, montado, instalado, apoiado em uma superfície, movimentado, aberto, fechado, conectado ou demonstrado de qualquer outra forma visível e coerente. Roupas, maquiagem, perfume, brinquedos e utensílios de cozinha são apenas exemplos; a análise deve aceitar qualquer produto e qualquer modo real de interação.
+
+- Descreva somente o estado visual: enquadramento, câmera, corpo, pose, expressão, olhar, modo de interação com o produto, estado do produto, localização, contato com corpo ou superfície, mãos quando relevantes, partes do corpo ativas, orientação, iluminação e elementos presentes.
+- "product_interaction_mode": descreva como o produto aparece na foto, por exemplo vestido, aplicado, segurado, em uso, apoiado, montado ou instalado. Não escolha um exemplo se a imagem mostrar outra forma.
+- "product_state": estado objetivo do produto no frame, como aberto/fechado, ligado/desligado, vestido, parcialmente aplicado, em funcionamento ou estático, somente quando visível.
+- "product_location": onde o produto está no frame, sem presumir mão.
+- "body_contact": relação visível com corpo, cabelo, rosto, mãos, superfície, outro objeto ou ambiente.
+- "hands_state": descreva as duas mãos apenas quando estiverem visíveis ou relevantes. Não invente mão livre e não force o produto para uma mão.
+- "active_body_parts": partes do corpo realmente envolvidas na demonstração.
+- "packaging_or_brand_visibility": embalagem, marca ou rótulo somente quando existirem e estiverem visíveis. Produtos como roupas e utensílios podem não ter embalagem ou rótulo aparente.
 - Quando algo não estiver claramente visível, escreva exatamente: "${NAO_DETERMINADO}".
-- Proibido inventar: texto do rótulo, cores escondidas, parte traseira da embalagem, mecanismo, tampa, aplicador, textura, quantidade, tamanho real ou conteúdo interno.
+- Proibido inventar: texto, marca, cores escondidas, parte traseira, mecanismo, componentes, textura, quantidade, tamanho real ou conteúdo interno.
 - Não descreva benefícios, características comerciais nem finalidade do produto: isso vem da página de vendas.
-- "safe_movements": movimentos naturais possíveis a partir desta pose.
-- "continuity_risks": movimentos que quebrariam a continuidade visual (ex.: trocar a mão que segura o produto).
+- "safe_movements": movimentos naturais possíveis a partir do estado real da foto e do modo de interação observado.
+- "continuity_risks": mudanças que quebrariam a continuidade, como trocar a peça vestida, remover maquiagem aplicada, mudar o utensílio de lugar sem transição, trocar uma mão quando o produto realmente estiver sendo segurado ou alterar o estado do produto sem ação visível.
 - Responda em português do Brasil.`;
 
 function limpar(bruto: any): AnaliseVisual {
@@ -61,7 +76,12 @@ function limpar(bruto: any): AnaliseVisual {
     const valor = String(bruto?.[campo] ?? "").trim();
     saida[campo] = valor || NAO_DETERMINADO;
   }
-  for (const lista of ["visible_elements", "safe_movements", "continuity_risks"] as const) {
+  for (const lista of [
+    "active_body_parts",
+    "visible_elements",
+    "safe_movements",
+    "continuity_risks",
+  ] as const) {
     saida[lista] = Array.isArray(bruto?.[lista])
       ? bruto[lista]
           .map((i: any) => String(i).trim())
@@ -95,7 +115,7 @@ export async function lerFoto(url: string): Promise<AnaliseVisual> {
         content: [
           {
             type: "text",
-            text: "Analise o estado visual inicial desta foto. Só registre o que está visível.",
+            text: "Analise o estado visual inicial desta foto. Identifique como o produto realmente aparece e está sendo usado ou demonstrado, sem presumir que esteja na mão. Só registre o que está visível.",
           },
           { type: "image", image: bytes, mediaType: tipo },
         ],
