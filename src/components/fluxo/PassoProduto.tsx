@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { analisarProdutoTikTok } from "@/lib/fluxo.functions";
-import { atualizar, criar, enviarArquivo } from "@/lib/queries";
+import { atualizar, criar } from "@/lib/queries";
 import { cn } from "@/lib/utils";
 import { linkTikTokValido } from "@/lib/config";
 
@@ -69,7 +69,6 @@ export function PassoProduto({
     tiktok_region: produto?.tiktok_region ?? "",
   });
   const [aviso, setAviso] = useState<string | null>(null);
-  const [descricaoColada, setDescricaoColada] = useState<string>(produto?.descricao_colada ?? "");
   const [editando, setEditando] = useState(false);
 
   function montar(p: ProdutoFluxo | null) {
@@ -125,19 +124,6 @@ export function PassoProduto({
     }
   }
 
-  async function subirImagens(files: FileList | null) {
-    if (!files?.length) return;
-    try {
-      const urls: string[] = [];
-      for (const f of Array.from(files).slice(0, 10)) urls.push(await enviarArquivo("produtos", f));
-      setImagens((a) => [...a, ...urls]);
-      setPrincipal((p) => p || urls[0]);
-      toast.success("Imagens enviadas.");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Falha ao enviar imagens.");
-    }
-  }
-
   async function confirmar() {
     if (!valores.nome?.trim()) return toast.error("Informe pelo menos o nome do produto.");
     setSalvando(true);
@@ -152,7 +138,6 @@ export function PassoProduto({
         last_analyzed_at: new Date().toISOString(),
         imagens,
         imagem_principal: principal || imagens[0] || null,
-        descricao_colada: descricaoColada.trim() || null,
         origem_dados: origem,
         status_extracao: aviso ? "parcial" : "tiktok_shop",
       };
@@ -196,40 +181,14 @@ export function PassoProduto({
           </p>
         ) : null}
         {aviso ? (
-          <div className="mt-4 space-y-3 rounded-xl border border-border bg-secondary/40 p-4 text-sm">
-            <p className="text-muted-foreground">{aviso}</p>
-            <Textarea
-              value={descricaoColada}
-              onChange={(e) => setDescricaoColada(e.target.value)}
-              placeholder="Cole aqui a descrição da página do produto"
-              rows={5}
-            />
-            <div>
-              <p className="mb-2 text-xs text-muted-foreground">
-                Envie até 10 capturas ou imagens do produto
-              </p>
-              <Input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={(e) => subirImagens(e.target.files)}
-              />
-            </div>
-          </div>
+          <p className="mt-4 rounded-xl border border-border bg-secondary/40 p-4 text-sm text-muted-foreground">
+            {aviso}
+          </p>
         ) : null}
       </section>
 
       <section className="surface p-4 sm:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold">Imagens do produto</h2>
-          <Input
-            type="file"
-            accept="image/*"
-            multiple
-            className="w-auto"
-            onChange={(e) => subirImagens(e.target.files)}
-          />
-        </div>
+        <h2 className="text-lg font-semibold">Imagens do produto</h2>
         {imagens.length ? (
           <div className="mt-4 grid grid-cols-2 gap-3 min-[420px]:grid-cols-3 sm:grid-cols-5">
             {imagens.map((url) => (
@@ -277,7 +236,7 @@ export function PassoProduto({
           </div>
         ) : (
           <p className="mt-3 text-sm text-muted-foreground">
-            Nenhuma imagem ainda. Analise o link ou envie as imagens manualmente.
+            Nenhuma imagem ainda. Analise o link do produto.
           </p>
         )}
         {imagens.length ? (
@@ -294,7 +253,7 @@ export function PassoProduto({
             <h2 className="text-lg font-semibold">{valores.nome?.trim() || "Dados do produto"}</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               {[valores.marca, valores.categoria, valores.preco].filter(Boolean).join(" · ") ||
-                "Analise o link ou preencha os dados manualmente."}
+                "Analise o link do produto do TikTok Shop."}
             </p>
             <p className="mt-1 text-xs text-muted-foreground/80">
               {CAMPOS.filter((c) => valores[c.id]?.trim()).length} de {CAMPOS.length} campos

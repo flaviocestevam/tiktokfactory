@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Link2, Loader2, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
-import { extrairProduto } from "@/lib/produtos.functions";
+import { analisarProduto } from "@/lib/produtos.functions";
 import { enviarArquivo } from "@/lib/queries";
 import { AreaField, TextField } from "@/components/Field";
 import { Button } from "@/components/ui/button";
@@ -55,7 +55,7 @@ export function ProductForm({
   salvando: boolean;
   rotuloSalvar?: string;
 }) {
-  const extrair = useServerFn(extrairProduto);
+  const extrair = useServerFn(analisarProduto);
   const [extraindo, setExtraindo] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);

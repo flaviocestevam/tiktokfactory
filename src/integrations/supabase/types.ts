@@ -408,11 +408,14 @@ export type Database = {
           advertencias: string | null
           avaliacoes: string | null
           beneficios: string | null
+          canonical_tiktok_url: string | null
           caracteristicas: string | null
           categoria: string | null
           cores: string | null
           created_at: string
           cupom: string | null
+          currency_code: string | null
+          currency_symbol: string | null
           dados_adicionais: string | null
           dados_extraidos: Json
           desconto: string | null
@@ -421,12 +424,18 @@ export type Database = {
           diferenciais: string | null
           duvidas_frequentes: string | null
           entrega: string | null
+          extraction_attempts: number
+          extraction_error_code: string | null
+          extraction_method: string | null
+          extraction_status: string | null
+          fetch_tiktok_url: string | null
           frete: string | null
           garantias: string | null
           id: string
           imagem_principal: string | null
           imagens: Json
           imagens_enviadas: Json
+          images_downloaded_at: string | null
           informacoes_tecnicas: string | null
           ingredientes: string | null
           last_analyzed_at: string | null
@@ -434,18 +443,25 @@ export type Database = {
           marca: string | null
           modo_de_uso: string | null
           nome: string
+          normalized_product_data: Json
           numero_avaliacoes: string | null
           oferta: string | null
           origem_dados: Json
+          original_product_data: Json
           original_tiktok_url: string | null
           preco: string | null
           preco_promocional: string | null
           publico: string | null
           quantidade_vendida: string | null
+          redirected_tiktok_url: string | null
           resolved_tiktok_url: string | null
           restricoes: string | null
+          source_language: string | null
+          source_locale: string | null
           status_extracao: string
           tamanho: string | null
+          tiktok_country_code: string | null
+          tiktok_market: string | null
           tiktok_product_id: string | null
           tiktok_region: string | null
           updated_at: string
@@ -456,11 +472,14 @@ export type Database = {
           advertencias?: string | null
           avaliacoes?: string | null
           beneficios?: string | null
+          canonical_tiktok_url?: string | null
           caracteristicas?: string | null
           categoria?: string | null
           cores?: string | null
           created_at?: string
           cupom?: string | null
+          currency_code?: string | null
+          currency_symbol?: string | null
           dados_adicionais?: string | null
           dados_extraidos?: Json
           desconto?: string | null
@@ -469,12 +488,18 @@ export type Database = {
           diferenciais?: string | null
           duvidas_frequentes?: string | null
           entrega?: string | null
+          extraction_attempts?: number
+          extraction_error_code?: string | null
+          extraction_method?: string | null
+          extraction_status?: string | null
+          fetch_tiktok_url?: string | null
           frete?: string | null
           garantias?: string | null
           id?: string
           imagem_principal?: string | null
           imagens?: Json
           imagens_enviadas?: Json
+          images_downloaded_at?: string | null
           informacoes_tecnicas?: string | null
           ingredientes?: string | null
           last_analyzed_at?: string | null
@@ -482,18 +507,25 @@ export type Database = {
           marca?: string | null
           modo_de_uso?: string | null
           nome: string
+          normalized_product_data?: Json
           numero_avaliacoes?: string | null
           oferta?: string | null
           origem_dados?: Json
+          original_product_data?: Json
           original_tiktok_url?: string | null
           preco?: string | null
           preco_promocional?: string | null
           publico?: string | null
           quantidade_vendida?: string | null
+          redirected_tiktok_url?: string | null
           resolved_tiktok_url?: string | null
           restricoes?: string | null
+          source_language?: string | null
+          source_locale?: string | null
           status_extracao?: string
           tamanho?: string | null
+          tiktok_country_code?: string | null
+          tiktok_market?: string | null
           tiktok_product_id?: string | null
           tiktok_region?: string | null
           updated_at?: string
@@ -504,11 +536,14 @@ export type Database = {
           advertencias?: string | null
           avaliacoes?: string | null
           beneficios?: string | null
+          canonical_tiktok_url?: string | null
           caracteristicas?: string | null
           categoria?: string | null
           cores?: string | null
           created_at?: string
           cupom?: string | null
+          currency_code?: string | null
+          currency_symbol?: string | null
           dados_adicionais?: string | null
           dados_extraidos?: Json
           desconto?: string | null
@@ -517,12 +552,18 @@ export type Database = {
           diferenciais?: string | null
           duvidas_frequentes?: string | null
           entrega?: string | null
+          extraction_attempts?: number
+          extraction_error_code?: string | null
+          extraction_method?: string | null
+          extraction_status?: string | null
+          fetch_tiktok_url?: string | null
           frete?: string | null
           garantias?: string | null
           id?: string
           imagem_principal?: string | null
           imagens?: Json
           imagens_enviadas?: Json
+          images_downloaded_at?: string | null
           informacoes_tecnicas?: string | null
           ingredientes?: string | null
           last_analyzed_at?: string | null
@@ -530,18 +571,25 @@ export type Database = {
           marca?: string | null
           modo_de_uso?: string | null
           nome?: string
+          normalized_product_data?: Json
           numero_avaliacoes?: string | null
           oferta?: string | null
           origem_dados?: Json
+          original_product_data?: Json
           original_tiktok_url?: string | null
           preco?: string | null
           preco_promocional?: string | null
           publico?: string | null
           quantidade_vendida?: string | null
+          redirected_tiktok_url?: string | null
           resolved_tiktok_url?: string | null
           restricoes?: string | null
+          source_language?: string | null
+          source_locale?: string | null
           status_extracao?: string
           tamanho?: string | null
+          tiktok_country_code?: string | null
+          tiktok_market?: string | null
           tiktok_product_id?: string | null
           tiktok_region?: string | null
           updated_at?: string

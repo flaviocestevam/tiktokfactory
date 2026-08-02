@@ -52,12 +52,16 @@ export const ROTULO_STATUS: Record<string, string> = {
 export const IDIOMA_FALA = "português do Brasil";
 export const FORMATO_VIDEO = "9:16 vertical";
 
-export const HOSTS_TIKTOK = ["shop.tiktok.com", "tiktok.com", "www.tiktok.com", "vt.tiktok.com"];
+/** Domínios raiz oficiais do TikTok. Qualquer subdomínio regional é aceito. */
+export const DOMINIOS_RAIZ_TIKTOK = ["tiktok.com"];
 
+/** Aceita qualquer link https de um domínio oficial do TikTok, de qualquer país. */
 export function linkTikTokValido(url: string) {
   try {
-    const host = new URL(url.trim()).hostname.toLowerCase();
-    return HOSTS_TIKTOK.some((h) => host === h || host.endsWith(`.${h}`));
+    const u = new URL(url.trim());
+    if (u.protocol !== "https:") return false;
+    const host = u.hostname.toLowerCase();
+    return DOMINIOS_RAIZ_TIKTOK.some((raiz) => host === raiz || host.endsWith(`.${raiz}`));
   } catch {
     return false;
   }

@@ -1,10 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { extrairPagina } from "./generation.server";
+import { analisarProdutoTikTokShop } from "./tiktok.server";
 
-/** Le uma pagina de venda e devolve os dados encontrados, sem inventar nada. */
-export const extrairProduto = createServerFn({ method: "POST" })
-  .inputValidator((i: unknown) =>
-    z.object({ url: z.string().url("Informe um link válido.") }).parse(i),
-  )
-  .handler(async ({ data }) => extrairPagina(data.url));
+/** Motor único: qualquer link de produto do TikTok Shop, de qualquer país. */
+export const analisarProduto = createServerFn({ method: "POST" })
+  .inputValidator((i: unknown) => z.object({ url: z.string().min(8).max(2000) }).parse(i))
+  .handler(async ({ data }) => analisarProdutoTikTokShop(data.url));
