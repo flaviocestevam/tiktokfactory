@@ -10,7 +10,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { editarRoteiroTexto, regerarRoteiroVariante } from "@/lib/fluxo.functions";
 
 const AJUSTES = [
-  { label: "MAIS CURTO", instrucao: "Reduza a fala para caber com folga na duração alvo." },
+  {
+    label: "MAIS CURTO",
+    instrucao:
+      "Reduza a fala mantendo a ideia principal, para que cada trecho caiba naturalmente em clipes de 4, 6, 8 ou 10 segundos.",
+  },
   {
     label: "MAIS PERSUASIVO",
     instrucao: "Aumente a persuasão sem inventar informações que não estejam no produto.",
@@ -120,7 +124,7 @@ function CardRoteiro({
       await editarRoteiroTexto({ data: { projectId, scriptId: s.id, campos: rascunho } });
       setEditando(false);
       onAtualizar();
-      toast.success("Roteiro salvo.");
+      toast.success("Roteiro salvo e duração recalculada.");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Falha ao salvar o roteiro.");
     } finally {
