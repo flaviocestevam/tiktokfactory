@@ -21,6 +21,12 @@ const AJUSTES = [
     instrucao: "Deixe a cena mais espontânea, com pose e expressão menos posadas.",
   },
   {
+    id: "composicao",
+    label: "OUTRA COMPOSIÇÃO",
+    instrucao:
+      "Crie uma composição diferente, mantendo exatamente a mesma identidade da personagem e a mesma aparência do produto.",
+  },
+  {
     id: "enquadramento",
     label: "AJUSTAR ENQUADRAMENTO",
     instrucao:
@@ -120,6 +126,11 @@ export function PassoFoto({
             </Button>
           </div>
         </div>
+
+        <p className="mt-2 text-xs text-muted-foreground">
+          Ao gerar a foto, anexe DUAS imagens: a imagem principal da personagem (só identidade) e a
+          imagem do produto (só aparência do produto). Roupa, pose, fundo e iluminação ficam livres.
+        </p>
 
         {prompt ? (
           <pre className="mt-4 whitespace-pre-wrap break-words rounded-xl border border-border bg-secondary/40 p-4 text-sm leading-relaxed">
