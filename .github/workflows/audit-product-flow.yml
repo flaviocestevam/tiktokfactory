@@ -79,22 +79,30 @@ jobs:
     needs: build
     if: always()
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     continue-on-error: true
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Wait for Lovable sync and test Apify
+      - name: Test live and preview deployments
         shell: bash
         run: |
           set -u
-          URL="https://tiktokfactory.lovable.app/api/public/tiktok-diagnostic"
+          PROJECT="ebb821a3-43ea-4852-994f-a202351aebcc"
+          PATH_DIAGNOSTIC="/api/public/tiktok-diagnostic"
           rm -f diagnostic.json
 
-          for attempt in $(seq 1 2); do
-            echo "Tentativa ${attempt}/2"
+          urls=(
+            "https://id-preview-f2439d57--${PROJECT}.lovable.app${PATH_DIAGNOSTIC}"
+            "https://id-preview-ba0f4ea5--${PROJECT}.lovable.app${PATH_DIAGNOSTIC}"
+            "https://id-preview-413b29e5--${PROJECT}.lovable.app${PATH_DIAGNOSTIC}"
+            "https://tiktokfactory.lovable.app${PATH_DIAGNOSTIC}"
+          )
+
+          for URL in "${urls[@]}"; do
+            echo "TESTANDO_URL=${URL}"
             http_code=$(curl \
               --silent \
               --show-error \
@@ -104,13 +112,10 @@ jobs:
               --write-out "%{http_code}" \
               "$URL" || true)
 
-            echo "HTTP ${http_code}"
-            if [ -f diagnostic.json ]; then
+            echo "HTTP=${http_code}"
+            if [ "$http_code" = "200" ]; then
               cat diagnostic.json
               echo
-            fi
-
-            if [ "$http_code" = "200" ]; then
               node - <<'NODE'
           const fs = require('fs');
           const data = JSON.parse(fs.readFileSync('diagnostic.json', 'utf8'));
@@ -118,6 +123,8 @@ jobs:
             ambiente: data.ambiente,
             ok: data.resultado?.ok,
             status: data.resultado?.status,
+            mensagem: data.resultado?.mensagem,
+            detalhe: data.resultado?.detalhe,
             fonte: data.resultado?.fonte,
             product_id: data.resultado?.product_id,
             region: data.resultado?.region,
@@ -130,10 +137,12 @@ jobs:
               exit $?
             fi
 
-            sleep 10
+            echo "RESPOSTA_PARCIAL:"
+            head -c 1200 diagnostic.json 2>/dev/null || true
+            echo
           done
 
-          echo "O endpoint de diagnóstico não respondeu dentro da janela curta."
+          echo "Nenhuma implantação contém o endpoint de diagnóstico."
           exit 1
 
       - name: Record diagnostic result
