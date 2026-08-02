@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// Leitura da página com navegador renderizado (Chromium remoto), com alternativas.
+// Leitura da página com navegador renderizado, com alternativas automáticas.
 import type { LeituraPagina, RespostaRede } from "./types";
 import { UA_NAVEGADOR } from "./resolve-url.server";
 import { PADROES_REDE_PRODUTO } from "./network-capture.server";
@@ -8,16 +8,52 @@ export type OpcoesLeitura = {
   locale?: string | null;
   country?: string | null;
   timezone?: string | null;
+  productId?: string | null;
   rolar?: boolean;
   esperaMs?: number;
   timeoutMs?: number;
 };
 
 const LIMITE_CORPO = 120_000;
+const BLOQUEIO =
+  /captcha|verify (that )?you are human|slide to verify|access denied|login to continue|sign up to continue|not available in your (region|country)|region not supported/i;
 
 function endpointFuncao(base: string) {
   const limpo = base.replace(/\/+$/, "");
   return limpo.endsWith("/function") ? limpo : `${limpo}/function`;
+}
+
+function escaparHtml(texto: string) {
+  return texto
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function pontuarLeitura(leitura: LeituraPagina, productId?: string | null) {
+  const html = leitura.html ?? "";
+  const rede = leitura.rede.map((r) => r.corpo).join("\n");
+  const bruto = `${html.slice(0, 180_000)}\n${rede.slice(0, 120_000)}`;
+  const baixo = bruto.toLowerCase();
+  let pontos = 0;
+
+  if (leitura.status && leitura.status >= 200 && leitura.status < 400) pontos += 1;
+  if (productId && bruto.includes(productId)) pontos += 12;
+  if (leitura.rede.length) pontos += 6;
+  if (/application\/ld\+json/i.test(html) && /"@type"\s*:\s*"product"/i.test(html)) pontos += 6;
+  if (/"product_id"|"productId"|"product_base"|"sku_list"|"skus"/i.test(bruto)) pontos += 4;
+  if (/og:title|<h1|"title"\s*:/i.test(html)) pontos += 2;
+  if (/price|preço|currency|moeda|r\$|\$|£|€|฿|rp\.?/i.test(baixo)) pontos += 2;
+  if (/seller|vendedor|merchant|loja|shop_name/i.test(baixo)) pontos += 1;
+  if (html.length > 1_500) pontos += 1;
+  if (BLOQUEIO.test(bruto)) pontos -= 20;
+
+  return pontos;
+}
+
+function leituraUtil(leitura: LeituraPagina | null, productId?: string | null) {
+  return Boolean(leitura && pontuarLeitura(leitura, productId) >= 6);
 }
 
 /** Script executado dentro do Chromium remoto (Playwright/Browserless). */
@@ -47,10 +83,6 @@ export default async function ({ page, context }) {
       await page.evaluate(() => window.scrollBy(0, window.innerHeight));
       await page.waitForTimeout(700);
     }
-    try {
-      const botoes = await page.$$('button, [role="button"]');
-      for (const b of botoes.slice(0, 12)) { try { await b.click({ timeout: 800 }); } catch (_) {} }
-    } catch (_) {}
     try { await page.waitForLoadState('networkidle', { timeout: 10000 }); } catch (_) {}
   }
   if (esperaMs) await page.waitForTimeout(esperaMs);
@@ -113,7 +145,7 @@ async function lerComNavegadorRemoto(
   }
 }
 
-/** Leitor renderizado secundário. */
+/** Leitor renderizado secundário configurável. */
 async function lerComFirecrawl(url: string, op: OpcoesLeitura): Promise<LeituraPagina | null> {
   const key = process.env["FIRECRAWL_API_KEY"];
   if (!key) return null;
@@ -125,7 +157,7 @@ async function lerComFirecrawl(url: string, op: OpcoesLeitura): Promise<LeituraP
         url,
         formats: ["rawHtml", "markdown"],
         onlyMainContent: false,
-        waitFor: 6000,
+        waitFor: Math.max(6000, op.esperaMs ?? 0),
         headers: op.locale ? { "Accept-Language": op.locale } : undefined,
       }),
       signal: AbortSignal.timeout(op.timeoutMs ?? 90_000),
@@ -142,12 +174,56 @@ async function lerComFirecrawl(url: string, op: OpcoesLeitura): Promise<LeituraP
       motor: "firecrawl",
       final_url: json?.data?.metadata?.sourceURL ?? url,
       status: json?.data?.metadata?.statusCode ?? null,
-      html: html || `<body>${markdown}</body>`,
+      html: html || `<body><pre>${escaparHtml(markdown)}</pre></body>`,
       rede: [],
       erro: null,
     };
   } catch (e) {
     console.error("[tiktok] erro no firecrawl:", e instanceof Error ? e.message : e);
+    return null;
+  }
+}
+
+/**
+ * Fallback renderizado que funciona sem secret obrigatório.
+ * Uma JINA_API_KEY opcional aumenta o limite, mas o modo anônimo continua disponível.
+ */
+async function lerComJina(url: string, op: OpcoesLeitura): Promise<LeituraPagina | null> {
+  const key = process.env["JINA_API_KEY"];
+  const alvo = `https://r.jina.ai/${url}`;
+  const timeoutSegundos = Math.max(20, Math.min(120, Math.ceil((op.timeoutMs ?? 90_000) / 1000)));
+
+  try {
+    const res = await fetch(alvo, {
+      method: "GET",
+      headers: {
+        Accept: "text/plain",
+        "X-Engine": "browser",
+        "X-No-Cache": "true",
+        "X-Respond-With": "markdown",
+        "X-Respond-Timing": "network-idle",
+        "X-Timeout": String(timeoutSegundos),
+        "X-Max-Tokens": "24000",
+        ...(op.locale ? { "Accept-Language": op.locale } : {}),
+        ...(key ? { Authorization: `Bearer ${key}` } : {}),
+      },
+      signal: AbortSignal.timeout(op.timeoutMs ?? 90_000),
+    });
+    const texto = await res.text();
+    if (!res.ok || texto.trim().length < 80) {
+      console.error(`[tiktok] jina falhou [${res.status}]: ${texto.slice(0, 300)}`);
+      return null;
+    }
+    return {
+      motor: "jina",
+      final_url: url,
+      status: res.status,
+      html: `<body><pre>${escaparHtml(texto)}</pre></body>`,
+      rede: [],
+      erro: null,
+    };
+  } catch (e) {
+    console.error("[tiktok] erro no jina:", e instanceof Error ? e.message : e);
     return null;
   }
 }
@@ -159,9 +235,11 @@ async function lerComFetch(url: string, op: OpcoesLeitura): Promise<LeituraPagin
         "User-Agent": UA_NAVEGADOR,
         Accept: "text/html,application/xhtml+xml",
         "Accept-Language": op.locale ? `${op.locale},en;q=0.8` : "en-US,en;q=0.9",
+        Referer: "https://www.tiktok.com/",
+        "Cache-Control": "no-cache",
       },
       redirect: "follow",
-      signal: AbortSignal.timeout(op.timeoutMs ?? 20_000),
+      signal: AbortSignal.timeout(Math.min(op.timeoutMs ?? 20_000, 45_000)),
     });
     const html = res.ok ? await res.text() : "";
     return {
@@ -184,15 +262,39 @@ async function lerComFetch(url: string, op: OpcoesLeitura): Promise<LeituraPagin
   }
 }
 
-/** Motor principal: navegador renderizado; alternativas só quando ele não está disponível. */
+/**
+ * Tenta todos os leitores necessários e escolhe conteúdo de produto, não apenas o HTML mais longo.
+ */
 export async function lerPagina(url: string, op: OpcoesLeitura = {}): Promise<LeituraPagina> {
+  const candidatos: LeituraPagina[] = [];
+
   const remoto = await lerComNavegadorRemoto(url, op);
-  if (remoto && (remoto.html.length > 500 || remoto.rede.length)) return remoto;
+  if (remoto) {
+    candidatos.push(remoto);
+    if (leituraUtil(remoto, op.productId)) return remoto;
+  }
+
   const fire = await lerComFirecrawl(url, op);
-  if (fire && fire.html.length > 500) return fire;
-  return remoto ?? fire ?? (await lerComFetch(url, op));
+  if (fire) {
+    candidatos.push(fire);
+    if (leituraUtil(fire, op.productId)) return fire;
+  }
+
+  const jina = await lerComJina(url, op);
+  if (jina) {
+    candidatos.push(jina);
+    if (leituraUtil(jina, op.productId)) return jina;
+  }
+
+  const direto = await lerComFetch(url, op);
+  candidatos.push(direto);
+
+  return candidatos.sort(
+    (a, b) => pontuarLeitura(b, op.productId) - pontuarLeitura(a, op.productId),
+  )[0];
 }
 
 export function navegadorRenderizadoDisponivel() {
-  return Boolean(process.env["BROWSER_SERVICE_URL"] || process.env["FIRECRAWL_API_KEY"]);
+  // Jina funciona em modo anônimo; secrets apenas aumentam robustez/limite.
+  return true;
 }
