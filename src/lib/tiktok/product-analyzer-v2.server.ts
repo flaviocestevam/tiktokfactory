@@ -124,6 +124,9 @@ export async function analisarProdutoTikTokShop(entrada: string): Promise<Result
       if (String(dados[campo] ?? "").trim()) origem[campo] = "tiktok_shop";
     }
 
+    const productIdFinal = link.product_id ?? (idRetornado || null);
+    const countryFinal = link.country_code ?? (pais || null);
+
     return {
       ok: true,
       status: "success",
@@ -139,15 +142,15 @@ export async function analisarProdutoTikTokShop(entrada: string): Promise<Result
       imagens: [],
       link: {
         ...link,
-        product_id: link.product_id ?? idRetornado || null,
-        country_code: link.country_code ?? pais || null,
-        market: link.market ?? pais || null,
+        product_id: productIdFinal,
+        country_code: countryFinal,
+        market: link.market ?? countryFinal,
         source_language: link.source_language ?? idioma,
       },
       original_tiktok_url: link.original_url,
       resolved_tiktok_url: link.redirected_url,
-      tiktok_product_id: link.product_id ?? idRetornado || null,
-      tiktok_region: link.country_code ?? pais || null,
+      tiktok_product_id: productIdFinal,
+      tiktok_region: countryFinal,
     };
   } catch (e) {
     console.error(
