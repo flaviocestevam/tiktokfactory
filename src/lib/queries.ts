@@ -4,6 +4,7 @@ import {
   contarRegistros,
   criarRegistro,
   enviarImagem,
+  excluirImagem,
   excluirRegistro,
   listarRegistros,
   obterRegistro,
@@ -19,6 +20,13 @@ type Tabela =
   | "image_prompts"
   | "video_prompts"
   | "version_history";
+
+type Bucket = "produtos" | "personagens";
+
+export type ArquivoEnviado = {
+  caminho: string;
+  url: string;
+};
 
 export async function listar<T extends Tabela>(
   tabela: T,
@@ -59,12 +67,25 @@ export async function excluir(tabela: Tabela, id: string) {
   await excluirRegistro({ data: { tabela, id } });
 }
 
-export async function enviarArquivo(bucket: "produtos" | "personagens", arquivo: File) {
+export async function enviarArquivoDetalhado(
+  bucket: Bucket,
+  arquivo: File,
+): Promise<ArquivoEnviado> {
   const base64 = await arquivoParaBase64(arquivo);
   const res = await enviarImagem({
     data: { bucket, nome: arquivo.name, tipo: arquivo.type || "image/jpeg", base64 },
   });
-  return res.url;
+  return { caminho: res.caminho, url: res.url };
+}
+
+/** Compatibilidade com telas que precisam apenas da URL assinada. */
+export async function enviarArquivo(bucket: Bucket, arquivo: File) {
+  return (await enviarArquivoDetalhado(bucket, arquivo)).url;
+}
+
+export async function removerArquivo(bucket: Bucket, caminho: string) {
+  if (!caminho.trim()) return { ok: true };
+  return excluirImagem({ data: { bucket, caminho } });
 }
 
 function arquivoParaBase64(arquivo: File): Promise<string> {
