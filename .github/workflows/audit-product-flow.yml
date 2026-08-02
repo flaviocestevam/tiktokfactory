@@ -1,0 +1,36 @@
+name: Audit TikTok Product Flow
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "scripts/audit-product-flow.ts"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/audit-product-flow.yml"
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build application
+        run: npm run build
+
+      - name: Test real TikTok Shop product
+        run: npx --yes tsx scripts/audit-product-flow.ts
