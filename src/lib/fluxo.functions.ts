@@ -12,7 +12,7 @@ import {
   editarRoteiroManual,
   regerarClipe,
   regerarRoteiro,
-} from "./fluxo.persist.server";
+} from "./fluxo.hardened.server";
 
 export const analisarProdutoTikTok = createServerFn({ method: "POST" })
   .validator((i: unknown) => z.object({ url: z.string().min(8).max(2000) }).parse(i))
