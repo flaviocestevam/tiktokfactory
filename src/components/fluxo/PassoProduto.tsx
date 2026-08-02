@@ -1,17 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
-import { ChevronDown, Loader2, Search, Star, X } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { analisarProdutoTikTok } from "@/lib/fluxo.functions";
 import { atualizar, criar } from "@/lib/queries";
-import { cn } from "@/lib/utils";
 import { linkTikTokValido } from "@/lib/config";
+import {
+  CAMPOS_PRODUTO,
+  OFERTA_VAZIA,
+  type DadosProduto,
+  type Oferta,
+  type ResultadoAnalise,
+} from "@/lib/tiktok/types";
 
-const CAMPOS: Array<{ id: string; label: string; longo?: boolean }> = [
+const CAMPOS_EXIBICAO: Array<{ id: keyof DadosProduto; label: string; longo?: boolean }> = [
   { id: "nome", label: "Nome" },
   { id: "marca", label: "Marca" },
   { id: "vendedor", label: "Vendedor" },
@@ -24,9 +29,9 @@ const CAMPOS: Array<{ id: string; label: string; longo?: boolean }> = [
   { id: "avaliacoes", label: "Avaliação" },
   { id: "numero_avaliacoes", label: "Nº de avaliações" },
   { id: "quantidade_vendida", label: "Quantidade vendida" },
+  { id: "variacoes", label: "Variações" },
   { id: "tamanho", label: "Tamanho" },
   { id: "cores", label: "Cores" },
-  { id: "variacoes", label: "Variações" },
   { id: "publico", label: "Público indicado" },
   { id: "descricao", label: "Descrição", longo: true },
   { id: "beneficios", label: "Benefícios informados", longo: true },
@@ -34,15 +39,48 @@ const CAMPOS: Array<{ id: string; label: string; longo?: boolean }> = [
   { id: "ingredientes", label: "Ingredientes", longo: true },
   { id: "modo_de_uso", label: "Modo de uso", longo: true },
   { id: "informacoes_tecnicas", label: "Informações técnicas", longo: true },
-  { id: "duvidas_frequentes", label: "Perguntas frequentes", longo: true },
   { id: "advertencias", label: "Advertências", longo: true },
   { id: "restricoes", label: "Restrições", longo: true },
   { id: "diferenciais", label: "Diferenciais", longo: true },
   { id: "garantias", label: "Garantias", longo: true },
-  { id: "oferta", label: "Informações da oferta", longo: true },
 ];
 
 export type ProdutoFluxo = Record<string, any>;
+
+type Diagnostico = {
+  status: string;
+  fonte: string;
+  tentativas: number;
+  mensagem: string;
+  detalhe: string;
+  productId: string;
+  regiao: string;
+};
+
+function montarDados(origem: Record<string, unknown> | null | undefined): DadosProduto {
+  const dados: DadosProduto = {};
+  for (const campo of CAMPOS_PRODUTO) {
+    const valor = String(origem?.[campo] ?? "").trim();
+    if (valor) dados[campo] = valor;
+  }
+  return dados;
+}
+
+function mensagemFalha(resultado: ResultadoAnalise) {
+  if (resultado.status === "blocked") {
+    return "O TikTok bloqueou a leitura com uma verificação de segurança. O produto não foi liberado para evitar dados incompletos.";
+  }
+  if (resultado.status === "unavailable") {
+    return "O produto está indisponível, removido ou restrito para a região informada.";
+  }
+  if (resultado.status === "invalid_product") {
+    return "O link abriu uma página que não corresponde ao produto informado.";
+  }
+  if (resultado.status === "partial") {
+    return "A leitura retornou dados insuficientes. Nenhum produto parcial pode seguir para a produção.";
+  }
+  return resultado.detalhe || resultado.mensagem || "Não foi possível ler o produto.";
+}
 
 export function PassoProduto({
   produto,
@@ -53,86 +91,149 @@ export function PassoProduto({
   onProdutoSalvo: (produto: ProdutoFluxo) => void;
   onContinuar: (produto: ProdutoFluxo) => void;
 }) {
-  const [link, setLink] = useState<string>(produto?.original_tiktok_url ?? "");
+  const produtoJaValidado =
+    produto?.extraction_status === "success" || produto?.status_extracao === "success";
+  const [link, setLink] = useState<string>(
+    produto?.original_tiktok_url ?? produto?.link ?? "",
+  );
   const [analisando, setAnalisando] = useState(false);
   const [salvando, setSalvando] = useState(false);
-  const [valores, setValores] = useState<Record<string, string>>(() => montar(produto));
-  const [origem, setOrigem] = useState<Record<string, string>>(produto?.origem_dados ?? {});
-  const [meta, setMeta] = useState({
-    original_tiktok_url: produto?.original_tiktok_url ?? "",
-    resolved_tiktok_url: produto?.resolved_tiktok_url ?? "",
-    tiktok_product_id: produto?.tiktok_product_id ?? "",
-    tiktok_region: produto?.tiktok_region ?? "",
+  const [valido, setValido] = useState(Boolean(produtoJaValidado));
+  const [resultado, setResultado] = useState<ResultadoAnalise | null>(null);
+  const [dados, setDados] = useState<DadosProduto>(() => montarDados(produto));
+  const [oferta, setOferta] = useState<Oferta>(() => ({
+    ...OFERTA_VAZIA,
+    ...((produto?.normalized_product_data as any)?.oferta ?? {}),
+  }));
+  const [diagnostico, setDiagnostico] = useState<Diagnostico>({
+    status: String(produto?.extraction_status ?? produto?.status_extracao ?? ""),
+    fonte: String(produto?.extraction_method ?? ""),
+    tentativas: Number(produto?.extraction_attempts ?? 0),
+    mensagem: produtoJaValidado ? "Produto validado anteriormente." : "",
+    detalhe: "",
+    productId: String(produto?.tiktok_product_id ?? ""),
+    regiao: String(produto?.tiktok_country_code ?? produto?.tiktok_region ?? ""),
   });
-  const [aviso, setAviso] = useState<string | null>(null);
-  const [editando, setEditando] = useState(false);
-
-  function montar(p: ProdutoFluxo | null) {
-    const v: Record<string, string> = {};
-    for (const c of CAMPOS) v[c.id] = (p?.[c.id] as string) ?? "";
-    return v;
-  }
-
-  function alterar(id: string, valor: string) {
-    setValores((v) => ({ ...v, [id]: valor }));
-    setOrigem((o) => ({
-      ...o,
-      [id]: valor.trim() ? (o[id] === "tiktok_shop" ? "manual" : o[id] || "manual") : "",
-    }));
-  }
 
   async function analisar() {
-    if (!link.trim()) return toast.error("Cole o link do produto do TikTok Shop.");
-    if (!linkTikTokValido(link)) {
+    const entrada = link.trim();
+    if (!entrada) return toast.error("Cole o link do produto do TikTok Shop.");
+    if (!linkTikTokValido(entrada)) {
       return toast.error("Este link não é do TikTok Shop. Cole o link copiado direto do app.");
     }
+
     setAnalisando(true);
-    setAviso(null);
+    setValido(false);
+    setResultado(null);
+    setDados({});
+    setOferta({ ...OFERTA_VAZIA });
+    setDiagnostico({
+      status: "pending",
+      fonte: "",
+      tentativas: 0,
+      mensagem: "Analisando o produto...",
+      detalhe: "",
+      productId: "",
+      regiao: "",
+    });
+
     try {
-      const res = await analisarProdutoTikTok({ data: { url: link.trim() } });
-      setMeta({
-        original_tiktok_url: res.original_tiktok_url,
-        resolved_tiktok_url: res.resolved_tiktok_url,
-        tiktok_product_id: res.tiktok_product_id ?? "",
-        tiktok_region: res.tiktok_region ?? "",
+      const res = (await analisarProdutoTikTok({ data: { url: entrada } })) as ResultadoAnalise;
+      setResultado(res);
+      setDados(montarDados(res.dados));
+      setOferta({ ...OFERTA_VAZIA, ...res.oferta });
+      setValido(Boolean(res.ok));
+      setDiagnostico({
+        status: res.status,
+        fonte: res.fonte,
+        tentativas: res.tentativas,
+        mensagem: res.ok ? "Produto encontrado e validado." : mensagemFalha(res),
+        detalhe: res.detalhe ?? "",
+        productId: res.tiktok_product_id ?? "",
+        regiao: res.tiktok_region ?? "",
       });
-      setValores((v) => {
-        const novo = { ...v };
-        for (const c of CAMPOS) {
-          const lido = (res.dados as any)[c.id];
-          if (typeof lido === "string" && lido.trim()) novo[c.id] = lido.trim();
-        }
-        return novo;
-      });
-      setOrigem((o) => ({ ...o, ...res.origem }));
-      if (!res.ok) setAviso(res.mensagem);
-      toast[res.ok ? "success" : "warning"](res.mensagem);
+      toast[res.ok ? "success" : "warning"](
+        res.ok ? "Produto encontrado e validado." : mensagemFalha(res),
+      );
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Falha ao analisar o link.";
-      setAviso(msg);
-      toast.error(msg);
+      const mensagem = e instanceof Error ? e.message : "Falha ao analisar o link.";
+      setDiagnostico((d) => ({ ...d, status: "failed", mensagem, detalhe: mensagem }));
+      toast.error(mensagem);
     } finally {
       setAnalisando(false);
     }
   }
 
   async function confirmar() {
-    if (!valores.nome?.trim()) return toast.error("Informe pelo menos o nome do produto.");
+    if (!valido) {
+      return toast.error("Analise o produto com sucesso antes de continuar.");
+    }
+
+    const dadosFinais: DadosProduto = { ...(resultado?.dados ?? dados) };
+    const ofertaFinal: Oferta = { ...OFERTA_VAZIA, ...(resultado?.oferta ?? oferta) };
+    if (!dadosFinais.preco) {
+      dadosFinais.preco =
+        ofertaFinal.current_price_formatted || ofertaFinal.current_price_value || undefined;
+    }
+    if (!dadosFinais.preco_promocional) {
+      dadosFinais.preco_promocional =
+        ofertaFinal.original_price_formatted || ofertaFinal.original_price_value || undefined;
+    }
+    if (!dadosFinais.desconto && ofertaFinal.discount_text) {
+      dadosFinais.desconto = ofertaFinal.discount_text;
+    }
+
+    const nome = String(dadosFinais.nome ?? "").trim();
+    if (!nome) return toast.error("A leitura válida precisa conter o nome do produto.");
+
     setSalvando(true);
     try {
-      const payload: Record<string, unknown> = {
-        ...Object.fromEntries(CAMPOS.map((c) => [c.id, valores[c.id]?.trim() || null])),
-        link: meta.original_tiktok_url || link.trim() || null,
-        original_tiktok_url: meta.original_tiktok_url || link.trim() || null,
-        resolved_tiktok_url: meta.resolved_tiktok_url || null,
-        tiktok_product_id: meta.tiktok_product_id || null,
-        tiktok_region: meta.tiktok_region || null,
+      const linkInfo = resultado?.link;
+      const payload: Record<string, unknown> = {};
+      for (const campo of CAMPOS_PRODUTO) {
+        payload[campo] = String(dadosFinais[campo] ?? "").trim() || null;
+      }
+
+      Object.assign(payload, {
+        nome,
+        link: resultado?.original_tiktok_url ?? produto?.link ?? link.trim(),
+        original_tiktok_url:
+          resultado?.original_tiktok_url ?? produto?.original_tiktok_url ?? link.trim(),
+        resolved_tiktok_url:
+          resultado?.resolved_tiktok_url ?? produto?.resolved_tiktok_url ?? null,
+        redirected_tiktok_url:
+          linkInfo?.redirected_url ?? produto?.redirected_tiktok_url ?? null,
+        canonical_tiktok_url:
+          linkInfo?.canonical_url ?? produto?.canonical_tiktok_url ?? null,
+        fetch_tiktok_url: linkInfo?.fetch_url ?? produto?.fetch_tiktok_url ?? null,
+        tiktok_product_id:
+          resultado?.tiktok_product_id ?? produto?.tiktok_product_id ?? null,
+        tiktok_region: resultado?.tiktok_region ?? produto?.tiktok_region ?? null,
+        tiktok_country_code:
+          linkInfo?.country_code ?? produto?.tiktok_country_code ?? produto?.tiktok_region ?? null,
+        tiktok_market: linkInfo?.market ?? produto?.tiktok_market ?? null,
+        source_locale: linkInfo?.locale ?? produto?.source_locale ?? null,
+        source_language: linkInfo?.source_language ?? produto?.source_language ?? null,
+        currency_code: ofertaFinal.currency_code || produto?.currency_code || null,
+        currency_symbol: ofertaFinal.currency_symbol || produto?.currency_symbol || null,
+        normalized_product_data: { produto: dadosFinais, oferta: ofertaFinal },
+        original_product_data:
+          resultado?.dados_originais ?? produto?.original_product_data ?? {},
+        dados_extraidos: resultado?.dados ?? dadosFinais,
+        origem_dados: resultado?.origem ?? produto?.origem_dados ?? {},
+        imagens: resultado?.imagens ?? produto?.imagens ?? [],
+        extraction_status: "success",
+        status_extracao: "success",
+        extraction_attempts:
+          resultado?.tentativas ?? Number(produto?.extraction_attempts ?? 0),
+        extraction_method:
+          resultado?.fonte ?? produto?.extraction_method ?? "cache",
+        extraction_error_code: null,
         last_analyzed_at: new Date().toISOString(),
-        origem_dados: origem,
-        status_extracao: aviso ? "parcial" : "tiktok_shop",
-      };
+      });
+
       const salvo = produto?.id
-        ? await atualizar("products", produto.id as string, payload)
+        ? await atualizar("products", String(produto.id), payload)
         : await criar("products", payload);
       onProdutoSalvo(salvo as ProdutoFluxo);
       onContinuar(salvo as ProdutoFluxo);
@@ -144,14 +245,26 @@ export function PassoProduto({
     }
   }
 
+  const camposPreenchidos = CAMPOS_EXIBICAO.filter((campo) =>
+    String(dados[campo.id] ?? "").trim(),
+  );
+
   return (
     <div className="space-y-6">
       <section className="surface p-4 sm:p-6">
         <h2 className="text-lg font-semibold">Cole o link do produto do TikTok Shop</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Os dados são importados automaticamente. Produtos parciais ou bloqueados não podem avançar.
+        </p>
         <div className="mt-4 flex flex-col gap-3 sm:flex-row">
           <Input
             value={link}
-            onChange={(e) => setLink(e.target.value)}
+            onChange={(e) => {
+              setLink(e.target.value);
+              if (resultado && e.target.value.trim() !== resultado.original_tiktok_url) {
+                setValido(false);
+              }
+            }}
             placeholder="Cole aqui o link copiado do TikTok Shop"
             className="h-11"
           />
@@ -164,77 +277,74 @@ export function PassoProduto({
             ANALISAR PRODUTO
           </Button>
         </div>
-        {meta.tiktok_product_id ? (
-          <p className="mt-3 text-xs text-muted-foreground">
-            ID do produto: {meta.tiktok_product_id}
-            {meta.tiktok_region ? ` · região ${meta.tiktok_region}` : ""}
-          </p>
-        ) : null}
-        {aviso ? (
-          <p className="mt-4 rounded-xl border border-border bg-secondary/40 p-4 text-sm text-muted-foreground">
-            {aviso}
-          </p>
+
+        {diagnostico.status ? (
+          <div className="mt-4 rounded-xl border border-border bg-secondary/40 p-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant={valido ? "default" : "secondary"}>
+                {valido ? "LEITURA VÁLIDA" : diagnostico.status.toUpperCase()}
+              </Badge>
+              {diagnostico.fonte ? (
+                <span className="text-xs text-muted-foreground">Motor: {diagnostico.fonte}</span>
+              ) : null}
+              {diagnostico.tentativas ? (
+                <span className="text-xs text-muted-foreground">
+                  {diagnostico.tentativas} tentativa(s)
+                </span>
+              ) : null}
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">{diagnostico.mensagem}</p>
+            {diagnostico.productId ? (
+              <p className="mt-2 text-xs text-muted-foreground">
+                ID: {diagnostico.productId}
+                {diagnostico.regiao ? ` · região ${diagnostico.regiao}` : ""}
+              </p>
+            ) : null}
+          </div>
         ) : null}
       </section>
 
       <section className="surface p-4 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h2 className="text-lg font-semibold">{valores.nome?.trim() || "Dados do produto"}</h2>
+            <h2 className="text-lg font-semibold">{dados.nome || "Dados do produto"}</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              {[valores.marca, valores.categoria, valores.preco].filter(Boolean).join(" · ") ||
-                "Analise o link do produto do TikTok Shop."}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground/80">
-              {CAMPOS.filter((c) => valores[c.id]?.trim()).length} de {CAMPOS.length} campos
-              preenchidos
+              {[dados.marca, dados.categoria, dados.preco].filter(Boolean).join(" · ") ||
+                "Aguardando uma leitura automática válida."}
             </p>
           </div>
-          <Button variant="outline" className="gap-2" onClick={() => setEditando((e) => !e)}>
-            <ChevronDown className={cn("size-4 transition-transform", editando && "rotate-180")} />
-            {editando ? "OCULTAR DADOS" : "EDITAR DADOS DO PRODUTO"}
-          </Button>
+          <Badge variant="outline">{camposPreenchidos.length} campos encontrados</Badge>
         </div>
-        <div className={cn("mt-5 grid gap-4 sm:grid-cols-2", !editando && "hidden")}>
-          {CAMPOS.map((c) => (
-            <div key={c.id} className={cn("space-y-1.5", c.longo && "sm:col-span-2")}>
-              <div className="flex items-center justify-between gap-2">
-                <label className="text-xs font-medium uppercase tracking-[0.1em] text-muted-foreground">
-                  {c.label}
-                </label>
-                {valores[c.id]?.trim() ? (
-                  <Badge variant="secondary" className="text-[10px]">
-                    {origem[c.id] === "tiktok_shop"
-                      ? "TikTok Shop"
-                      : origem[c.id] === "ia"
-                        ? "Interpretação da IA"
-                        : "Manual"}
-                  </Badge>
-                ) : null}
+
+        {camposPreenchidos.length ? (
+          <dl className="mt-5 grid gap-4 sm:grid-cols-2">
+            {camposPreenchidos.map((campo) => (
+              <div
+                key={campo.id}
+                className={campo.longo ? "rounded-xl border border-border p-3 sm:col-span-2" : "rounded-xl border border-border p-3"}
+              >
+                <dt className="text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground">
+                  {campo.label}
+                </dt>
+                <dd className="mt-1 whitespace-pre-wrap break-words text-sm">
+                  {String(dados[campo.id])}
+                </dd>
               </div>
-              {c.longo ? (
-                <Textarea
-                  value={valores[c.id] ?? ""}
-                  onChange={(e) => alterar(c.id, e.target.value)}
-                  rows={3}
-                />
-              ) : (
-                <Input
-                  value={valores[c.id] ?? ""}
-                  onChange={(e) => alterar(c.id, e.target.value)}
-                  className="h-11"
-                />
-              )}
-            </div>
-          ))}
-        </div>
+            ))}
+          </dl>
+        ) : (
+          <div className="mt-5 rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+            Nenhum dado comercial validado.
+          </div>
+        )}
+
         <Button
           onClick={confirmar}
-          disabled={salvando}
+          disabled={!valido || salvando || analisando}
           className="mt-6 h-12 w-full gap-2 text-base sm:w-auto"
         >
           {salvando ? <Loader2 className="size-4 animate-spin" /> : null}
-          CONFIRMAR PRODUTO E CONTINUAR
+          {valido ? "CONFIRMAR PRODUTO E CONTINUAR" : "AGUARDANDO LEITURA VÁLIDA"}
         </Button>
       </section>
     </div>

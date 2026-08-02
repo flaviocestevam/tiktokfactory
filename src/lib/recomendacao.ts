@@ -44,6 +44,7 @@ function texto(produto: Registro | null) {
   if (!produto) return "";
   return [
     produto.categoria,
+    produto.subcategoria,
     produto.nome,
     produto.marca,
     produto.descricao,
@@ -59,19 +60,22 @@ export type Recomendacao = {
   motivo: string;
 };
 
-/** Escolhe a personagem mais adequada e explica o motivo em uma frase. */
+/** Escolhe a personagem adequada apenas quando a categoria é reconhecida com segurança. */
 export function recomendarPersonagem(
   produto: Registro | null,
   personagens: Registro[],
 ): Recomendacao {
+  if (!personagens.length) {
+    return { personagem: null, motivo: "Nenhuma personagem cadastrada." };
+  }
+
   const base = texto(produto);
   const regra = REGRAS.find((r) => r.padrao.test(base));
-  if (!regra || !personagens.length) {
+  if (!regra) {
     return {
-      personagem: personagens[0] ?? null,
-      motivo: personagens.length
-        ? "Não foi possível classificar a categoria deste produto automaticamente. Escolha a personagem mais adequada."
-        : "Nenhuma personagem cadastrada.",
+      personagem: null,
+      motivo:
+        "Não foi possível classificar este produto em um dos cinco nichos. Escolha manualmente a personagem mais adequada.",
     };
   }
 
@@ -82,10 +86,17 @@ export function recomendarPersonagem(
         .toLowerCase()
         .includes(regra.nome.toLowerCase()),
     ) ??
-    personagens[0];
+    null;
+
+  if (!alvo) {
+    return {
+      personagem: null,
+      motivo: `O produto foi classificado como ${regra.rotulo}, mas a personagem correspondente não está cadastrada.`,
+    };
+  }
 
   return {
-    personagem: alvo ?? null,
+    personagem: alvo,
     motivo: `este produto foi classificado como ${regra.rotulo}.`,
   };
 }

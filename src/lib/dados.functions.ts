@@ -18,7 +18,7 @@ const bucket = z.enum(BUCKETS);
 const valores = z.record(z.string(), z.unknown());
 
 export const listarRegistros = createServerFn({ method: "POST" })
-  .inputValidator((i: unknown) =>
+  .validator((i: unknown) =>
     z
       .object({
         tabela,
@@ -30,27 +30,27 @@ export const listarRegistros = createServerFn({ method: "POST" })
   .handler(async ({ data }) => listar(data.tabela, data.filtros, data.ordem));
 
 export const obterRegistro = createServerFn({ method: "POST" })
-  .inputValidator((i: unknown) => z.object({ tabela, id: z.string().uuid() }).parse(i))
+  .validator((i: unknown) => z.object({ tabela, id: z.string().uuid() }).parse(i))
   .handler(async ({ data }) => obter(data.tabela, data.id));
 
 export const contarRegistros = createServerFn({ method: "POST" })
-  .inputValidator((i: unknown) => z.object({ tabela }).parse(i))
+  .validator((i: unknown) => z.object({ tabela }).parse(i))
   .handler(async ({ data }) => contar(data.tabela));
 
 export const criarRegistro = createServerFn({ method: "POST" })
-  .inputValidator((i: unknown) => z.object({ tabela, valores }).parse(i))
+  .validator((i: unknown) => z.object({ tabela, valores }).parse(i))
   .handler(async ({ data }) => criar(data.tabela, data.valores));
 
 export const atualizarRegistro = createServerFn({ method: "POST" })
-  .inputValidator((i: unknown) => z.object({ tabela, id: z.string().uuid(), valores }).parse(i))
+  .validator((i: unknown) => z.object({ tabela, id: z.string().uuid(), valores }).parse(i))
   .handler(async ({ data }) => atualizar(data.tabela, data.id, data.valores));
 
 export const excluirRegistro = createServerFn({ method: "POST" })
-  .inputValidator((i: unknown) => z.object({ tabela, id: z.string().uuid() }).parse(i))
+  .validator((i: unknown) => z.object({ tabela, id: z.string().uuid() }).parse(i))
   .handler(async ({ data }) => excluir(data.tabela, data.id));
 
 export const enviarImagem = createServerFn({ method: "POST" })
-  .inputValidator((i: unknown) =>
+  .validator((i: unknown) =>
     z
       .object({
         bucket,
@@ -63,7 +63,7 @@ export const enviarImagem = createServerFn({ method: "POST" })
   .handler(async ({ data }) => enviarArquivo(data.bucket, data.nome, data.base64, data.tipo));
 
 export const excluirImagem = createServerFn({ method: "POST" })
-  .inputValidator((i: unknown) =>
+  .validator((i: unknown) =>
     z.object({ bucket, caminho: z.string().min(1).max(400) }).parse(i),
   )
   .handler(async ({ data }) => removerArquivo(data.bucket, data.caminho));

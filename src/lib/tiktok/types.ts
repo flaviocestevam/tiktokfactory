@@ -14,7 +14,7 @@ export type LinkNormalizado = {
 
 export type RespostaRede = { url: string; corpo: string };
 
-export type MotorLeitura = "browser_service" | "firecrawl" | "jina" | "fetch";
+export type MotorLeitura = "apify" | "browser_service" | "firecrawl" | "jina" | "fetch";
 
 export type LeituraPagina = {
   motor: MotorLeitura;
@@ -119,7 +119,6 @@ export type ResultadoAnalise = {
   origem: Record<string, string>;
   imagens: string[];
   link: LinkNormalizado;
-  /* compatibilidade com o restante do fluxo */
   original_tiktok_url: string;
   resolved_tiktok_url: string;
   tiktok_product_id: string | null;

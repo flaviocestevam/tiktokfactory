@@ -1,6 +1,14 @@
 name: Audit TikTok Product Flow
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "scripts/audit-product-flow.ts"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/audit-product-flow.yml"
   push:
     branches: [main]
     paths:
@@ -12,7 +20,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  audit:
+  build:
+    name: Build obrigatório
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -32,5 +41,32 @@ jobs:
       - name: Build application
         run: npm run build
 
+  live-product-test:
+    name: Teste externo TikTok Shop
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
       - name: Test real TikTok Shop product
+        env:
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+          APIFY_TIKTOK_ACTOR_ID: ${{ secrets.APIFY_TIKTOK_ACTOR_ID }}
+          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+          JINA_API_KEY: ${{ secrets.JINA_API_KEY }}
+          LOVABLE_API_KEY: ${{ secrets.LOVABLE_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: npx --yes tsx scripts/audit-product-flow.ts

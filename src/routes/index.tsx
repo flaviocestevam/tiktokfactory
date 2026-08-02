@@ -43,7 +43,6 @@ function CriarConteudo() {
   const [personagem, setPersonagem] = useState<string | null>(null);
   const [personagemNome, setPersonagemNome] = useState("");
   const [projetoId, setProjetoId] = useState<string | null>(null);
-  const [promptFoto, setPromptFoto] = useState("");
   const [fotoUrl, setFotoUrl] = useState("");
   const [cta, setCta] = useState({ valor: "", tipo: CTA_AUTOMATICO });
   const [gerando, setGerando] = useState(false);
@@ -56,7 +55,6 @@ function CriarConteudo() {
     queryFn: () => listarResultados({ data: { projectId: projetoId! } }),
   });
 
-  // Retoma automaticamente a última produção em andamento.
   useEffect(() => {
     let ativo = true;
     (async () => {
@@ -71,10 +69,17 @@ function CriarConteudo() {
         setProjetoId(projeto.id);
         setPersonagem(projeto.character_id ?? null);
         setFotoUrl(projeto.reference_image_url ?? "");
-        setPromptFoto(projeto.image_prompt_used ?? "");
         setCta({ valor: projeto.cta ?? "", tipo: projeto.cta_tipo ?? CTA_AUTOMATICO });
-        if (projeto.product_id) setProduto((await obter("products", projeto.product_id)) as any);
-        const passo = Math.min(5, Math.max(1, projeto.etapa ?? 1));
+
+        let produtoSalvo: any = null;
+        if (projeto.product_id) produtoSalvo = await obter("products", projeto.product_id);
+        if (produtoSalvo) setProduto(produtoSalvo as any);
+
+        const produtoValido =
+          produtoSalvo?.extraction_status === "success" ||
+          produtoSalvo?.status_extracao === "success";
+        const passoSalvo = Math.min(5, Math.max(1, projeto.etapa ?? 1));
+        const passo = passoSalvo > 1 && !produtoValido ? 1 : passoSalvo;
         setEtapa(passo);
         setMaximo(passo);
       } catch {
@@ -112,8 +117,12 @@ function CriarConteudo() {
     return criado;
   }
 
-  // Etapa 1 → 2: produto confirmado cria a produção.
   async function confirmarProduto(p: ProdutoFluxo) {
+    const validado = p.extraction_status === "success" || p.status_extracao === "success";
+    if (!validado) {
+      toast.error("O produto precisa de uma extração automática válida.");
+      return;
+    }
     try {
       setProduto(p);
       await salvarProducao({
@@ -128,7 +137,6 @@ function CriarConteudo() {
     }
   }
 
-  // Etapa 2 → 3: personagem escolhida (recomendada ou manual).
   async function confirmarPersonagem(id: string, nome: string, motivo?: string) {
     setPersonagem(id);
     setPersonagemNome(nome);
@@ -146,7 +154,6 @@ function CriarConteudo() {
     }
   }
 
-  // Etapa 3 → 4: foto confirmada, única fonte visual do vídeo.
   async function confirmarFoto() {
     if (!projetoId) {
       toast.error("Produção não encontrada. Refaça a etapa do produto.");
@@ -154,21 +161,22 @@ function CriarConteudo() {
       return;
     }
     try {
+      const projeto: any = await obter("projects", projetoId);
+      if (!projeto?.reference_image_url || projeto.image_analysis_status !== "ok") {
+        throw new Error("A foto precisa estar enviada e analisada com sucesso antes de continuar.");
+      }
       await atualizar("projects", projetoId, {
-        reference_image_url: fotoUrl,
         image_confirmed: true,
-        image_prompt_used: promptFoto,
-        reference_image_uploaded_at: new Date().toISOString(),
         etapa: 4,
         status: "foto_confirmada",
       });
+      setFotoUrl(projeto.reference_image_url);
       avancar(4);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Falha ao confirmar a foto.");
     }
   }
 
-  // Etapa 4: gera os três roteiros.
   async function criarRoteiros() {
     if (!projetoId) {
       toast.error("Produção não encontrada. Refaça a etapa do produto.");
@@ -189,7 +197,6 @@ function CriarConteudo() {
     }
   }
 
-  // Etapa 4 → 5: aprovação do roteiro escolhido.
   async function aprovarRoteiro(scriptId: string) {
     if (!projetoId) return;
     setAprovando(true);
@@ -211,7 +218,6 @@ function CriarConteudo() {
     setProduto(null);
     setPersonagem(null);
     setPersonagemNome("");
-    setPromptFoto("");
     setFotoUrl("");
     setCta({ valor: "", tipo: CTA_AUTOMATICO });
     setEtapa(1);
@@ -263,9 +269,7 @@ function CriarConteudo() {
       {etapa === 3 && projetoId ? (
         <PassoFoto
           projectId={projetoId}
-          prompt={promptFoto}
           fotoUrl={fotoUrl}
-          onPrompt={setPromptFoto}
           onFoto={setFotoUrl}
           onConfirmar={confirmarFoto}
         />

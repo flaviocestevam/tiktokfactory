@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// Leitura da página com navegador renderizado, com alternativas automáticas.
+// Leitura da página com fontes estruturadas e navegadores renderizados.
 import type { LeituraPagina, RespostaRede } from "./types";
 import { UA_NAVEGADOR } from "./resolve-url.server";
 import { PADROES_REDE_PRODUTO } from "./network-capture.server";
@@ -16,7 +16,7 @@ export type OpcoesLeitura = {
 
 const LIMITE_CORPO = 120_000;
 const BLOQUEIO =
-  /captcha|verify (that )?you are human|slide to verify|access denied|login to continue|sign up to continue|not available in your (region|country)|region not supported/i;
+  /captcha|verify (that )?you are human|verify to continue|drag the puzzle|slide to verify|access denied|login to continue|sign up to continue|not available in your (region|country)|region not supported/i;
 
 function endpointFuncao(base: string) {
   const limpo = base.replace(/\/+$/, "");
@@ -41,6 +41,9 @@ function pontuarLeitura(leitura: LeituraPagina, productId?: string | null) {
   if (leitura.status && leitura.status >= 200 && leitura.status < 400) pontos += 1;
   if (productId && bruto.includes(productId)) pontos += 12;
   if (leitura.rede.length) pontos += 6;
+  if (leitura.motor === "apify" && /product|title|price|seller|description|sku/i.test(bruto)) {
+    pontos += 10;
+  }
   if (/application\/ld\+json/i.test(html) && /"@type"\s*:\s*"product"/i.test(html)) pontos += 6;
   if (/"product_id"|"productId"|"product_base"|"sku_list"|"skus"/i.test(bruto)) pontos += 4;
   if (/og:title|<h1|"title"\s*:/i.test(html)) pontos += 2;
@@ -54,6 +57,67 @@ function pontuarLeitura(leitura: LeituraPagina, productId?: string | null) {
 
 function leituraUtil(leitura: LeituraPagina | null, productId?: string | null) {
   return Boolean(leitura && pontuarLeitura(leitura, productId) >= 6);
+}
+
+/** Leitor estruturado prioritário. Requer APIFY_TOKEN no ambiente do servidor. */
+async function lerComApify(url: string, op: OpcoesLeitura): Promise<LeituraPagina | null> {
+  const token = process.env["APIFY_TOKEN"];
+  if (!token) return null;
+
+  const actor = process.env["APIFY_TIKTOK_ACTOR_ID"] || "lemur~tiktok-shop-products";
+  const endpoint = new URL(
+    `https://api.apify.com/v2/acts/${encodeURIComponent(actor)}/run-sync-get-dataset-items`,
+  );
+  endpoint.searchParams.set("token", token);
+  endpoint.searchParams.set("clean", "true");
+
+  try {
+    const res = await fetch(endpoint.toString(), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        product: url,
+        responseType: "structured",
+        country: (op.country ?? "").toLowerCase() || undefined,
+        proxy: process.env["APIFY_TIKTOK_PROXY"] || "",
+      }),
+      signal: AbortSignal.timeout(op.timeoutMs ?? 120_000),
+    });
+    const texto = await res.text();
+    if (!res.ok) {
+      console.error(`[tiktok] apify falhou [${res.status}]: ${texto.slice(0, 500)}`);
+      return null;
+    }
+
+    let itens: any;
+    try {
+      itens = JSON.parse(texto);
+    } catch {
+      console.error("[tiktok] apify retornou conteúdo não JSON");
+      return null;
+    }
+    const lista = Array.isArray(itens) ? itens : [itens];
+    const validos = lista.filter((item) => item && typeof item === "object");
+    if (!validos.length) return null;
+
+    const corpo = JSON.stringify(validos).slice(0, LIMITE_CORPO);
+    if (!/product|title|price|seller|description|sku|name/i.test(corpo)) {
+      console.error("[tiktok] apify não retornou sinais de produto");
+      return null;
+    }
+
+    return {
+      motor: "apify",
+      final_url: url,
+      status: res.status,
+      html: `<body><pre>${escaparHtml(corpo)}</pre></body>`,
+      rede: [{ url: endpoint.toString().replace(token, "***"), corpo }],
+      erro: null,
+    };
+  } catch (e) {
+    console.error("[tiktok] erro no apify:", e instanceof Error ? e.message : e);
+    return null;
+  }
 }
 
 /** Script executado dentro do Chromium remoto (Playwright/Browserless). */
@@ -145,7 +209,6 @@ async function lerComNavegadorRemoto(
   }
 }
 
-/** Leitor renderizado secundário configurável. */
 async function lerComFirecrawl(url: string, op: OpcoesLeitura): Promise<LeituraPagina | null> {
   const key = process.env["FIRECRAWL_API_KEY"];
   if (!key) return null;
@@ -184,10 +247,6 @@ async function lerComFirecrawl(url: string, op: OpcoesLeitura): Promise<LeituraP
   }
 }
 
-/**
- * Fallback renderizado que funciona sem secret obrigatório.
- * Uma JINA_API_KEY opcional aumenta o limite, mas o modo anônimo continua disponível.
- */
 async function lerComJina(url: string, op: OpcoesLeitura): Promise<LeituraPagina | null> {
   const key = process.env["JINA_API_KEY"];
   const alvo = `https://r.jina.ai/${url}`;
@@ -262,11 +321,14 @@ async function lerComFetch(url: string, op: OpcoesLeitura): Promise<LeituraPagin
   }
 }
 
-/**
- * Tenta todos os leitores necessários e escolhe conteúdo de produto, não apenas o HTML mais longo.
- */
 export async function lerPagina(url: string, op: OpcoesLeitura = {}): Promise<LeituraPagina> {
   const candidatos: LeituraPagina[] = [];
+
+  const apify = await lerComApify(url, op);
+  if (apify) {
+    candidatos.push(apify);
+    if (leituraUtil(apify, op.productId)) return apify;
+  }
 
   const remoto = await lerComNavegadorRemoto(url, op);
   if (remoto) {
@@ -294,7 +356,15 @@ export async function lerPagina(url: string, op: OpcoesLeitura = {}): Promise<Le
   )[0];
 }
 
+export function statusLeitoresProduto() {
+  return {
+    apify: Boolean(process.env["APIFY_TOKEN"]),
+    browser_service: Boolean(process.env["BROWSER_SERVICE_URL"]),
+    firecrawl: Boolean(process.env["FIRECRAWL_API_KEY"]),
+    jina: true,
+  };
+}
+
 export function navegadorRenderizadoDisponivel() {
-  // Jina funciona em modo anônimo; secrets apenas aumentam robustez/limite.
   return true;
 }
