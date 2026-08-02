@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { analisarProdutoTikTokShop } from "./tiktok.server";
+import { analisarFotoDaProducao } from "./analise-imagem.server";
 import {
   ajustarClipes,
   aprovarRoteiro,
@@ -104,3 +105,8 @@ export const editarClipeTexto = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data }) => editarClipeManual(data.projectId, data.clipId, data.campos));
+
+/** Análise multimodal automática da foto enviada na etapa Foto. */
+export const analisarFotoProjeto = createServerFn({ method: "POST" })
+  .inputValidator((i: unknown) => z.object({ projectId: z.string().uuid() }).parse(i))
+  .handler(async ({ data }) => analisarFotoDaProducao(data.projectId));
