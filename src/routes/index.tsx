@@ -120,7 +120,6 @@ function CriarConteudo() {
         product_id: p.id,
         etapa: 2,
         status: "produto_analisado",
-        imagem_produto_referencia: p.imagem_principal ?? null,
         nome: nomeAutomatico(p.nome),
       });
       avancar(2);

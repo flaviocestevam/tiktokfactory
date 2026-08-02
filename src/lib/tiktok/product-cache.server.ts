@@ -56,9 +56,6 @@ export async function gravarNoCache(link: LinkNormalizado, resultado: ResultadoA
     extraction_attempts: resultado.tentativas,
     extraction_error_code: resultado.ok ? null : resultado.status,
     origem_dados: resultado.origem as any,
-    imagens: resultado.imagens as any,
-    imagem_principal: resultado.imagens[0] ?? null,
-    images_downloaded_at: resultado.imagens.length ? new Date().toISOString() : null,
     status_extracao: resultado.status,
     last_analyzed_at: new Date().toISOString(),
   };
