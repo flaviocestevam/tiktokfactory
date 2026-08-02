@@ -14,8 +14,10 @@ export type LinkNormalizado = {
 
 export type RespostaRede = { url: string; corpo: string };
 
+export type MotorLeitura = "browser_service" | "firecrawl" | "jina" | "fetch";
+
 export type LeituraPagina = {
-  motor: "browser_service" | "firecrawl" | "fetch";
+  motor: MotorLeitura;
   final_url: string;
   status: number | null;
   html: string;
