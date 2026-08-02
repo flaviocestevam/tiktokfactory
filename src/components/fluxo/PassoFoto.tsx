@@ -13,7 +13,8 @@ const AJUSTES = [
   {
     id: "produto",
     label: "PRODUTO MAIS VISÍVEL",
-    instrucao: "Deixe o produto maior, mais próximo da câmera e com o rótulo totalmente legível.",
+    instrucao:
+      "Torne o produto principal mais fácil de identificar, preservando a forma natural de vestir, aplicar, usar, manusear, apoiar ou demonstrar conforme sua categoria. Não force o produto para uma mão e não invente embalagem ou rótulo.",
   },
   {
     id: "natural",
@@ -24,13 +25,13 @@ const AJUSTES = [
     id: "composicao",
     label: "OUTRA COMPOSIÇÃO",
     instrucao:
-      "Crie uma composição diferente, mantendo exatamente a mesma identidade da personagem e a mesma aparência do produto.",
+      "Crie uma composição diferente, mantendo exatamente a mesma identidade da personagem, a mesma aparência do produto e uma forma de demonstração coerente com a categoria.",
   },
   {
     id: "enquadramento",
     label: "AJUSTAR ENQUADRAMENTO",
     instrucao:
-      "Ajuste apenas o enquadramento e a distância da câmera, sem alterar nada mais da cena.",
+      "Ajuste apenas o enquadramento e a distância da câmera, sem alterar a identidade, o produto nem a forma natural de interação.",
   },
 ];
 
@@ -128,8 +129,10 @@ export function PassoFoto({
         </div>
 
         <p className="mt-2 text-xs text-muted-foreground">
-          Ao gerar a foto, anexe DUAS imagens: a imagem principal da personagem (só identidade) e a
-          imagem do produto (só aparência do produto). Roupa, pose, fundo e iluminação ficam livres.
+          Ao gerar a foto, anexe DUAS imagens: a imagem principal da personagem para manter a
+          identidade e a imagem do produto para manter sua aparência. O produto será apresentado da
+          forma apropriada à categoria — vestido, aplicado, usado, demonstrado ou de outra maneira
+          coerente — sem obrigação de estar na mão.
         </p>
 
         {prompt ? (
@@ -139,7 +142,8 @@ export function PassoFoto({
         ) : (
           <div className="mt-4 rounded-xl border border-dashed border-border p-6 text-center">
             <p className="text-sm text-muted-foreground">
-              Gere o prompt da personagem segurando exatamente este produto.
+              Gere o prompt da personagem apresentando ou demonstrando este produto da forma
+              apropriada à categoria.
             </p>
             <Button onClick={() => gerar()} disabled={gerando} className="mt-4 gap-2">
               {gerando ? <Loader2 className="size-4 animate-spin" /> : null}
@@ -207,7 +211,7 @@ export function PassoFoto({
             ) : null}
             {analise === "ok" && fotoUrl ? (
               <p className="text-xs text-muted-foreground">
-                Foto lida: pose, mãos e posição do produto serão respeitadas nos prompts.
+                Foto lida: pose, modo de interação e estado do produto serão respeitados nos prompts.
               </p>
             ) : null}
             {analise === "falhou" ? (
