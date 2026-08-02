@@ -163,24 +163,46 @@ export function detectarMercadoNoConteudo(conteudo: string): {
   };
 }
 
-/** Função central: recebe qualquer link e devolve tudo o que der para descobrir. */
+function ehUrlDiretaDeProduto(url: URL) {
+  return Boolean(extrairProductId(url)) && /\/(?:[a-z]{2}(?:-[A-Z]{2})?\/)?(?:pdp|product|view\/product)\//i.test(url.pathname);
+}
+
+/**
+ * Função central: recebe qualquer link e devolve tudo o que der para descobrir.
+ * Em links diretos de produto, país, ID e caminho originais são autoritativos.
+ * O IP do servidor nunca pode transformar um produto BR em uma home US.
+ */
 export async function normalizarLinkTikTokShop(entrada: string): Promise<LinkNormalizado> {
   const original = validarUrlTikTok(entrada);
-  const resolvida = await resolverRedirecionamentos(original);
-  const limpa = limparRastreamento(resolvida);
-  const mercado = detectarMercado(resolvida);
+  const idOriginal = extrairProductId(original);
   const mercadoOriginal = detectarMercado(original);
-  const country = mercado.country_code ?? mercadoOriginal.country_code;
+  const direta = ehUrlDiretaDeProduto(original);
+
+  // Links curtos/compartilhados precisam ser resolvidos. Um link direto com ID não:
+  // o TikTok pode redirecioná-lo conforme o IP do servidor e apagar o produto.
+  const resolvida = direta ? original : await resolverRedirecionamentos(original);
+  const idResolvido = extrairProductId(resolvida);
+  const mercadoResolvido = detectarMercado(resolvida);
+
+  // Se a resolução perdeu o ID, virou home ou mudou o país de um link direto,
+  // mantemos a página original limpa como URL canônica e de leitura.
+  const redirecionamentoPreservaProduto = Boolean(idResolvido && (!idOriginal || idResolvido === idOriginal));
+  const baseCanonica = direta || !redirecionamentoPreservaProduto ? original : resolvida;
+  const limpa = limparRastreamento(baseCanonica);
+
+  const country = mercadoOriginal.country_code ?? mercadoResolvido.country_code;
+  const locale = mercadoOriginal.locale ?? mercadoResolvido.locale;
+  const sourceLanguage = mercadoOriginal.source_language ?? mercadoResolvido.source_language;
 
   return {
     original_url: String(entrada).trim(),
     redirected_url: resolvida.toString(),
     canonical_url: limpa.toString(),
     fetch_url: limpa.toString(),
-    product_id: extrairProductId(resolvida) ?? extrairProductId(original),
+    product_id: idOriginal ?? idResolvido,
     country_code: country,
     market: country,
-    locale: mercado.locale ?? mercadoOriginal.locale,
-    source_language: mercado.source_language ?? mercadoOriginal.source_language,
+    locale,
+    source_language: sourceLanguage,
   };
 }
