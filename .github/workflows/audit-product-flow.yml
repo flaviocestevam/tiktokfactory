@@ -72,7 +72,15 @@ jobs:
           LOVABLE_API_KEY: ${{ secrets.LOVABLE_API_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: npx --yes tsx scripts/audit-product-flow.ts
+        shell: bash
+        run: |
+          if [ -z "${APIFY_TOKEN:-}" ]; then
+            echo "APIFY_TOKEN não está configurado no GitHub; o teste externo foi ignorado."
+            echo "A validação real será feita pelo job Diagnóstico produção Lovable."
+            exit 0
+          fi
+
+          npx --yes tsx scripts/audit-product-flow.ts
 
   production-diagnostic:
     name: Diagnóstico produção Lovable
@@ -86,32 +94,85 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Wait for Lovable sync and test Apify
+      - name: Wait for Lovable sync and validate Apify
         shell: bash
         run: |
           set -u
-          URL="https://tiktokfactory.lovable.app/api/public/tiktok-diagnostic"
-          rm -f diagnostic.json
+          HEALTH_URL="https://tiktokfactory.lovable.app/api/public/apify-health"
+          PRODUCT_URL="https://tiktokfactory.lovable.app/api/public/tiktok-diagnostic"
+          rm -f apify-health.json diagnostic.json
 
+          health_ready=false
           for attempt in $(seq 1 24); do
-            echo "Tentativa ${attempt}/24"
-            http_code=$(curl \
+            echo "Saúde Apify — tentativa ${attempt}/24"
+            health_code=$(curl \
               --silent \
               --show-error \
               --location \
-              --max-time 190 \
-              --output diagnostic.json \
+              --max-time 30 \
+              --output apify-health.json \
               --write-out "%{http_code}" \
-              "$URL" || true)
+              "$HEALTH_URL" || true)
 
-            echo "HTTP ${http_code}"
-            if [ -f diagnostic.json ]; then
-              cat diagnostic.json
+            echo "HTTP saúde ${health_code}"
+            if [ -s apify-health.json ]; then
+              cat apify-health.json
               echo
             fi
 
-            if [ "$http_code" = "200" ]; then
+            if [ "$health_code" = "200" ]; then
               node - <<'NODE'
+          const fs = require('fs');
+          const data = JSON.parse(fs.readFileSync('apify-health.json', 'utf8'));
+          if (data.ok !== true || data.conectado !== true) process.exit(2);
+          console.log('APIFY_HEALTH=' + JSON.stringify({
+            ok: data.ok,
+            conectado: data.conectado,
+            modo: data.modo,
+            status_apify: data.status_apify,
+          }));
+          NODE
+              if [ $? -eq 0 ]; then
+                health_ready=true
+                break
+              fi
+            fi
+
+            sleep 25
+          done
+
+          if [ "$health_ready" != "true" ]; then
+            echo "A conexão Apify não ficou disponível no ambiente publicado dentro do prazo."
+            if [ -s apify-health.json ]; then
+              cp apify-health.json diagnostic.json
+            else
+              printf '{"diagnostico":"apify_health","ok":false,"conectado":false,"erro":"endpoint_indisponivel"}\n' > diagnostic.json
+            fi
+            exit 1
+          fi
+
+          echo "Conexão Apify confirmada. Executando teste real do produto."
+          product_code=$(curl \
+            --silent \
+            --show-error \
+            --location \
+            --max-time 190 \
+            --output diagnostic.json \
+            --write-out "%{http_code}" \
+            "$PRODUCT_URL" || true)
+
+          echo "HTTP produto ${product_code}"
+          if [ -s diagnostic.json ]; then
+            cat diagnostic.json
+            echo
+          fi
+
+          if [ "$product_code" != "200" ]; then
+            echo "O endpoint do produto retornou HTTP ${product_code}."
+            exit 1
+          fi
+
+          node - <<'NODE'
           const fs = require('fs');
           const data = JSON.parse(fs.readFileSync('diagnostic.json', 'utf8'));
           console.log('RESUMO_DIAGNOSTICO=' + JSON.stringify({
@@ -127,14 +188,6 @@ jobs:
           }));
           process.exit(data.resultado?.ok === true ? 0 : 2);
           NODE
-              exit $?
-            fi
-
-            sleep 25
-          done
-
-          echo "O endpoint de diagnóstico não ficou disponível dentro do prazo."
-          exit 1
 
       - name: Record diagnostic result
         if: always()
@@ -162,11 +215,13 @@ jobs:
           git commit -m "chore: record production diagnostic [skip ci]"
           git push origin main
 
-      - name: Upload diagnostic response
+      - name: Upload diagnostic responses
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: tiktok-production-diagnostic
-          path: diagnostic.json
+          path: |
+            apify-health.json
+            diagnostic.json
           if-no-files-found: ignore
           retention-days: 3
