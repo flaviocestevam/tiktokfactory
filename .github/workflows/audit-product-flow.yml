@@ -156,7 +156,7 @@ jobs:
             --silent \
             --show-error \
             --location \
-            --max-time 190 \
+            --max-time 90 \
             --output diagnostic.json \
             --write-out "%{http_code}" \
             "$PRODUCT_URL" || true)
