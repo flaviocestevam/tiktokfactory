@@ -5,7 +5,7 @@ import { TIPOS_FOTO, confirmarIdentidade, enviarFoto, removerFoto } from "./pers
 const tipo = z.enum(TIPOS_FOTO);
 
 export const enviarFotoPersonagem = createServerFn({ method: "POST" })
-  .inputValidator((i: unknown) =>
+  .validator((i: unknown) =>
     z
       .object({
         characterId: z.string().uuid(),
@@ -19,13 +19,13 @@ export const enviarFotoPersonagem = createServerFn({ method: "POST" })
   .handler(async ({ data }) => enviarFoto(data));
 
 export const removerFotoPersonagem = createServerFn({ method: "POST" })
-  .inputValidator((i: unknown) =>
+  .validator((i: unknown) =>
     z.object({ characterId: z.string().uuid(), tipo, fotoId: z.string().optional() }).parse(i),
   )
   .handler(async ({ data }) => removerFoto(data));
 
 export const confirmarIdentidadePersonagem = createServerFn({ method: "POST" })
-  .inputValidator((i: unknown) =>
+  .validator((i: unknown) =>
     z.object({ characterId: z.string().uuid(), confirmada: z.boolean() }).parse(i),
   )
   .handler(async ({ data }) => confirmarIdentidade(data.characterId, data.confirmada));
