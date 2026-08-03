@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { analisarProdutoTikTokShop } from "../../../lib/tiktok.server";
 
 const PRODUTO_TESTE =
-  "https://shop.tiktok.com/br/pdp/1731254692141565116";
-const CACHE_MS = 10 * 60 * 1000;
+  "https://shop.tiktok.com/br/pdp/1732007737983141823";
+const CACHE_MS = 60 * 1000;
 
 let cache:
   | {
