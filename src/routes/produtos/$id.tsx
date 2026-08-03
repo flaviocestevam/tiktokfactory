@@ -12,9 +12,9 @@ export const Route = createFileRoute("/produtos/$id")({
   head: () => ({
     meta: [
       { title: "Editar produto | TikTok Factory" },
-      { name: "description", content: "Revise e complete as informações do produto." },
+      { name: "description", content: "Atualize manualmente as informações do produto." },
       { property: "og:title", content: "Editar produto | TikTok Factory" },
-      { property: "og:description", content: "Revise e complete as informações do produto." },
+      { property: "og:description", content: "Atualize manualmente as informações do produto." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -40,6 +40,15 @@ function EditarProduto() {
 
   async function salvar() {
     if (!valores) return;
+
+    const nome = typeof valores.nome === "string" ? valores.nome.trim() : "";
+    const descricao = typeof valores.descricao === "string" ? valores.descricao.trim() : "";
+    const beneficios = typeof valores.beneficios === "string" ? valores.beneficios.trim() : "";
+
+    if (!nome) return toast.error("Informe o nome do produto.");
+    if (!descricao) return toast.error("Informe a descrição do produto.");
+    if (!beneficios) return toast.error("Informe os principais benefícios.");
+
     setSalvando(true);
     try {
       await atualizar("products", id, montarPayloadProduto(valores));
@@ -58,7 +67,10 @@ function EditarProduto() {
 
   return (
     <>
-      <PageHeader titulo="Editar produto" descricao="Complete as informações que faltarem." />
+      <PageHeader
+        titulo="Editar produto"
+        descricao="Atualize manualmente as informações usadas nos roteiros e CTAs."
+      />
       <ProductForm
         valores={valores}
         onChange={setValores}
