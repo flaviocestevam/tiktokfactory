@@ -12,9 +12,15 @@ export const Route = createFileRoute("/produtos/$id")({
   head: () => ({
     meta: [
       { title: "Editar produto | TikTok Factory" },
-      { name: "description", content: "Atualize manualmente as informações do produto." },
+      {
+        name: "description",
+        content: "Atualize o texto original do produto.",
+      },
       { property: "og:title", content: "Editar produto | TikTok Factory" },
-      { property: "og:description", content: "Atualize manualmente as informações do produto." },
+      {
+        property: "og:description",
+        content: "Atualize o texto original do produto.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -35,19 +41,19 @@ function EditarProduto() {
   });
 
   useEffect(() => {
-    if (data) setValores(produtoParaDraft(data as unknown as Record<string, unknown>));
+    if (data) {
+      setValores(
+        produtoParaDraft(data as unknown as Record<string, unknown>),
+      );
+    }
   }, [data]);
 
   async function salvar() {
     if (!valores) return;
-
-    const nome = typeof valores.nome === "string" ? valores.nome.trim() : "";
-    const descricao = typeof valores.descricao === "string" ? valores.descricao.trim() : "";
-    const beneficios = typeof valores.beneficios === "string" ? valores.beneficios.trim() : "";
-
-    if (!nome) return toast.error("Informe o nome do produto.");
-    if (!descricao) return toast.error("Informe a descrição do produto.");
-    if (!beneficios) return toast.error("Informe os principais benefícios.");
+    const texto = String(valores.descricao_colada ?? "").trim();
+    if (texto.length < 10) {
+      return toast.error("Cole o título e a descrição do produto.");
+    }
 
     setSalvando(true);
     try {
@@ -63,13 +69,15 @@ function EditarProduto() {
     }
   }
 
-  if (isLoading || !valores) return <Skeleton className="h-96 rounded-2xl" />;
+  if (isLoading || !valores) {
+    return <Skeleton className="h-96 rounded-2xl" />;
+  }
 
   return (
     <>
       <PageHeader
         titulo="Editar produto"
-        descricao="Atualize manualmente as informações usadas nos roteiros e CTAs."
+        descricao="Cole novamente o título e a descrição quando precisar atualizar o produto."
       />
       <ProductForm
         valores={valores}

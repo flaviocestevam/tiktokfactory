@@ -1,4 +1,4 @@
-// Recomendação automática de personagem a partir da categoria do produto (client-safe).
+// Recomendação automática de personagem a partir do texto colado do produto.
 
 type Registro = Record<string, unknown>;
 
@@ -43,6 +43,8 @@ const REGRAS: Array<{ slug: string; nome: string; rotulo: string; padrao: RegExp
 function texto(produto: Registro | null) {
   if (!produto) return "";
   return [
+    produto.descricao_colada,
+    produto.dados_adicionais,
     produto.categoria,
     produto.subcategoria,
     produto.nome,
@@ -60,7 +62,6 @@ export type Recomendacao = {
   motivo: string;
 };
 
-/** Escolhe a personagem adequada apenas quando a categoria é reconhecida com segurança. */
 export function recomendarPersonagem(
   produto: Registro | null,
   personagens: Registro[],
@@ -75,7 +76,7 @@ export function recomendarPersonagem(
     return {
       personagem: null,
       motivo:
-        "Não foi possível classificar este produto em um dos cinco nichos. Escolha manualmente a personagem mais adequada.",
+        "A categoria não foi reconhecida com segurança. Escolha a personagem mais adequada.",
     };
   }
 
@@ -97,6 +98,6 @@ export function recomendarPersonagem(
 
   return {
     personagem: alvo,
-    motivo: `este produto foi classificado como ${regra.rotulo}.`,
+    motivo: `o texto do produto indica a categoria ${regra.rotulo}.`,
   };
 }

@@ -11,9 +11,15 @@ export const Route = createFileRoute("/produtos/novo")({
   head: () => ({
     meta: [
       { title: "Novo produto | TikTok Factory" },
-      { name: "description", content: "Cadastre manualmente as informações do produto." },
+      {
+        name: "description",
+        content: "Cole o título e a descrição do produto para criar conteúdo.",
+      },
       { property: "og:title", content: "Novo produto | TikTok Factory" },
-      { property: "og:description", content: "Cadastre manualmente as informações do produto." },
+      {
+        property: "og:description",
+        content: "Cole o título e a descrição do produto para criar conteúdo.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -28,19 +34,16 @@ function NovoProduto() {
   const qc = useQueryClient();
 
   async function salvar() {
-    const nome = typeof valores.nome === "string" ? valores.nome.trim() : "";
-    const descricao = typeof valores.descricao === "string" ? valores.descricao.trim() : "";
-    const beneficios = typeof valores.beneficios === "string" ? valores.beneficios.trim() : "";
-
-    if (!nome) return toast.error("Informe o nome do produto.");
-    if (!descricao) return toast.error("Informe a descrição do produto.");
-    if (!beneficios) return toast.error("Informe os principais benefícios.");
+    const texto = String(valores.descricao_colada ?? "").trim();
+    if (texto.length < 10) {
+      return toast.error("Cole o título e a descrição do produto.");
+    }
 
     setSalvando(true);
     try {
       await criar("products", montarPayloadProduto(valores));
       qc.invalidateQueries({ queryKey: ["products"] });
-      toast.success("Produto cadastrado.");
+      toast.success("Produto salvo. A IA usará esse texto nos roteiros.");
       navigate({ to: "/produtos" });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Falha ao salvar.");
@@ -53,9 +56,14 @@ function NovoProduto() {
     <>
       <PageHeader
         titulo="Novo produto"
-        descricao="Preencha manualmente as informações que serão usadas nos roteiros e CTAs."
+        descricao="Copie o título e a descrição da página e cole tudo no campo abaixo."
       />
-      <ProductForm valores={valores} onChange={setValores} onSalvar={salvar} salvando={salvando} />
+      <ProductForm
+        valores={valores}
+        onChange={setValores}
+        onSalvar={salvar}
+        salvando={salvando}
+      />
     </>
   );
 }
