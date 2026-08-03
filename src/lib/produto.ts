@@ -40,6 +40,24 @@ function textoColado(valores: ProductDraft): string {
   ).trim();
 }
 
+function removerCondicoesComerciais(texto: string): string {
+  return texto
+    .split(/\r?\n/)
+    .filter((linha) => {
+      const normalizada = linha.trim();
+      if (!normalizada) return true;
+      return !(
+        /R\$\s*\d/i.test(normalizada) ||
+        /^(preço|preco|valor|por apenas|de r\$|por r\$|cupom|frete|desconto|promoção|promocao|oferta)\b/i.test(
+          normalizada,
+        )
+      );
+    })
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 function extrairNomeDoTexto(texto: string): string {
   const linhas = texto
     .split(/\r?\n/)
@@ -64,23 +82,27 @@ function extrairNomeDoTexto(texto: string): string {
 export function montarPayloadProduto(
   valores: ProductDraft,
 ): TablesInsert<"products"> {
-  const texto = textoColado(valores);
-  const nome = extrairNomeDoTexto(texto);
+  const textoOriginal = textoColado(valores);
+  const textoParaRoteiro =
+    removerCondicoesComerciais(textoOriginal) || textoOriginal;
+  const nome = extrairNomeDoTexto(textoOriginal);
   const payload: Record<string, unknown> = {
     nome,
-    descricao_colada: texto,
-    descricao: texto,
-    dados_adicionais: texto,
+    descricao_colada: textoOriginal,
+    descricao: textoParaRoteiro,
+    dados_adicionais: textoParaRoteiro,
     link: null,
     status_extracao: "success",
     extraction_status: "success",
     extraction_method: "pasted_text",
     extraction_attempts: 0,
     extraction_error_code: null,
-    normalized_product_data: { texto_original: texto },
-    original_product_data: { texto_original: texto },
-    dados_extraidos: { texto_original: texto },
-    origem_dados: { texto_original: "usuario" },
+    normalized_product_data: {
+      texto_para_roteiro: textoParaRoteiro,
+    },
+    original_product_data: { texto_original: textoOriginal },
+    dados_extraidos: { texto_para_roteiro: textoParaRoteiro },
+    origem_dados: { texto_para_roteiro: "usuario" },
   };
 
   for (const campo of CAMPOS_ANTIGOS) payload[campo] = null;
