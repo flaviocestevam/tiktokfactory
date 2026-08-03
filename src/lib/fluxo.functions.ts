@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { analisarProdutoTikTokShop } from "./tiktok.server";
 import { analisarFotoDaProducao } from "./analise-imagem.server";
 import {
   ajustarClipes,
@@ -13,10 +12,6 @@ import {
   regerarClipe,
   regerarRoteiro,
 } from "./fluxo.hardened.server";
-
-export const analisarProdutoTikTok = createServerFn({ method: "POST" })
-  .validator((i: unknown) => z.object({ url: z.string().min(8).max(2000) }).parse(i))
-  .handler(async ({ data }) => analisarProdutoTikTokShop(data.url));
 
 export const gerarTresRoteiros = createServerFn({ method: "POST" })
   .validator((i: unknown) => z.object({ projectId: z.string().uuid() }).parse(i))
