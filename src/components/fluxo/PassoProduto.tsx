@@ -15,6 +15,10 @@ function texto(valor: unknown) {
   return typeof valor === "string" ? valor.trim() : "";
 }
 
+function textoDoProduto(produto: ProdutoFluxo | null | undefined) {
+  return texto(produto?.descricao_colada) || texto(produto?.descricao) || texto(produto?.dados_adicionais);
+}
+
 export function PassoProduto({
   produto,
   onProdutoSalvo,
@@ -52,12 +56,8 @@ export function PassoProduto({
       return;
     }
 
-    const nome = texto(selecionado.nome);
-    const descricao = texto(selecionado.descricao);
-    const beneficios = texto(selecionado.beneficios);
-
-    if (!nome || !descricao || !beneficios) {
-      toast.error("Complete o nome, a descrição e os benefícios deste produto antes de continuar.");
+    if (textoDoProduto(selecionado).length < 10) {
+      toast.error("Cole o título e a descrição deste produto antes de continuar.");
       navigate({ to: "/produtos/$id", params: { id: String(selecionado.id) } });
       return;
     }
@@ -78,7 +78,7 @@ export function PassoProduto({
           <div>
             <h2 className="text-lg font-semibold">Escolha o produto</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Selecione um produto já preenchido manualmente para criar a produção.
+              Selecione um produto criado a partir do texto que você colou.
             </p>
           </div>
           <Button
@@ -103,13 +103,7 @@ export function PassoProduto({
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             {lista.map((item) => {
               const ativo = String(item.id) === selecionadoId;
-              const resumo = [
-                texto(item.marca),
-                texto(item.categoria),
-                texto(item.preco_promocional || item.preco),
-              ]
-                .filter(Boolean)
-                .join(" · ");
+              const resumo = textoDoProduto(item);
 
               return (
                 <button
@@ -124,9 +118,9 @@ export function PassoProduto({
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="truncate font-semibold">{texto(item.nome) || "Produto sem nome"}</p>
+                      <p className="truncate font-semibold">{texto(item.nome) || "Produto"}</p>
                       <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                        {resumo || texto(item.descricao) || "Sem resumo preenchido"}
+                        {resumo || "Sem texto do produto"}
                       </p>
                     </div>
                     {ativo ? <CheckCircle2 className="size-5 shrink-0 text-primary" /> : null}
@@ -139,7 +133,7 @@ export function PassoProduto({
           <div className="mt-5 rounded-2xl border border-dashed border-border p-6 text-center">
             <p className="font-medium">Nenhum produto cadastrado</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Cadastre o primeiro produto manualmente para iniciar uma produção.
+              Cole o título e a descrição do primeiro produto para iniciar uma produção.
             </p>
             <Button className="mt-4 gap-2" onClick={() => navigate({ to: "/produtos/novo" })}>
               <PackagePlus className="size-4" />
@@ -153,33 +147,21 @@ export function PassoProduto({
         <section className="surface p-4 sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
-              <h2 className="text-lg font-semibold">{texto(selecionado.nome)}</h2>
+              <h2 className="text-lg font-semibold">{texto(selecionado.nome) || "Produto"}</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                {[
-                  texto(selecionado.marca),
-                  texto(selecionado.categoria),
-                  texto(selecionado.preco_promocional || selecionado.preco),
-                ]
-                  .filter(Boolean)
-                  .join(" · ") || "Produto cadastrado manualmente"}
+                Texto que será usado como fonte de verdade para os roteiros.
               </p>
             </div>
-            <Badge variant="outline">CADASTRO MANUAL</Badge>
+            <Badge variant="outline">TEXTO COLADO</Badge>
           </div>
 
-          <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            <div className="rounded-xl border border-border p-3 sm:col-span-2">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Descrição</p>
-              <p className="mt-2 whitespace-pre-wrap text-sm">
-                {texto(selecionado.descricao) || "Não informada"}
-              </p>
-            </div>
-            <div className="rounded-xl border border-border p-3 sm:col-span-2">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Benefícios</p>
-              <p className="mt-2 whitespace-pre-wrap text-sm">
-                {texto(selecionado.beneficios) || "Não informados"}
-              </p>
-            </div>
+          <div className="mt-5 rounded-xl border border-border p-3">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Informações do produto
+            </p>
+            <p className="mt-2 whitespace-pre-wrap text-sm">
+              {textoDoProduto(selecionado) || "Nenhuma informação colada"}
+            </p>
           </div>
 
           <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-end">
@@ -190,7 +172,7 @@ export function PassoProduto({
                 navigate({ to: "/produtos/$id", params: { id: String(selecionado.id) } })
               }
             >
-              Editar produto
+              Editar texto
             </Button>
             <Button type="button" onClick={continuar}>
               Continuar com este produto
