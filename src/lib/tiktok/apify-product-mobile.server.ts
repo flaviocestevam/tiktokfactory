@@ -3,7 +3,7 @@ import {
   apifyProdutoDisponivel as apifyFallbackDisponivel,
   lerProdutoComApify as lerProdutoComFallback,
   type OpcoesApifyProduto,
-} from "./apify-product-final.server";
+} from "./apify-product-async.server";
 
 type CredenciaisApify =
   | { modo: "gateway"; connectionKey: string; lovableKey: string }
